@@ -22,11 +22,17 @@
 
 #define yy_create_buffer parse_cstyle_YY_create_buffer
 #define yy_delete_buffer parse_cstyle_YY_delete_buffer
-#define yy_flex_debug parse_cstyle_YY_flex_debug
+#define yy_scan_buffer parse_cstyle_YY_scan_buffer
+#define yy_scan_string parse_cstyle_YY_scan_string
+#define yy_scan_bytes parse_cstyle_YY_scan_bytes
 #define yy_init_buffer parse_cstyle_YY_init_buffer
 #define yy_flush_buffer parse_cstyle_YY_flush_buffer
 #define yy_load_buffer_state parse_cstyle_YY_load_buffer_state
 #define yy_switch_to_buffer parse_cstyle_YY_switch_to_buffer
+#define yypush_buffer_state parse_cstyle_YYpush_buffer_state
+#define yypop_buffer_state parse_cstyle_YYpop_buffer_state
+#define yyensure_buffer_stack parse_cstyle_YYensure_buffer_stack
+#define yy_flex_debug parse_cstyle_YY_flex_debug
 #define yyin parse_cstyle_YYin
 #define yyleng parse_cstyle_YYleng
 #define yylex parse_cstyle_YYlex
@@ -41,10 +47,244 @@
 
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
-#define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 35
+#define YY_FLEX_MINOR_VERSION 6
+#define YY_FLEX_SUBMINOR_VERSION 4
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
+#endif
+
+#ifdef yy_create_buffer
+#define parse_cstyle_YY_create_buffer_ALREADY_DEFINED
+#else
+#define yy_create_buffer parse_cstyle_YY_create_buffer
+#endif
+
+#ifdef yy_delete_buffer
+#define parse_cstyle_YY_delete_buffer_ALREADY_DEFINED
+#else
+#define yy_delete_buffer parse_cstyle_YY_delete_buffer
+#endif
+
+#ifdef yy_scan_buffer
+#define parse_cstyle_YY_scan_buffer_ALREADY_DEFINED
+#else
+#define yy_scan_buffer parse_cstyle_YY_scan_buffer
+#endif
+
+#ifdef yy_scan_string
+#define parse_cstyle_YY_scan_string_ALREADY_DEFINED
+#else
+#define yy_scan_string parse_cstyle_YY_scan_string
+#endif
+
+#ifdef yy_scan_bytes
+#define parse_cstyle_YY_scan_bytes_ALREADY_DEFINED
+#else
+#define yy_scan_bytes parse_cstyle_YY_scan_bytes
+#endif
+
+#ifdef yy_init_buffer
+#define parse_cstyle_YY_init_buffer_ALREADY_DEFINED
+#else
+#define yy_init_buffer parse_cstyle_YY_init_buffer
+#endif
+
+#ifdef yy_flush_buffer
+#define parse_cstyle_YY_flush_buffer_ALREADY_DEFINED
+#else
+#define yy_flush_buffer parse_cstyle_YY_flush_buffer
+#endif
+
+#ifdef yy_load_buffer_state
+#define parse_cstyle_YY_load_buffer_state_ALREADY_DEFINED
+#else
+#define yy_load_buffer_state parse_cstyle_YY_load_buffer_state
+#endif
+
+#ifdef yy_switch_to_buffer
+#define parse_cstyle_YY_switch_to_buffer_ALREADY_DEFINED
+#else
+#define yy_switch_to_buffer parse_cstyle_YY_switch_to_buffer
+#endif
+
+#ifdef yypush_buffer_state
+#define parse_cstyle_YYpush_buffer_state_ALREADY_DEFINED
+#else
+#define yypush_buffer_state parse_cstyle_YYpush_buffer_state
+#endif
+
+#ifdef yypop_buffer_state
+#define parse_cstyle_YYpop_buffer_state_ALREADY_DEFINED
+#else
+#define yypop_buffer_state parse_cstyle_YYpop_buffer_state
+#endif
+
+#ifdef yyensure_buffer_stack
+#define parse_cstyle_YYensure_buffer_stack_ALREADY_DEFINED
+#else
+#define yyensure_buffer_stack parse_cstyle_YYensure_buffer_stack
+#endif
+
+#ifdef yylex
+#define parse_cstyle_YYlex_ALREADY_DEFINED
+#else
+#define yylex parse_cstyle_YYlex
+#endif
+
+#ifdef yyrestart
+#define parse_cstyle_YYrestart_ALREADY_DEFINED
+#else
+#define yyrestart parse_cstyle_YYrestart
+#endif
+
+#ifdef yylex_init
+#define parse_cstyle_YYlex_init_ALREADY_DEFINED
+#else
+#define yylex_init parse_cstyle_YYlex_init
+#endif
+
+#ifdef yylex_init_extra
+#define parse_cstyle_YYlex_init_extra_ALREADY_DEFINED
+#else
+#define yylex_init_extra parse_cstyle_YYlex_init_extra
+#endif
+
+#ifdef yylex_destroy
+#define parse_cstyle_YYlex_destroy_ALREADY_DEFINED
+#else
+#define yylex_destroy parse_cstyle_YYlex_destroy
+#endif
+
+#ifdef yyget_debug
+#define parse_cstyle_YYget_debug_ALREADY_DEFINED
+#else
+#define yyget_debug parse_cstyle_YYget_debug
+#endif
+
+#ifdef yyset_debug
+#define parse_cstyle_YYset_debug_ALREADY_DEFINED
+#else
+#define yyset_debug parse_cstyle_YYset_debug
+#endif
+
+#ifdef yyget_extra
+#define parse_cstyle_YYget_extra_ALREADY_DEFINED
+#else
+#define yyget_extra parse_cstyle_YYget_extra
+#endif
+
+#ifdef yyset_extra
+#define parse_cstyle_YYset_extra_ALREADY_DEFINED
+#else
+#define yyset_extra parse_cstyle_YYset_extra
+#endif
+
+#ifdef yyget_in
+#define parse_cstyle_YYget_in_ALREADY_DEFINED
+#else
+#define yyget_in parse_cstyle_YYget_in
+#endif
+
+#ifdef yyset_in
+#define parse_cstyle_YYset_in_ALREADY_DEFINED
+#else
+#define yyset_in parse_cstyle_YYset_in
+#endif
+
+#ifdef yyget_out
+#define parse_cstyle_YYget_out_ALREADY_DEFINED
+#else
+#define yyget_out parse_cstyle_YYget_out
+#endif
+
+#ifdef yyset_out
+#define parse_cstyle_YYset_out_ALREADY_DEFINED
+#else
+#define yyset_out parse_cstyle_YYset_out
+#endif
+
+#ifdef yyget_leng
+#define parse_cstyle_YYget_leng_ALREADY_DEFINED
+#else
+#define yyget_leng parse_cstyle_YYget_leng
+#endif
+
+#ifdef yyget_text
+#define parse_cstyle_YYget_text_ALREADY_DEFINED
+#else
+#define yyget_text parse_cstyle_YYget_text
+#endif
+
+#ifdef yyget_lineno
+#define parse_cstyle_YYget_lineno_ALREADY_DEFINED
+#else
+#define yyget_lineno parse_cstyle_YYget_lineno
+#endif
+
+#ifdef yyset_lineno
+#define parse_cstyle_YYset_lineno_ALREADY_DEFINED
+#else
+#define yyset_lineno parse_cstyle_YYset_lineno
+#endif
+
+#ifdef yywrap
+#define parse_cstyle_YYwrap_ALREADY_DEFINED
+#else
+#define yywrap parse_cstyle_YYwrap
+#endif
+
+#ifdef yyalloc
+#define parse_cstyle_YYalloc_ALREADY_DEFINED
+#else
+#define yyalloc parse_cstyle_YYalloc
+#endif
+
+#ifdef yyrealloc
+#define parse_cstyle_YYrealloc_ALREADY_DEFINED
+#else
+#define yyrealloc parse_cstyle_YYrealloc
+#endif
+
+#ifdef yyfree
+#define parse_cstyle_YYfree_ALREADY_DEFINED
+#else
+#define yyfree parse_cstyle_YYfree
+#endif
+
+#ifdef yytext
+#define parse_cstyle_YYtext_ALREADY_DEFINED
+#else
+#define yytext parse_cstyle_YYtext
+#endif
+
+#ifdef yyleng
+#define parse_cstyle_YYleng_ALREADY_DEFINED
+#else
+#define yyleng parse_cstyle_YYleng
+#endif
+
+#ifdef yyin
+#define parse_cstyle_YYin_ALREADY_DEFINED
+#else
+#define yyin parse_cstyle_YYin
+#endif
+
+#ifdef yyout
+#define parse_cstyle_YYout_ALREADY_DEFINED
+#else
+#define yyout parse_cstyle_YYout
+#endif
+
+#ifdef yy_flex_debug
+#define parse_cstyle_YY_flex_debug_ALREADY_DEFINED
+#else
+#define yy_flex_debug parse_cstyle_YY_flex_debug
+#endif
+
+#ifdef yylineno
+#define parse_cstyle_YYlineno_ALREADY_DEFINED
+#else
+#define yylineno parse_cstyle_YYlineno
 #endif
 
 /* First, we deal with  platform-specific or compiler-specific issues. */
@@ -117,60 +357,48 @@ typedef unsigned int flex_uint32_t;
 #define UINT32_MAX             (4294967295U)
 #endif
 
+#ifndef SIZE_MAX
+#define SIZE_MAX               (~(size_t)0)
+#endif
+
 #endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
-#ifdef __cplusplus
+/* begin standard C++ headers. */
 
-/* The "const" storage-class-modifier is valid. */
-#define YY_USE_CONST
-
-#else	/* ! __cplusplus */
-
-/* C99 requires __STDC__ to be defined as 1. */
-#if defined (__STDC__)
-
-#define YY_USE_CONST
-
-#endif	/* defined (__STDC__) */
-#endif	/* ! __cplusplus */
-
-#ifdef YY_USE_CONST
+/* TODO: this is always defined, so inline it */
 #define yyconst const
+
+#if defined(__GNUC__) && __GNUC__ >= 3
+#define yynoreturn __attribute__((__noreturn__))
 #else
-#define yyconst
+#define yynoreturn
 #endif
 
 /* Returned upon end-of-file. */
 #define YY_NULL 0
 
-/* Promotes a possibly negative, possibly signed char to an unsigned
- * integer for use as an array index.  If the signed char is negative,
- * we want to instead treat it as an 8-bit unsigned char, hence the
- * double cast.
+/* Promotes a possibly negative, possibly signed char to an
+ *   integer in range [0..255] for use as an array index.
  */
-#define YY_SC_TO_UI(c) ((unsigned int) (unsigned char) c)
+#define YY_SC_TO_UI(c) ((YY_CHAR) (c))
 
 /* Enter a start condition.  This macro really ought to take a parameter,
  * but we do it the disgusting crufty way forced on us by the ()-less
  * definition of BEGIN.
  */
 #define BEGIN (yy_start) = 1 + 2 *
-
 /* Translate the current start state into a value that can be later handed
  * to BEGIN to return to the state.  The YYSTATE alias is for lex
  * compatibility.
  */
 #define YY_START (((yy_start) - 1) / 2)
 #define YYSTATE YY_START
-
 /* Action number for EOF rule of a given start state. */
 #define YY_STATE_EOF(state) (YY_END_OF_BUFFER + state + 1)
-
 /* Special action meaning "start processing a new file". */
-#define YY_NEW_FILE parse_cstyle_YYrestart(parse_cstyle_YYin  )
-
+#define YY_NEW_FILE yyrestart( yyin  )
 #define YY_END_OF_BUFFER_CHAR 0
 
 /* Size of default input buffer. */
@@ -195,36 +423,36 @@ typedef unsigned int flex_uint32_t;
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
-extern int parse_cstyle_YYleng;
+#ifndef YY_TYPEDEF_YY_SIZE_T
+#define YY_TYPEDEF_YY_SIZE_T
+typedef size_t yy_size_t;
+#endif
 
-extern FILE *parse_cstyle_YYin, *parse_cstyle_YYout;
+extern int yyleng;
+
+extern FILE *yyin, *yyout;
 
 #define EOB_ACT_CONTINUE_SCAN 0
 #define EOB_ACT_END_OF_FILE 1
 #define EOB_ACT_LAST_MATCH 2
-
+    
     #define YY_LESS_LINENO(n)
+    #define YY_LINENO_REWIND_TO(ptr)
     
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
 	do \
 		{ \
-		/* Undo effects of setting up parse_cstyle_YYtext. */ \
+		/* Undo effects of setting up yytext. */ \
         int yyless_macro_arg = (n); \
         YY_LESS_LINENO(yyless_macro_arg);\
 		*yy_cp = (yy_hold_char); \
 		YY_RESTORE_YY_MORE_OFFSET \
 		(yy_c_buf_p) = yy_cp = yy_bp + yyless_macro_arg - YY_MORE_ADJ; \
-		YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */ \
+		YY_DO_BEFORE_ACTION; /* set up yytext again */ \
 		} \
 	while ( 0 )
-
 #define unput(c) yyunput( c, (yytext_ptr)  )
-
-#ifndef YY_TYPEDEF_YY_SIZE_T
-#define YY_TYPEDEF_YY_SIZE_T
-typedef size_t yy_size_t;
-#endif
 
 #ifndef YY_STRUCT_YY_BUFFER_STATE
 #define YY_STRUCT_YY_BUFFER_STATE
@@ -238,7 +466,7 @@ struct yy_buffer_state
 	/* Size of input buffer in bytes, not including room for EOB
 	 * characters.
 	 */
-	yy_size_t yy_buf_size;
+	int yy_buf_size;
 
 	/* Number of characters read into yy_ch_buf, not including EOB
 	 * characters.
@@ -266,7 +494,7 @@ struct yy_buffer_state
 
     int yy_bs_lineno; /**< The line count. */
     int yy_bs_column; /**< The column count. */
-    
+
 	/* Whether to try to fill the input buffer when we reach the
 	 * end of it.
 	 */
@@ -283,8 +511,8 @@ struct yy_buffer_state
 	 * possible backing-up.
 	 *
 	 * When we actually see the EOF, we change the status to "new"
-	 * (via parse_cstyle_YYrestart()), so that the user can continue scanning by
-	 * just pointing parse_cstyle_YYin at a new input file.
+	 * (via yyrestart()), so that the user can continue scanning by
+	 * just pointing yyin at a new input file.
 	 */
 #define YY_BUFFER_EOF_PENDING 2
 
@@ -294,117 +522,112 @@ struct yy_buffer_state
 /* Stack of input buffers. */
 static size_t yy_buffer_stack_top = 0; /**< index of top of stack. */
 static size_t yy_buffer_stack_max = 0; /**< capacity of stack. */
-static YY_BUFFER_STATE * yy_buffer_stack = 0; /**< Stack as an array. */
+static YY_BUFFER_STATE * yy_buffer_stack = nullptr; /**< Stack as an array. */
 
 /* We provide macros for accessing buffer states in case in the
  * future we want to put the buffer states in a more general
  * "scanner state".
  *
- * Returns the top of the stack, or NULL.
+ * Returns the top of the stack, or nullptr.
  */
 #define YY_CURRENT_BUFFER ( (yy_buffer_stack) \
                           ? (yy_buffer_stack)[(yy_buffer_stack_top)] \
-                          : NULL)
-
+                          : nullptr)
 /* Same as previous macro, but useful when we know that the buffer stack is not
- * NULL or when we need an lvalue. For internal use only.
+ * nullptr or when we need an lvalue. For internal use only.
  */
 #define YY_CURRENT_BUFFER_LVALUE (yy_buffer_stack)[(yy_buffer_stack_top)]
 
-/* yy_hold_char holds the character lost when parse_cstyle_YYtext is formed. */
+/* yy_hold_char holds the character lost when yytext is formed. */
 static char yy_hold_char;
 static int yy_n_chars;		/* number of characters read into yy_ch_buf */
-int parse_cstyle_YYleng;
+int yyleng;
 
 /* Points to current character in buffer. */
-static char *yy_c_buf_p = (char *) 0;
+static char *yy_c_buf_p = nullptr;
 static int yy_init = 0;		/* whether we need to initialize */
 static int yy_start = 0;	/* start state number */
 
-/* Flag which is used to allow parse_cstyle_YYwrap()'s to do buffer switches
- * instead of setting up a fresh parse_cstyle_YYin.  A bit of a hack ...
+/* Flag which is used to allow yywrap()'s to do buffer switches
+ * instead of setting up a fresh yyin.  A bit of a hack ...
  */
 static int yy_did_buffer_switch_on_eof;
 
-void parse_cstyle_YYrestart (FILE *input_file  );
-void parse_cstyle_YY_switch_to_buffer (YY_BUFFER_STATE new_buffer  );
-YY_BUFFER_STATE parse_cstyle_YY_create_buffer (FILE *file,int size  );
-void parse_cstyle_YY_delete_buffer (YY_BUFFER_STATE b  );
-void parse_cstyle_YY_flush_buffer (YY_BUFFER_STATE b  );
-void parse_cstyle_YYpush_buffer_state (YY_BUFFER_STATE new_buffer  );
-void parse_cstyle_YYpop_buffer_state (void );
+void yyrestart ( FILE *input_file  );
+void yy_switch_to_buffer ( YY_BUFFER_STATE new_buffer  );
+YY_BUFFER_STATE yy_create_buffer ( FILE *file, int size  );
+void yy_delete_buffer ( YY_BUFFER_STATE b  );
+void yy_flush_buffer ( YY_BUFFER_STATE b  );
+void yypush_buffer_state ( YY_BUFFER_STATE new_buffer  );
+void yypop_buffer_state ( void );
 
-static void parse_cstyle_YYensure_buffer_stack (void );
-static void parse_cstyle_YY_load_buffer_state (void );
-static void parse_cstyle_YY_init_buffer (YY_BUFFER_STATE b,FILE *file  );
+static void yyensure_buffer_stack ( void );
+static void yy_load_buffer_state ( void );
+static void yy_init_buffer ( YY_BUFFER_STATE b, FILE *file  );
+#define YY_FLUSH_BUFFER yy_flush_buffer( YY_CURRENT_BUFFER )
 
-#define YY_FLUSH_BUFFER parse_cstyle_YY_flush_buffer(YY_CURRENT_BUFFER )
+YY_BUFFER_STATE yy_scan_buffer ( char *base, yy_size_t size  );
+YY_BUFFER_STATE yy_scan_string ( const char *yy_str  );
+YY_BUFFER_STATE yy_scan_bytes ( const char *bytes, int len  );
 
-YY_BUFFER_STATE parse_cstyle_YY_scan_buffer (char *base,yy_size_t size  );
-YY_BUFFER_STATE parse_cstyle_YY_scan_string (yyconst char *yy_str  );
-YY_BUFFER_STATE parse_cstyle_YY_scan_bytes (yyconst char *bytes,int len  );
+void *yyalloc ( yy_size_t  );
+void *yyrealloc ( void *, yy_size_t  );
+void yyfree ( void *  );
 
-void *parse_cstyle_YYalloc (yy_size_t  );
-void *parse_cstyle_YYrealloc (void *,yy_size_t  );
-void parse_cstyle_YYfree (void *  );
-
-#define yy_new_buffer parse_cstyle_YY_create_buffer
-
+#define yy_new_buffer yy_create_buffer
 #define yy_set_interactive(is_interactive) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){ \
-        parse_cstyle_YYensure_buffer_stack (); \
+        yyensure_buffer_stack (); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-            parse_cstyle_YY_create_buffer(parse_cstyle_YYin,YY_BUF_SIZE ); \
+            yy_create_buffer( yyin, YY_BUF_SIZE ); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_is_interactive = is_interactive; \
 	}
-
 #define yy_set_bol(at_bol) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){\
-        parse_cstyle_YYensure_buffer_stack (); \
+        yyensure_buffer_stack (); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-            parse_cstyle_YY_create_buffer(parse_cstyle_YYin,YY_BUF_SIZE ); \
+            yy_create_buffer( yyin, YY_BUF_SIZE ); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_at_bol = at_bol; \
 	}
-
 #define YY_AT_BOL() (YY_CURRENT_BUFFER_LVALUE->yy_at_bol)
 
 /* Begin user sect3 */
 
-#define parse_cstyle_YYwrap(n) 1
+#define parse_cstyle_YYwrap() (/*CONSTCOND*/1)
 #define YY_SKIP_YYWRAP
+typedef flex_uint8_t YY_CHAR;
 
-typedef unsigned char YY_CHAR;
-
-FILE *parse_cstyle_YYin = (FILE *) 0, *parse_cstyle_YYout = (FILE *) 0;
+FILE *yyin = nullptr, *yyout = nullptr;
 
 typedef int yy_state_type;
 
-extern int parse_cstyle_YYlineno;
+extern int yylineno;
+int yylineno = 1;
 
-int parse_cstyle_YYlineno = 1;
+extern char *yytext;
+#ifdef yytext_ptr
+#undef yytext_ptr
+#endif
+#define yytext_ptr yytext
 
-extern char *parse_cstyle_YYtext;
-#define yytext_ptr parse_cstyle_YYtext
-
-static yy_state_type yy_get_previous_state (void );
-static yy_state_type yy_try_NUL_trans (yy_state_type current_state  );
-static int yy_get_next_buffer (void );
-static void yy_fatal_error (yyconst char msg[]  );
+static yy_state_type yy_get_previous_state ( void );
+static yy_state_type yy_try_NUL_trans ( yy_state_type current_state  );
+static int yy_get_next_buffer ( void );
+static void yynoreturn yy_fatal_error ( const char* msg  );
 
 /* Done after the current pattern has been matched and before the
- * corresponding action - sets up parse_cstyle_YYtext.
+ * corresponding action - sets up yytext.
  */
 #define YY_DO_BEFORE_ACTION \
 	(yytext_ptr) = yy_bp; \
-	parse_cstyle_YYleng = (size_t) (yy_cp - yy_bp); \
+	yyleng = (int) (yy_cp - yy_bp); \
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
-
 #define YY_NUM_RULES 882
 #define YY_END_OF_BUFFER 883
 /* This struct is not used in this scanner,
@@ -414,7 +637,7 @@ struct yy_trans_info
 	flex_int32_t yy_verify;
 	flex_int32_t yy_nxt;
 	};
-static yyconst flex_int16_t yy_acclist[8196] =
+static const flex_int16_t yy_acclist[8196] =
     {   0,
        40,   40,  484,  484,  484,  484,  484,  484,  481,  481,
        51,   51,   59,   59,  543,  543,  543,  543,17197,17197,
@@ -1320,7 +1543,7 @@ static yyconst flex_int16_t yy_acclist[8196] =
 
     } ;
 
-static yyconst flex_int16_t yy_accept[5916] =
+static const flex_int16_t yy_accept[5916] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -1975,7 +2198,7 @@ static yyconst flex_int16_t yy_accept[5916] =
      8194, 8194, 8195, 8196, 8196
     } ;
 
-static yyconst flex_int32_t yy_ec[256] =
+static const YY_CHAR yy_ec[256] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    2,    3,
         1,    1,    4,    1,    1,    1,    1,    1,    1,    1,
@@ -2007,7 +2230,7 @@ static yyconst flex_int32_t yy_ec[256] =
        93,   93,   93,   93,   93
     } ;
 
-static yyconst flex_int32_t yy_meta[94] =
+static const YY_CHAR yy_meta[94] =
     {   0,
         1,    2,    3,    4,    2,    5,    6,    7,    8,    1,
         9,   10,   11,   12,   13,    1,   14,   15,   16,   17,
@@ -2022,7 +2245,7 @@ static yyconst flex_int32_t yy_meta[94] =
 
     } ;
 
-static yyconst flex_int32_t yy_base[6698] =
+static const flex_int32_t yy_base[6698] =
     {   0,
         0,   11,   14,   42,   53,   74,  165,   28,  257,  268,
       359,   33,  452,   87,  545,   88,  638,   96,  729,  740,
@@ -2763,7 +2986,7 @@ static yyconst flex_int32_t yy_base[6698] =
 
     } ;
 
-static yyconst flex_int16_t yy_def[6698] =
+static const flex_int16_t yy_def[6698] =
     {   0,
      5915, 5915, 5916, 5916, 5917, 5917, 5914,    7, 5918, 5918,
      5914,   11, 5914,   13, 5914,   15, 5914,   17, 5915, 5915,
@@ -3504,7 +3727,7 @@ static yyconst flex_int16_t yy_def[6698] =
 
     } ;
 
-static yyconst flex_int16_t yy_nxt[50202] =
+static const flex_int16_t yy_nxt[50202] =
     {   0,
      5914, 5914,  361, 1880, 1881, 1902,  362,  363, 1902, 2171,
      2026,  364,  369,  361, 2026,  369,  372,  362,  370,  365,
@@ -9031,7 +9254,7 @@ static yyconst flex_int16_t yy_nxt[50202] =
      5914
     } ;
 
-static yyconst flex_int16_t yy_chk[50202] =
+static const flex_int16_t yy_chk[50202] =
     {   0,
         0,    0,    1,  406,  406,  419,    1,    1,  419,  793,
       594,    1,    2,    2,  594,    2,    3,    2,    2,    1,
@@ -14558,8 +14781,8 @@ static yyconst flex_int16_t yy_chk[50202] =
      5914
     } ;
 
-extern int parse_cstyle_YY_flex_debug;
-int parse_cstyle_YY_flex_debug = 0;
+extern int yy_flex_debug;
+int yy_flex_debug = 0;
 
 static yy_state_type *yy_state_buf=0, *yy_state_ptr=0;
 static char *yy_full_match;
@@ -14571,7 +14794,7 @@ static int *yy_full_state;
 #define YY_TRAILING_HEAD_MASK 0x4000
 #define REJECT \
 { \
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */ \
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */ \
 yy_cp = (yy_full_match); /* restore poss. backed-over text */ \
 (yy_lp) = (yy_full_lp); /* restore orig. accepting pos. */ \
 (yy_state_ptr) = (yy_full_state); /* restore orig. state */ \
@@ -14583,7 +14806,7 @@ goto find_rule; \
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
-char *parse_cstyle_YYtext;
+char *yytext;
 /*************************************************************************
  *
  * Copyright (c) 2014-2024 Barbara Geller & Ansel Sermersheim
@@ -14591,28 +14814,29 @@ char *parse_cstyle_YYtext;
 
 *************************************************************************/
 
-#include <QFile>
-#include <QHash>
-#include <QStack>
-#include <QVector>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <ctype.h>
+#include <parse_cstyle.h>
 
 #include <arguments.h>
-#include <config.h>
-#include <commentscan.h>
 #include <code_cstyle.h>
+#include <commentscan.h>
+#include <config.h>
 #include <default_args.h>
 #include <doxy_globals.h>
 #include <entry.h>
 #include <language.h>
 #include <message.h>
 #include <parse_clang.h>
-#include <parse_cstyle.h>
 #include <util.h>
+
+#include <QFile>
+#include <QHash>
+#include <QStack>
+#include <QVector>
+
+#include <assert.h>
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define YY_NO_INPUT 1
 
@@ -14917,10 +15141,11 @@ static void lineCount()
   static const int tabSize = Config::getInt("tab-size");
   const char *p;
 
-  for (p = parse_cstyle_YYtext; *p; ++p) {
+  for (p = yytext; *p; ++p) {
 
       if (*p == '\n') {
-         yyLineNr++;
+         ++yyLineNr;
+
          s_column = 0;
          yyColNr  = 1;
 
@@ -15224,7 +15449,7 @@ static void addKnRArgInfo(const QString &type, const QString &name, const QStrin
       if (a.type == name) {
          a.type = type.trimmed();
 
-         if (a.type.startsWith("")) {
+         if (a.type.startsWith("register ")) {
             // strip keyword
             a.type = a.type.mid(9);
          }
@@ -15525,41 +15750,41 @@ static int yyread(char *buf, int max_size)
  */
 #include <unistd.h>
 #endif
-
+    
 #ifndef YY_EXTRA_TYPE
 #define YY_EXTRA_TYPE void *
 #endif
 
-static int yy_init_globals (void );
+static int yy_init_globals ( void );
 
 /* Accessor methods to globals.
    These are made visible to non-reentrant scanners for convenience. */
 
-int parse_cstyle_YYlex_destroy (void );
+int yylex_destroy ( void );
 
-int parse_cstyle_YYget_debug (void );
+int yyget_debug ( void );
 
-void parse_cstyle_YYset_debug (int debug_flag  );
+void yyset_debug ( int debug_flag  );
 
-YY_EXTRA_TYPE parse_cstyle_YYget_extra (void );
+YY_EXTRA_TYPE yyget_extra ( void );
 
-void parse_cstyle_YYset_extra (YY_EXTRA_TYPE user_defined  );
+void yyset_extra ( YY_EXTRA_TYPE user_defined  );
 
-FILE *parse_cstyle_YYget_in (void );
+FILE *yyget_in ( void );
 
-void parse_cstyle_YYset_in  (FILE * in_str  );
+void yyset_in  ( FILE * _in_str  );
 
-FILE *parse_cstyle_YYget_out (void );
+FILE *yyget_out ( void );
 
-void parse_cstyle_YYset_out  (FILE * out_str  );
+void yyset_out  ( FILE * _out_str  );
 
-int parse_cstyle_YYget_leng (void );
+			int yyget_leng ( void );
 
-char *parse_cstyle_YYget_text (void );
+char *yyget_text ( void );
 
-int parse_cstyle_YYget_lineno (void );
+int yyget_lineno ( void );
 
-void parse_cstyle_YYset_lineno (int line_number  );
+void yyset_lineno ( int _line_number  );
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -15567,28 +15792,31 @@ void parse_cstyle_YYset_lineno (int line_number  );
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int parse_cstyle_YYwrap (void );
+extern "C" int yywrap ( void );
 #else
-extern int parse_cstyle_YYwrap (void );
+extern int yywrap ( void );
 #endif
 #endif
 
-    static void yyunput (int c,char *buf_ptr  );
+#ifndef YY_NO_UNPUT
     
+    static void yyunput ( int c, char *buf_ptr  );
+    
+#endif
+
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char *,yyconst char *,int );
+static void yy_flex_strncpy ( char *, const char *, int );
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen (yyconst char * );
+static int yy_flex_strlen ( const char * );
 #endif
 
 #ifndef YY_NO_INPUT
-
 #ifdef __cplusplus
-static int yyinput (void );
+static int yyinput ( void );
 #else
-static int input (void );
+static int input ( void );
 #endif
 
 #endif
@@ -15608,7 +15836,7 @@ static int input (void );
 /* This used to be an fputs(), but since the string might contain NUL's,
  * we now use fwrite().
  */
-#define ECHO do { if (fwrite( parse_cstyle_YYtext, parse_cstyle_YYleng, 1, parse_cstyle_YYout )) {} } while (0)
+#define ECHO do { if (fwrite( yytext, (size_t) yyleng, 1, yyout )) {} } while (0)
 #endif
 
 /* Gets input and stuffs it into "buf".  number of characters read, or YY_NULL,
@@ -15619,20 +15847,20 @@ static int input (void );
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
 		{ \
 		int c = '*'; \
-		size_t n; \
+		int n; \
 		for ( n = 0; n < max_size && \
-			     (c = getc( parse_cstyle_YYin )) != EOF && c != '\n'; ++n ) \
+			     (c = getc( yyin )) != EOF && c != '\n'; ++n ) \
 			buf[n] = (char) c; \
 		if ( c == '\n' ) \
 			buf[n++] = (char) c; \
-		if ( c == EOF && ferror( parse_cstyle_YYin ) ) \
+		if ( c == EOF && ferror( yyin ) ) \
 			YY_FATAL_ERROR( "input in flex scanner failed" ); \
 		result = n; \
 		} \
 	else \
 		{ \
 		errno=0; \
-		while ( (result = fread(buf, 1, max_size, parse_cstyle_YYin))==0 && ferror(parse_cstyle_YYin)) \
+		while ( (result = (int) fread(buf, 1, (yy_size_t) max_size, yyin)) == 0 && ferror(yyin)) \
 			{ \
 			if( errno != EINTR) \
 				{ \
@@ -15640,7 +15868,7 @@ static int input (void );
 				break; \
 				} \
 			errno=0; \
-			clearerr(parse_cstyle_YYin); \
+			clearerr(yyin); \
 			} \
 		}\
 \
@@ -15673,12 +15901,12 @@ static int input (void );
 #ifndef YY_DECL
 #define YY_DECL_IS_OURS 1
 
-extern int parse_cstyle_YYlex (void);
+extern int yylex (void);
 
-#define YY_DECL int parse_cstyle_YYlex (void)
+#define YY_DECL int yylex (void)
 #endif /* !YY_DECL */
 
-/* Code executed at the beginning of each rule, after parse_cstyle_YYtext and parse_cstyle_YYleng
+/* Code executed at the beginning of each rule, after yytext and yyleng
  * have been set up.
  */
 #ifndef YY_USER_ACTION
@@ -15687,13 +15915,13 @@ extern int parse_cstyle_YYlex (void);
 
 /* Code executed at the end of each rule. */
 #ifndef YY_BREAK
-#define YY_BREAK break;
+#define YY_BREAK /*LINTED*/break;
 #endif
 
 #define YY_RULE_SETUP \
-	if ( parse_cstyle_YYleng > 0 ) \
+	if ( yyleng > 0 ) \
 		YY_CURRENT_BUFFER_LVALUE->yy_at_bol = \
-				(parse_cstyle_YYtext[parse_cstyle_YYleng - 1] == '\n'); \
+				(yytext[yyleng - 1] == '\n'); \
 	YY_USER_ACTION
 
 /** The main scanner function which does all the work.
@@ -15714,33 +15942,35 @@ YY_DECL
 
         /* Create the reject buffer large enough to save one state per allowed character. */
         if ( ! (yy_state_buf) )
-            (yy_state_buf) = (yy_state_type *)parse_cstyle_YYalloc(YY_STATE_BUF_SIZE  );
+            (yy_state_buf) = (yy_state_type *)yyalloc(YY_STATE_BUF_SIZE  );
             if ( ! (yy_state_buf) )
-                YY_FATAL_ERROR( "out of dynamic memory in parse_cstyle_YYlex()" );
+                YY_FATAL_ERROR( "out of dynamic memory in yylex()" );
 
 		if ( ! (yy_start) )
 			(yy_start) = 1;	/* first start state */
 
-		if ( ! parse_cstyle_YYin )
-			parse_cstyle_YYin = stdin;
+		if ( ! yyin )
+			yyin = stdin;
 
-		if ( ! parse_cstyle_YYout )
-			parse_cstyle_YYout = stdout;
+		if ( ! yyout )
+			yyout = stdout;
 
 		if ( ! YY_CURRENT_BUFFER ) {
-			parse_cstyle_YYensure_buffer_stack ();
+			yyensure_buffer_stack ();
 			YY_CURRENT_BUFFER_LVALUE =
-				parse_cstyle_YY_create_buffer(parse_cstyle_YYin,YY_BUF_SIZE );
+				yy_create_buffer( yyin, YY_BUF_SIZE );
 		}
 
-		parse_cstyle_YY_load_buffer_state( );
+		yy_load_buffer_state(  );
 		}
 
-	while ( 1 )		/* loops until end-of-file is reached */
+	{
+
+	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
 		yy_cp = (yy_c_buf_p);
 
-		/* Support of parse_cstyle_YYtext. */
+		/* Support of yytext. */
 		*yy_cp = (yy_hold_char);
 
 		/* yy_bp points to the position in yy_ch_buf of the start of
@@ -15757,14 +15987,14 @@ YY_DECL
 yy_match:
 		do
 			{
-			YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)];
+			YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)] ;
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
 				if ( yy_current_state >= 5915 )
-					yy_c = yy_meta[(unsigned int) yy_c];
+					yy_c = yy_meta[yy_c];
 				}
-			yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
+			yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 			*(yy_state_ptr)++ = yy_current_state;
 			++yy_cp;
 			}
@@ -15896,14 +16126,14 @@ YY_RULE_SETUP
 case 10:
 YY_RULE_SETUP
 {
-      unput(*parse_cstyle_YYtext);
+      unput(*yytext);
       BEGIN( FindMembers );
                }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
 {
-      unput(*parse_cstyle_YYtext);
+      unput(*yytext);
       BEGIN( FindMembers );
    }
 	YY_BREAK
@@ -15912,7 +16142,7 @@ YY_RULE_SETUP
 {
       current->setData(EntryKey::Member_Args,   current->getData(EntryKey::Member_Args).simplified());
 
-      unput(*parse_cstyle_YYtext);
+      unput(*yytext);
       BEGIN( ClassVar );
    }
 	YY_BREAK
@@ -16227,7 +16457,7 @@ YY_RULE_SETUP
 case 35:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addType(current);
       current->m_entryName = text;
    }
@@ -16250,7 +16480,7 @@ YY_RULE_SETUP
 case 38:
 YY_RULE_SETUP
 {
-      unput(*parse_cstyle_YYtext);
+      unput(*yytext);
       BEGIN( FindMembers );
    }
 	YY_BREAK
@@ -16269,7 +16499,7 @@ YY_RULE_SETUP
 case 41:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addType(current);
       current->appendData(EntryKey::Member_Type, text);
    }
@@ -16277,7 +16507,7 @@ YY_RULE_SETUP
 case 42:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args, text);
       BEGIN( CliPropertyType );
    }
@@ -16285,7 +16515,7 @@ YY_RULE_SETUP
 case 43:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args, text);
    }
 	YY_BREAK
@@ -16354,7 +16584,7 @@ case 47:
 /* rule 47 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (! insideObjC) {
          REJECT;
@@ -16401,7 +16631,7 @@ case 49:
 YY_RULE_SETUP
 {
       // found method name
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (current->getData(EntryKey::Member_Type).isEmpty()) {
          current->setData(EntryKey::Member_Type, "id");
@@ -16431,7 +16661,7 @@ case 51:
 YY_RULE_SETUP
 {
       // TODO: check if nested branches are possible
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->setData(EntryKey::Member_Type, text);
    }
 	YY_BREAK
@@ -16445,7 +16675,7 @@ case 53:
 YY_RULE_SETUP
 {
       // Keyword of parameter
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       text = text.left(text.length() - 1);
 
       if (text.isEmpty()) {
@@ -16469,7 +16699,7 @@ case 54:
 YY_RULE_SETUP
 {
       // name of parameter
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       lineCount();
       current->argList.last().name = QString(text).trimmed();
    }
@@ -16506,18 +16736,18 @@ YY_RULE_SETUP
 case 57:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       roundCount++;
       current->argList.last().type += text;
    }
 	YY_BREAK
 case 58:
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (roundCount <= 0) {
          BEGIN( ObjCParams );
@@ -16531,7 +16761,7 @@ case 59:
 /* rule 59 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->argList.last().type += text.trimmed();
    }
 	YY_BREAK
@@ -16577,7 +16807,7 @@ case 63:
 /* rule 63 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insideJava) {
          // Java annotation
@@ -16610,14 +16840,14 @@ YY_RULE_SETUP
 case 64:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->setData(EntryKey::Read_Property, text.mid(7));
    }
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->setData(EntryKey::Write_Property, text.mid(7));
    }
 	YY_BREAK
@@ -16689,7 +16919,7 @@ YY_RULE_SETUP
 case 76:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insideJava)   {
          // Java annotaton
@@ -16726,7 +16956,7 @@ YY_RULE_SETUP
 case 78:
 YY_RULE_SETUP
 {
-      QString text          = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text          = QString::fromUtf8(yytext);
       isTypedef             = false;
 
       current->m_entryName  = text;
@@ -16969,9 +17199,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 96:
 /* rule 96 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       if (insideJava) {
@@ -17019,7 +17250,7 @@ YY_RULE_SETUP
          BEGIN(PackageName);
 
       } else {
-         QString text = QString::fromUtf8(parse_cstyle_YYtext);
+         QString text = QString::fromUtf8(yytext);
          addType(current);
          current->m_entryName = text.trimmed();
       }
@@ -17045,7 +17276,7 @@ YY_RULE_SETUP
          BEGIN( CompoundName );
 
       } else {
-         QString text = QString::fromUtf8(parse_cstyle_YYtext);
+         QString text = QString::fromUtf8(yytext);
          addType(current);
          current->m_entryName = text.trimmed();
       }
@@ -17072,7 +17303,7 @@ YY_RULE_SETUP
          BEGIN( CompoundName );
 
       } else {
-         QString text = QString::fromUtf8(parse_cstyle_YYtext);
+         QString text = QString::fromUtf8(yytext);
          addType(current);
          current->m_entryName = text.trimmed();
       }
@@ -17110,7 +17341,7 @@ YY_RULE_SETUP
          BEGIN( CompoundName );
 
       } else {
-         QString text = QString::fromUtf8(parse_cstyle_YYtext);
+         QString text = QString::fromUtf8(yytext);
          addType(current);
          current->m_entryName = text.trimmed();
       }
@@ -17145,7 +17376,7 @@ YY_RULE_SETUP
          BEGIN( CompoundName );
 
       } else   {
-         QString text = QString::fromUtf8(parse_cstyle_YYtext);
+         QString text = QString::fromUtf8(yytext);
          addType(current);
          current->m_entryName = text.trimmed();
       }
@@ -17157,7 +17388,7 @@ YY_RULE_SETUP
 {
       // M$/Corba/UNO IDL/Java interface
 
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       lineCount();
 
       if (insideIDL || insideJava || insideCSharp || insideD || insidePHP) {
@@ -17313,7 +17544,7 @@ case 109:
 YY_RULE_SETUP
 {
       // add a new class
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       isTypedef        = text.contains("typedef");
       bool isConst     = text.contains("const");
@@ -17366,7 +17597,7 @@ YY_RULE_SETUP
 {
       // C++/CLI extension
 
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       isTypedef = false;
       current->section = Entry::CLASS_SEC;
@@ -17398,7 +17629,7 @@ YY_RULE_SETUP
 {
       // C++/CLI extension
 
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       isTypedef = false;
 
       current->section = Entry::CLASS_SEC;
@@ -17426,7 +17657,7 @@ case 115:
 /* rule 115 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       isTypedef = false;
 
       current->section = Entry::CLASS_SEC;
@@ -17454,7 +17685,7 @@ case 116:
 /* rule 116 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insideIDL) {
          isTypedef = false;
@@ -17487,7 +17718,7 @@ case 118:
 /* rule 118 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       isTypedef = text.indexOf("typedef") != -1;
 
@@ -17537,7 +17768,7 @@ case 120:
 /* rule 120 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       isTypedef        = false;
       current->section = Entry::CLASS_SEC;
@@ -17568,7 +17799,7 @@ case 122:
 /* rule 122 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       isTypedef = false;
       current->section = Entry::CLASS_SEC;
@@ -17599,7 +17830,7 @@ case 124:
 /* rule 124 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       isTypedef = false;
       current->section = Entry::CLASS_SEC;
@@ -17631,7 +17862,7 @@ case 126:
 /* rule 126 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       isTypedef         = text.indexOf("typedef")  !=-1;
       bool isConst      = text.indexOf("const")    !=-1;
@@ -17675,8 +17906,8 @@ case 128:
 /* rule 128 can match eol */
 YY_RULE_SETUP
 {
-      // for IDL: typedef [something] enum
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      // if this is IDL can match typedef [something] enum
+      QString text = QString::fromUtf8(yytext);
 
       isTypedef = text.indexOf("typedef") != -1;
 
@@ -17749,9 +17980,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 130:
 /* rule 130 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // A::operator()<int>(int arg)
@@ -17762,12 +17994,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 131:
 /* rule 131 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       lineCount();
       current->m_entryName += text;
       current->m_entryName = current->m_entryName.simplified();
@@ -17786,7 +18019,7 @@ case 133:
 /* rule 133 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       lineCount();
       current->m_entryName += text[0];
    }
@@ -17796,7 +18029,7 @@ case 134:
 YY_RULE_SETUP
 {
       /* skip guided template specifiers */
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (! current->getData(EntryKey::Member_Type).startsWith("friend ")) {
          current->m_entryName += text;
@@ -17807,7 +18040,7 @@ case 135:
 YY_RULE_SETUP
 {
       current->m_entryName = current->m_entryName.simplified();
-      unput(*parse_cstyle_YYtext);
+      unput(*yytext);
       BEGIN( FindMembers ) ;
    }
 	YY_BREAK
@@ -17846,7 +18079,7 @@ YY_RULE_SETUP
 case 138:
 YY_RULE_SETUP
 {
-      aliasName = QString::fromUtf8(parse_cstyle_YYtext);
+      aliasName = QString::fromUtf8(yytext);
       BEGIN( NSAliasArg );
    }
 	YY_BREAK
@@ -17855,7 +18088,7 @@ YY_RULE_SETUP
 {
       // TODO: namespace aliases are now treated as global entities
       // while they should be aware of the scope they are in
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       Doxy_Globals::namespaceAliasDict.insert(aliasName, text);
    }
 	YY_BREAK
@@ -17869,7 +18102,7 @@ case 141:
 /* rule 141 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       lineCount();
       aliasName = text;
       BEGIN(PHPUseAs);
@@ -17879,7 +18112,7 @@ case 142:
 /* rule 142 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       lineCount();
       current->m_entryName = removeRedundantWhiteSpace(substitute(text,"\\","::"));
@@ -17909,7 +18142,7 @@ YY_RULE_SETUP
 case 144:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       if (! aliasName.isEmpty()) {
          Doxy_Globals::namespaceAliasDict.insert(text,
                removeRedundantWhiteSpace(substitute(aliasName, "\\", "::")));
@@ -17921,7 +18154,7 @@ YY_RULE_SETUP
 case 145:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (text[0] ==',') {
          BEGIN(PHPUse);
@@ -17935,7 +18168,7 @@ case 146:
 YY_RULE_SETUP
 {
       // package import => add as a using directive
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       lineCount();
       current->m_entryName = removeRedundantWhiteSpace(substitute(text.left(text.length()-1),".","::"));
@@ -17953,7 +18186,7 @@ case 147:
 YY_RULE_SETUP
 {
       // class import => add as a using declaration
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       lineCount();
       current->m_entryName = removeRedundantWhiteSpace(substitute(text,".","::"));
@@ -17996,7 +18229,7 @@ case 150:
 YY_RULE_SETUP
 {
 
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       lineCount();
 
       current->m_entryName = text;
@@ -18065,7 +18298,7 @@ case 153:
 YY_RULE_SETUP
 {
       // */ (editor syntax fix)
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       s_docBlockContext = UsingAliasEnd;
       s_docBlockInBody  = false;
@@ -18100,7 +18333,7 @@ YY_RULE_SETUP
 case 155:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       previous->appendData(EntryKey::Member_Args, text);
    }
 	YY_BREAK
@@ -18108,7 +18341,7 @@ case 156:
 /* rule 156 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       previous->appendData(EntryKey::Member_Args, text);
       lineCount();
    }
@@ -18130,7 +18363,7 @@ case 158:
 /* rule 158 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       current->m_entryName = removeRedundantWhiteSpace(text);
       current->section     = Entry::USINGDIR_SEC;
@@ -18154,20 +18387,21 @@ case 160:
 YY_RULE_SETUP
 {
       // guided template decl
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addType(current);
       current->m_entryName = text.left(text.length() - 2);
    }
 	YY_BREAK
 case 161:
 /* rule 161 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // Note: this could be a return type
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       roundCount = 0;
       sharpCount = 0;
 
@@ -18186,12 +18420,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 162:
 /* rule 162 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       sharpCount = 0;
       roundCount = 0;
       lineCount();
@@ -18218,14 +18453,14 @@ YY_RULE_SETUP
 case 164:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName += text;
    }
 	YY_BREAK
 case 165:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       if (roundCount == 0) {
          sharpCount++;
       }
@@ -18235,7 +18470,7 @@ YY_RULE_SETUP
 case 166:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insideJava || insideCSharp || insideCli || roundCount == 0) {
 
@@ -18306,9 +18541,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 170:
 /* rule 170 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 2);
 (yy_c_buf_p) = yy_cp -= 2;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       lineCount();
@@ -18322,7 +18558,7 @@ YY_RULE_SETUP
 case 171:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName += text[0];
       roundCount++;
    }
@@ -18330,7 +18566,7 @@ YY_RULE_SETUP
 case 172:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName += text[0];
 
       if (roundCount > 0) {
@@ -18341,7 +18577,7 @@ YY_RULE_SETUP
 case 173:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName += text[0];
    }
 	YY_BREAK
@@ -18361,7 +18597,7 @@ case 175:
 YY_RULE_SETUP
 {
       // PHP heredoc
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       s_delimiter  = text;
 
       addToOutput(s_hereDocEntry, s_hereDocEnum, text);
@@ -18370,13 +18606,13 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 case 176:
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // PHP nowdoc
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       s_delimiter  = text.mid(1);
 
       addToOutput(s_hereDocEntry, s_hereDocEnum, text);
@@ -18388,19 +18624,19 @@ case 177:
 YY_RULE_SETUP
 {
       // PHP heredoc
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       s_delimiter  = text;
       BEGIN(HereDocEnd);
    }
 	YY_BREAK
 case 178:
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // PHP nowdoc
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       s_delimiter  = text.mid(1);
       BEGIN(HereDocEnd);
    }
@@ -18409,7 +18645,7 @@ case 179:
 YY_RULE_SETUP
 {
       // id at start of the line could mark the end of the block
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (s_delimiter == text) {
          // it is the end marker
@@ -18426,7 +18662,7 @@ case 181:
 YY_RULE_SETUP
 {
       // id at start of the line could mark the end of the block
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_hereDocEntry, s_hereDocEnum, text);
 
       if (s_delimiter == text) {
@@ -18439,7 +18675,7 @@ case 182:
 /* rule 182 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       lineCount();
       addToOutput(s_hereDocEntry, s_hereDocEnum, text);
@@ -18448,14 +18684,14 @@ YY_RULE_SETUP
 case 183:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_hereDocEntry, s_hereDocEnum, text);
    }
 	YY_BREAK
 case 184:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_hereDocEntry, s_hereDocEnum, text);
    }
 	YY_BREAK
@@ -18493,21 +18729,21 @@ YY_RULE_SETUP
 case 189:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Type, text);
    }
 	YY_BREAK
 case 190:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Type, text);
    }
 	YY_BREAK
 case 191:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Type, text);
       BEGIN(QtPropName);
    }
@@ -18515,7 +18751,7 @@ YY_RULE_SETUP
 case 192:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName = text;
       BEGIN(QtPropAttr);
    }
@@ -18555,7 +18791,7 @@ YY_RULE_SETUP
 case 198:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->setData(EntryKey::Read_Property, text);
       BEGIN(QtPropAttr);
    }
@@ -18563,7 +18799,7 @@ YY_RULE_SETUP
 case 199:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->setData(EntryKey::Write_Property, text);
       BEGIN(QtPropAttr);
    }
@@ -18676,7 +18912,7 @@ case 212:
 YY_RULE_SETUP
 {
       // cs property read name
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName = text;
    }
 	YY_BREAK
@@ -18690,7 +18926,7 @@ case 214:
 YY_RULE_SETUP
 {
       // cs property read method
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->setData(EntryKey::Read_Property, text);
       BEGIN(CsPropClose);
    }
@@ -18715,7 +18951,7 @@ case 217:
 YY_RULE_SETUP
 {
       // cs property write name
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName = text;
    }
 	YY_BREAK
@@ -18728,7 +18964,7 @@ YY_RULE_SETUP
 case 219:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->setData(EntryKey::Write_Property, text);
       BEGIN(CsPropClose);
    }
@@ -18736,7 +18972,7 @@ YY_RULE_SETUP
 case 220:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       current->protection = Protection::Public;
       current->mtype      = MethodType::Property;
@@ -18754,7 +18990,7 @@ YY_RULE_SETUP
 case 222:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName = text;
    }
 	YY_BREAK
@@ -18767,7 +19003,7 @@ YY_RULE_SETUP
 case 224:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->setData(EntryKey::Reset_Property, text);
       BEGIN(CsPropClose);
    }
@@ -18791,7 +19027,7 @@ YY_RULE_SETUP
 case 227:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName = text;
    }
 	YY_BREAK
@@ -18804,7 +19040,7 @@ YY_RULE_SETUP
 case 229:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->setData(EntryKey::Notify_Property, text);
       BEGIN(CsPropClose);
    }
@@ -18895,7 +19131,7 @@ YY_RULE_SETUP
 case 238:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName = text;
    }
 	YY_BREAK
@@ -18945,7 +19181,7 @@ YY_RULE_SETUP
 case 244:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName = text;
       BEGIN(CsPropClose);
    }
@@ -18967,7 +19203,7 @@ YY_RULE_SETUP
 case 247:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       Protection visibility = getProtection(text);
       current->protection   = visibility;
    }
@@ -18983,6 +19219,7 @@ YY_RULE_SETUP
 {
       current->mtype = MethodType::Slot;
       current->setData(EntryKey::Member_Type, "");
+
       BEGIN(CsSlot);
    }
 	YY_BREAK
@@ -18995,7 +19232,7 @@ YY_RULE_SETUP
 case 251:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       Protection visibility = getProtection(text);
       current->protection   = visibility;
    }
@@ -19009,7 +19246,7 @@ YY_RULE_SETUP
 case 253:
 YY_RULE_SETUP
 {
-      current->m_entryName += QString::fromUtf8(parse_cstyle_YYtext);
+      current->m_entryName += QString::fromUtf8(yytext);
    }
 	YY_BREAK
 case 254:
@@ -19023,7 +19260,7 @@ YY_RULE_SETUP
 case 255:
 YY_RULE_SETUP
 {
-      current->m_entryName += QString::fromUtf8(parse_cstyle_YYtext);
+      current->m_entryName += QString::fromUtf8(yytext);
 
       addType(current);
    }
@@ -19032,7 +19269,7 @@ case 256:
 /* rule 256 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       yyBegColNr   = yyColNr;
       yyBegLineNr  = yyLineNr;
       lineCount();
@@ -19046,7 +19283,7 @@ YY_RULE_SETUP
 case 257:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (! current->m_entryName.isEmpty()) {
 
@@ -19079,9 +19316,9 @@ YY_RULE_SETUP
 
       currentArgumentContext = FindMembers;
       current_root->addSubEntry(current);
+
       current = QMakeShared<Entry>();
       initEntry();
-
       BEGIN(FindMembers);
    }
 	YY_BREAK
@@ -19123,7 +19360,7 @@ YY_RULE_SETUP
 case 264:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName += text;
    }
 	YY_BREAK
@@ -19148,6 +19385,8 @@ case 268:
 YY_RULE_SETUP
 {
       // end of signal2 or slot2 or overload
+      lineCount();
+
       --roundCount;
 
       if (roundCount == 0)    {
@@ -19162,7 +19401,7 @@ case 269:
 /* rule 269 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName = text;
 
       lineCount();
@@ -19184,9 +19423,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 271:
 /* rule 271 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // requires requires { ... }
@@ -19195,7 +19435,7 @@ YY_RULE_SETUP
          REJECT;
       }
 
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       lineCount();
       current->appendData(EntryKey::Requires_Clause, text);
@@ -19212,7 +19452,7 @@ YY_RULE_SETUP
          REJECT;
       }
 
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       lineCount();
 
@@ -19230,7 +19470,7 @@ YY_RULE_SETUP
 case 273:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       current->appendData(EntryKey::Requires_Clause, text);
       lastCurlyContext = RequiresClause;
@@ -19254,7 +19494,7 @@ YY_RULE_SETUP
 case 275:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Requires_Clause, text);
    }
 	YY_BREAK
@@ -19262,7 +19502,7 @@ case 276:
 YY_RULE_SETUP
 {
       // requires "(A && B)"
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       current->appendData(EntryKey::Requires_Clause, text);
       lastRoundContext = RequiresClause;
@@ -19280,7 +19520,7 @@ case 277:
 YY_RULE_SETUP
 {
       // something like "requires true"
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (startOfRequiresExpression(current->getData(EntryKey::Requires_Clause))) {
          lineCount();
@@ -19298,7 +19538,7 @@ case 278:
 YY_RULE_SETUP
 {
       // "requires func(x)"
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (startOfRequiresExpression(current->getData(EntryKey::Requires_Clause))) {
         lineCount();
@@ -19323,7 +19563,7 @@ case 279:
 YY_RULE_SETUP
 {
       // "requires C<S,T>"
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (startOfRequiresExpression(current->getData(EntryKey::Requires_Clause))) {
         lineCount();
@@ -19346,7 +19586,7 @@ case 280:
 /* rule 280 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Requires_Clause, text);
 
       lineCount();
@@ -19356,7 +19596,7 @@ case 281:
 YY_RULE_SETUP
 {
       // "requires A || B" or "requires A && B"
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Requires_Clause, text);
    }
 	YY_BREAK
@@ -19371,7 +19611,7 @@ YY_RULE_SETUP
 case 283:
 YY_RULE_SETUP
 {
-      unput(*parse_cstyle_YYtext);
+      unput(*yytext);
 
       QString tmp = current->getData(EntryKey::Requires_Clause);
       current->setData(EntryKey::Requires_Clause, tmp.simplified());
@@ -19383,7 +19623,7 @@ case 284:
 /* rule 284 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insideCpp || insideObjC)  {
          current->setData(EntryKey::Clang_Id, ClangParser::instance()->lookup(yyLineNr, text));
@@ -19568,14 +19808,14 @@ case 287:
 YY_RULE_SETUP
 {
       // variable with static_assert as name?
-      unput(*parse_cstyle_YYtext);
+      unput(*yytext);
       BEGIN(FindMembers);
    }
 	YY_BREAK
 case 288:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Type, text);
 
       lastRoundContext = FindMembers;
@@ -19597,14 +19837,14 @@ YY_RULE_SETUP
 case 290:
 YY_RULE_SETUP
 {
-      unput(*parse_cstyle_YYtext);
+      unput(*yytext);
       BEGIN(FindMembers);
    }
 	YY_BREAK
 case 291:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName += removeRedundantWhiteSpace(text);
       BEGIN(FindMembers);
    }
@@ -19626,7 +19866,7 @@ YY_RULE_SETUP
 case 294:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName += text;
    }
 	YY_BREAK
@@ -19690,14 +19930,14 @@ case 304:
 /* rule 304 can match eol */
 YY_RULE_SETUP
 {
-      unput(*parse_cstyle_YYtext); // rule added to fix bug id 601138
+      unput(*yytext); // rule added to fix bug id 601138
       BEGIN( FindMembers );
    }
 	YY_BREAK
 case 305:
 YY_RULE_SETUP
 {
-      unput(*parse_cstyle_YYtext);
+      unput(*yytext);
       BEGIN( FindMembers );
    }
 	YY_BREAK
@@ -19731,13 +19971,13 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 case 309:
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       /* line control directive */
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       static QRegularExpression regExp("\\d+");
       QRegularExpressionMatch match = regExp.match(text);
@@ -19764,7 +20004,7 @@ YY_RULE_SETUP
 case 310:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       yyFileName = stripQuotes(text);
 
       if (lastPreLineCtrlContext == ReadBody || lastPreLineCtrlContext == ReadNSBody || lastPreLineCtrlContext == ReadBodyIntf) {
@@ -19775,7 +20015,7 @@ YY_RULE_SETUP
 case 311:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       if (lastPreLineCtrlContext == ReadBody || lastPreLineCtrlContext == ReadNSBody || lastPreLineCtrlContext == ReadBodyIntf) {
          current->appendData(EntryKey::Source_Text, text);
       }
@@ -19785,7 +20025,7 @@ case 312:
 /* rule 312 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       if (lastPreLineCtrlContext == ReadBody || lastPreLineCtrlContext == ReadNSBody || lastPreLineCtrlContext == ReadBodyIntf) {
          current->appendData(EntryKey::Source_Text, text);
       }
@@ -19816,7 +20056,7 @@ YY_RULE_SETUP
 case 316:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName   = text.left(text.length() - 1).trimmed();
 
       current->setData(EntryKey::Member_Args, "(");
@@ -19839,14 +20079,14 @@ YY_RULE_SETUP
    }
 
 <DefineArg>.            {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args,   text[0]);
    }
  */
 case 317:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       current->startBodyLine = yyLineNr;
       current->m_entryName   = text;
@@ -19930,7 +20170,7 @@ case 324:
 /* rule 324 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       current->m_entryName   = text;
       current->m_entryName   = current->m_entryName.trimmed();
@@ -19951,7 +20191,7 @@ case 325:
 YY_RULE_SETUP
 {
       // ^ and % are C++/CLI extensions
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insideCli) {
           addType(current);
@@ -19964,7 +20204,7 @@ YY_RULE_SETUP
 case 326:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName += text;
       addType(current);
    }
@@ -19975,7 +20215,7 @@ YY_RULE_SETUP
 {
       // */ (editor syntax fix)  comment found after a member
 
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       static const bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
       static const bool qt_auto_brief      = Config::getBool("qt-auto-brief");
@@ -20016,7 +20256,7 @@ case 328:
 YY_RULE_SETUP
 {
       // */ (editor syntax fix)
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       s_docBlockContext = YY_START;
       s_docBlockInBody  = false;
 
@@ -20054,7 +20294,7 @@ YY_RULE_SETUP
 {
       // */ (editor syntax fix)
 
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       if (current->startBodyLine == -1) {
          current->startBodyLine = yyLineNr;
       }
@@ -20086,7 +20326,7 @@ case 330:
 YY_RULE_SETUP
 {
       // */ (editor syntax fix)
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (previous && previous->section == Entry::GROUPDOC_SEC) {
          // link open command to the group defined in the previous entry
@@ -20160,7 +20400,7 @@ YY_RULE_SETUP
          REJECT;
       }
 
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       current->startBodyLine = yyLineNr;
    // current->bodyColumn    = yyColNr;
@@ -20182,7 +20422,7 @@ case 333:
 YY_RULE_SETUP
 {
       // in PHP code this could also be due to "<?="
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       current->startBodyLine = yyLineNr;
       current->setData(EntryKey::Initial_Value, text);
@@ -20197,7 +20437,7 @@ case 334:
 /* rule 334 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       lineCount();
 
       current->appendData(EntryKey::Exception_Spec, " " + removeRedundantWhiteSpace(text));
@@ -20214,7 +20454,7 @@ YY_RULE_SETUP
 case 336:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       lastRoundContext = YY_START;
 
@@ -20234,7 +20474,7 @@ YY_RULE_SETUP
          REJECT;
       }
 
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       lastSquareContext = YY_START;
 
@@ -20250,7 +20490,7 @@ YY_RULE_SETUP
 case 338:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       lastCurlyContext  = YY_START;
 
@@ -20266,7 +20506,7 @@ YY_RULE_SETUP
 case 339:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       bool isEnum = current_root->m_traits.hasTrait(Entry::Virtue::Enum);
 
@@ -20288,7 +20528,7 @@ YY_RULE_SETUP
 
          } else if (text[0] == ';' || (lastInitializerContext == FindFields && initBracketCount == 0))  {
 
-            unput(*parse_cstyle_YYtext);
+            unput(*yytext);
             if (YY_START == ReadInitializerPtr) {
                current->setData(EntryKey::Initial_Value, QString());
             }
@@ -20305,7 +20545,7 @@ YY_RULE_SETUP
          } else if (text[0] == ',' && initBracketCount == 0) {
             // for "int a=0,b=0"
 
-            unput(*parse_cstyle_YYtext);
+            unput(*yytext);
 
             if (YY_START == ReadInitializerPtr) {
                current->setData(EntryKey::Initial_Value, QString());
@@ -20331,7 +20571,7 @@ case 340:
 YY_RULE_SETUP
 {
       // C++11 raw string
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (! insideCpp) {
          REJECT;
@@ -20356,7 +20596,7 @@ case 341:
 /* rule 341 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       addToOutput(s_rawGEntry, s_rawGEnum, text);
 
@@ -20371,14 +20611,14 @@ YY_RULE_SETUP
 case 342:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_rawGEntry, s_rawGEnum, text);
    }
 	YY_BREAK
 case 343:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_rawGEntry, s_rawGEnum, text);
    }
 	YY_BREAK
@@ -20386,7 +20626,7 @@ case 344:
 /* rule 344 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_rawGEntry, s_rawGEnum, text);
       lineCount();
    }
@@ -20395,7 +20635,7 @@ case 345:
 /* rule 345 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_rawEntry, EntryKey::User_Property, text, s_rawEnum);
 
       fullArgString += text;
@@ -20412,7 +20652,7 @@ case 346:
 /* rule 346 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_rawEntry, EntryKey::User_Property, text, s_rawEnum);
       fullArgString  += text;
    }
@@ -20420,7 +20660,7 @@ YY_RULE_SETUP
 case 347:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_rawEntry, EntryKey::User_Property, text, s_rawEnum);
       fullArgString  += text;
    }
@@ -20429,7 +20669,7 @@ case 348:
 /* rule 348 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_rawEntry, EntryKey::User_Property, text, s_rawEnum);
       fullArgString  += text;
       lineCount();
@@ -20438,7 +20678,7 @@ YY_RULE_SETUP
 case 349:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
     if (insideIDL && insideCppQuote) {
          BEGIN(EndCppQuote);
@@ -20457,28 +20697,28 @@ YY_RULE_SETUP
 case 350:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Initial_Value, text);
    }
 	YY_BREAK
 case 351:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Initial_Value, text);
    }
 	YY_BREAK
 case 352:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Initial_Value, text);
    }
 	YY_BREAK
 case 353:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       initBracketCount++;
       current->appendData(EntryKey::Initial_Value, text[0]);
    }
@@ -20486,7 +20726,7 @@ YY_RULE_SETUP
 case 354:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       initBracketCount--;
       current->appendData(EntryKey::Initial_Value, text[0]);
    }
@@ -20494,7 +20734,7 @@ YY_RULE_SETUP
 case 355:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insidePHP) {
          current->appendData(EntryKey::Initial_Value, text);
@@ -20514,7 +20754,7 @@ YY_RULE_SETUP
 case 356:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insidePHP) {
          REJECT;
@@ -20527,7 +20767,7 @@ case 357:
 /* rule 357 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Initial_Value, text[0]);
       lineCount();
    }
@@ -20535,7 +20775,7 @@ YY_RULE_SETUP
 case 358:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Initial_Value, text);
 
       if (! insideCSharp && ! insideObjC)    {
@@ -20555,7 +20795,7 @@ YY_RULE_SETUP
 case 359:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_skipVerbEntry, s_skipVerbEnum, text);
    }
 	YY_BREAK
@@ -20563,14 +20803,14 @@ case 360:
 YY_RULE_SETUP
 {
       // quote escape
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_skipVerbEntry, s_skipVerbEnum, text);
    }
 	YY_BREAK
 case 361:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_skipVerbEntry, s_skipVerbEnum, text[0]);
       BEGIN(lastSkipVerbStringContext);
    }
@@ -20579,7 +20819,7 @@ case 362:
 /* rule 362 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_skipVerbEntry, s_skipVerbEnum, text[0]);
       lineCount();
    }
@@ -20587,14 +20827,14 @@ YY_RULE_SETUP
 case 363:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_skipVerbEntry, s_skipVerbEnum, text[0]);
    }
 	YY_BREAK
 case 364:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insidePHP) {
          BEGIN( FindMembersPHP );
@@ -20606,7 +20846,7 @@ YY_RULE_SETUP
 case 365:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Initial_Value,    text[0]);
    }
 	YY_BREAK
@@ -20614,14 +20854,14 @@ YY_RULE_SETUP
 case 366:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_quotedEntry, s_quotedEnum, text);
    }
 	YY_BREAK
 case 367:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_quotedEntry, s_quotedEnum, text[0]);
       BEGIN( lastStringContext );
    }
@@ -20629,7 +20869,7 @@ YY_RULE_SETUP
 case 368:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_quotedEntry, s_quotedEnum, text[0]);
       BEGIN( lastStringContext );
    }
@@ -20637,7 +20877,7 @@ YY_RULE_SETUP
 case 369:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_quotedEntry, s_quotedEnum, text);
    }
 	YY_BREAK
@@ -20645,7 +20885,7 @@ case 370:
 /* rule 370 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_quotedEntry, s_quotedEnum, text);
       lineCount();
    }
@@ -20653,7 +20893,7 @@ YY_RULE_SETUP
 case 371:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_quotedEntry, s_quotedEnum, text[0]);
    }
 	YY_BREAK
@@ -20661,14 +20901,14 @@ YY_RULE_SETUP
 case 372:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_quotedGEntry, s_quotedGEnum, text);
    }
 	YY_BREAK
 case 373:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_quotedGEntry, s_quotedGEnum, text[0]);
       BEGIN( lastStringContext );
    }
@@ -20676,7 +20916,7 @@ YY_RULE_SETUP
 case 374:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_quotedGEntry, s_quotedGEnum, text[0]);
       BEGIN( lastStringContext );
    }
@@ -20684,7 +20924,7 @@ YY_RULE_SETUP
 case 375:
 YY_RULE_SETUP
 {
-     QString text = QString::fromUtf8(parse_cstyle_YYtext);
+     QString text = QString::fromUtf8(yytext);
      addToOutput(s_quotedGEntry, s_quotedGEnum, text);
      BEGIN( lastStringContext );
    }
@@ -20692,7 +20932,7 @@ YY_RULE_SETUP
 case 376:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_quotedGEntry, s_quotedGEnum, text);
    }
 	YY_BREAK
@@ -20700,7 +20940,7 @@ case 377:
 /* rule 377 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_quotedGEntry, s_quotedGEnum, text[0]);
       lineCount();
    }
@@ -20708,7 +20948,7 @@ YY_RULE_SETUP
 case 378:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_quotedGEntry, s_quotedGEnum, text[0]);
    }
 	YY_BREAK
@@ -20716,7 +20956,7 @@ YY_RULE_SETUP
 case 379:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_roundEntry, s_roundEnum, text[0]);
 
       s_quotedEntry = s_roundEntry;
@@ -20730,7 +20970,7 @@ YY_RULE_SETUP
 case 380:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_roundEntry, s_roundEnum, text[0]);
       roundCount++;
    }
@@ -20738,7 +20978,7 @@ YY_RULE_SETUP
 case 381:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_roundEntry, s_roundEnum, text[0]);
 
       if (--roundCount < 0) {
@@ -20750,7 +20990,7 @@ case 382:
 /* rule 382 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       lineCount();
       addToOutput(s_roundEntry, s_roundEnum, text[0]);
    }
@@ -20758,7 +20998,7 @@ YY_RULE_SETUP
 case 383:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insidePHP) {
          current->appendData(EntryKey::Initial_Value, text);
@@ -20778,7 +21018,7 @@ YY_RULE_SETUP
 case 384:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insidePHP) {
          REJECT;
@@ -20790,14 +21030,14 @@ YY_RULE_SETUP
 case 385:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_roundEntry, s_roundEnum, text);
    }
 	YY_BREAK
 case 386:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_roundEntry, s_roundEnum, text[0]);
    }
 	YY_BREAK
@@ -20805,7 +21045,7 @@ YY_RULE_SETUP
 case 387:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_sharpEntry, s_sharpEnum, text[0]);
 
       s_quotedEntry = s_sharpEntry;
@@ -20818,7 +21058,7 @@ YY_RULE_SETUP
 case 388:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_sharpEntry, s_sharpEnum, text[0]);
 
       ++sharpCount;
@@ -20827,7 +21067,7 @@ YY_RULE_SETUP
 case 389:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_sharpEntry, s_sharpEnum, text[0]);
 
       if (--sharpCount < 0) {
@@ -20839,7 +21079,7 @@ case 390:
 /* rule 390 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       lineCount();
       addToOutput(s_sharpEntry, s_sharpEnum, text[0]);
@@ -20848,7 +21088,7 @@ YY_RULE_SETUP
 case 391:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insidePHP) {
         current->appendData(EntryKey::Initial_Value, text);
@@ -20870,7 +21110,7 @@ YY_RULE_SETUP
       if (insidePHP) {
         REJECT;
       } else {
-         QString text = QString::fromUtf8(parse_cstyle_YYtext);
+         QString text = QString::fromUtf8(yytext);
          addToOutput(s_sharpEntry, s_sharpEnum, text);
       }
    }
@@ -20878,14 +21118,14 @@ YY_RULE_SETUP
 case 393:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_sharpEntry, s_sharpEnum, text);
    }
 	YY_BREAK
 case 394:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_sharpEntry, s_sharpEnum, text[0]);
    }
 	YY_BREAK
@@ -20893,7 +21133,7 @@ YY_RULE_SETUP
 case 395:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_roundGEntry, s_roundGEnum, text[0]);
 
       s_quotedGEntry = s_roundGEntry;
@@ -20906,7 +21146,7 @@ YY_RULE_SETUP
 case 396:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_roundGEntry, s_roundGEnum, text[0]);
       roundCount++;
    }
@@ -20914,7 +21154,7 @@ YY_RULE_SETUP
 case 397:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_roundGEntry, s_roundGEnum, text[0]);
 
       if (--roundCount < 0)
@@ -20925,7 +21165,7 @@ case 398:
 /* rule 398 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       lineCount();
       addToOutput(s_roundGEntry, s_roundGEnum, text[0]);
    }
@@ -20933,7 +21173,7 @@ YY_RULE_SETUP
 case 399:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
     if (insidePHP) {
          current->appendData(EntryKey::Initial_Value, text);
@@ -20953,7 +21193,7 @@ YY_RULE_SETUP
 case 400:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insidePHP) {
          REJECT;
@@ -20965,14 +21205,14 @@ YY_RULE_SETUP
 case 401:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_roundGEntry, s_roundGEnum, text);
    }
 	YY_BREAK
 case 402:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_roundGEntry, s_roundGEnum, text[0]);
    }
 	YY_BREAK
@@ -20981,7 +21221,7 @@ YY_RULE_SETUP
 case 403:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_squareGEntry, s_squareGEnum, text[0]);
 
       s_quotedGEntry    = s_squareGEntry;
@@ -20994,7 +21234,7 @@ YY_RULE_SETUP
 case 404:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_squareGEntry, s_squareGEnum, text[0]);
 
       squareCount++;
@@ -21003,7 +21243,7 @@ YY_RULE_SETUP
 case 405:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_squareGEntry, s_squareGEnum, text[0]);
 
       if (--squareCount < 0) {
@@ -21015,7 +21255,7 @@ case 406:
 /* rule 406 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_squareGEntry, s_squareGEnum, text[0]);
 
       lineCount();
@@ -21024,7 +21264,7 @@ YY_RULE_SETUP
 case 407:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insidePHP) {
          current->appendData(EntryKey::Initial_Value,  text);
@@ -21046,7 +21286,7 @@ YY_RULE_SETUP
       if (insidePHP) {
          REJECT;
       } else {
-         QString text = QString::fromUtf8(parse_cstyle_YYtext);
+         QString text = QString::fromUtf8(yytext);
          addToOutput(s_squareGEntry, s_squareGEnum, text);
       }
    }
@@ -21054,14 +21294,14 @@ YY_RULE_SETUP
 case 409:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_squareGEntry, s_squareGEnum, text);
    }
 	YY_BREAK
 case 410:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_squareGEntry, s_squareGEnum, text[0]);
    }
 	YY_BREAK
@@ -21069,7 +21309,7 @@ YY_RULE_SETUP
 case 411:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_curlyEntry, s_curlyEnum, text[0]);
 
       s_quotedEntry = s_curlyEntry;
@@ -21083,7 +21323,7 @@ YY_RULE_SETUP
 case 412:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_curlyEntry, s_curlyEnum, text[0]);
 
       if (insidePHP) {
@@ -21098,7 +21338,7 @@ YY_RULE_SETUP
 case 413:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_curlyEntry, s_curlyEnum, text[0]);
       curlyCount++;
    }
@@ -21106,7 +21346,7 @@ YY_RULE_SETUP
 case 414:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_curlyEntry, s_curlyEnum, text[0]);
 
       if (--curlyCount < 0) {
@@ -21117,7 +21357,7 @@ YY_RULE_SETUP
 case 415:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insidePHP) {
          REJECT;
@@ -21129,14 +21369,14 @@ YY_RULE_SETUP
 case 416:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_curlyEntry, s_curlyEnum, text);
    }
 	YY_BREAK
 case 417:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_curlyEntry, s_curlyEnum, text);
    }
 	YY_BREAK
@@ -21144,7 +21384,7 @@ case 418:
 /* rule 418 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       lineCount();
       addToOutput(s_curlyEntry, s_curlyEnum, text[0]);
    }
@@ -21152,7 +21392,7 @@ YY_RULE_SETUP
 case 419:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_curlyEntry, s_curlyEnum, text[0]);
    }
 	YY_BREAK
@@ -21169,7 +21409,7 @@ case 421:
 YY_RULE_SETUP
 {
       // end of included file marker
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       int s    = text.indexOf(' ');
       int e    = text.indexOf('"',s);
@@ -21184,7 +21424,7 @@ YY_RULE_SETUP
 case 422:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_curlyGEntry, s_curlyGEnum, text[0]);
 
       s_quotedGEntry = s_curlyGEntry;
@@ -21198,7 +21438,7 @@ YY_RULE_SETUP
 case 423:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_curlyGEntry, s_curlyGEnum, text[0]);
 
       if (insidePHP) {
@@ -21213,7 +21453,7 @@ YY_RULE_SETUP
 case 424:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_curlyGEntry, s_curlyGEnum, text[0]);
       curlyCount++;
    }
@@ -21221,7 +21461,7 @@ YY_RULE_SETUP
 case 425:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_curlyGEntry, s_curlyGEnum, text[0]);
 
       if (--curlyCount < 0) {
@@ -21232,7 +21472,7 @@ YY_RULE_SETUP
 case 426:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insidePHP) {
          REJECT;
@@ -21245,21 +21485,21 @@ YY_RULE_SETUP
 case 427:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_curlyGEntry, s_curlyGEnum, text);
    }
 	YY_BREAK
 case 428:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_curlyGEntry, s_curlyGEnum, text);
    }
 	YY_BREAK
 case 429:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_curlyGEntry, s_curlyGEnum, text);
    }
 	YY_BREAK
@@ -21267,7 +21507,7 @@ case 430:
 /* rule 430 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       lineCount();
       addToOutput(s_curlyGEntry, s_curlyGEnum, text[0]);
    }
@@ -21275,7 +21515,7 @@ YY_RULE_SETUP
 case 431:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToOutput(s_curlyGEntry, s_curlyGEnum, text[0]);
    }
 	YY_BREAK
@@ -21308,14 +21548,14 @@ YY_RULE_SETUP
 case 433:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Bitfields, text[0]);
    }
 	YY_BREAK
 case 434:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args, text[0]);
    }
 	YY_BREAK
@@ -21330,7 +21570,7 @@ YY_RULE_SETUP
 case 436:
 YY_RULE_SETUP
 {
-      QString text    = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text    = QString::fromUtf8(yytext);
       QString tmpType = current->getData(EntryKey::Member_Type);
       QString oldType = tmpType;
 
@@ -21425,7 +21665,7 @@ YY_RULE_SETUP
 case 437:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (! insideCSharp && (current->m_entryName.isEmpty() ||  current->m_entryName == "typedef"))  {
          // IDL function property
@@ -21590,7 +21830,7 @@ case 453:
 YY_RULE_SETUP
 {
       // return type (probably HRESULT) - skip it
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (odlProp) {
          // property type
@@ -21602,7 +21842,7 @@ case 454:
 /* rule 454 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName = text;
       current->m_entryName = current->m_entryName.left(current->m_entryName.length()-1).trimmed();
       current->startLine   = yyLineNr;
@@ -21614,7 +21854,7 @@ case 455:
 /* rule 455 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (odlProp) {
          idlProp += text;
@@ -21623,12 +21863,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 456:
 /* rule 456 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       if (odlProp) {
          current->m_entryName = text;
          idlProp = idlProp.trimmed();
@@ -21643,7 +21884,7 @@ case 457:
 YY_RULE_SETUP
 {
       // attribute of a parameter
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       idlAttr = text;
       idlAttr = idlAttr.trimmed();
    }
@@ -21652,7 +21893,7 @@ case 458:
 YY_RULE_SETUP
 {
       // property type
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       idlProp = text;
    }
 	YY_BREAK
@@ -21661,7 +21902,7 @@ case 459:
 YY_RULE_SETUP
 {
       // Rare: Another parameter ([propput] HRESULT Item(int index, [in] Type theRealProperty);)
-      QString text    = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text    = QString::fromUtf8(yytext);
       QString tmpArgs = current->getData(EntryKey::Member_Args);
 
       if (tmpArgs.isEmpty()) {
@@ -21715,14 +21956,14 @@ case 462:
 YY_RULE_SETUP
 {
       // spaces, *, or other stuff
-      // QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      // QString text = QString::fromUtf8(yytext);
       // idlProp += text;
    }
 	YY_BREAK
 case 463:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args, text[0]);
 
       if (--squareCount <= 0) {
@@ -21733,7 +21974,7 @@ YY_RULE_SETUP
 case 464:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args, text[0]);
 
       if (--squareCount <= 0) {
@@ -21744,7 +21985,7 @@ YY_RULE_SETUP
 case 465:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args, text[0]);
       squareCount++;
    }
@@ -21752,7 +21993,7 @@ YY_RULE_SETUP
 case 466:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args, text[0]);
    }
 	YY_BREAK
@@ -21784,7 +22025,7 @@ YY_RULE_SETUP
 case 471:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       addType(current);
       current->appendData(EntryKey::Member_Type, text);
@@ -21795,7 +22036,7 @@ YY_RULE_SETUP
 case 472:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Type, text[0]);
 
       if (--sharpCount <= 0) {
@@ -21806,7 +22047,7 @@ YY_RULE_SETUP
 case 473:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Type, text[0]);
       sharpCount++;
    }
@@ -21822,14 +22063,14 @@ YY_RULE_SETUP
 case 475:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Type, text[0]);
    }
 	YY_BREAK
 case 476:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->startBodyLine = yyLineNr;
       current->m_entryName   = text;
    }
@@ -21851,7 +22092,7 @@ YY_RULE_SETUP
 case 478:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       lastInitializerContext = YY_START;
       initBracketCount       = 0;
@@ -21962,14 +22203,14 @@ YY_RULE_SETUP
 	YY_BREAK
 /*
 <FindFieldArg>","           {
-      unput(*parse_cstyle_YYtext);
+      unput(*yytext);
       BEGIN(FindFields);
    }
   */
 case 484:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Source_Text, text);
    }
 	YY_BREAK
@@ -21977,14 +22218,14 @@ case 485:
 YY_RULE_SETUP
 {
       // read a comment
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Source_Text, text);
    }
 	YY_BREAK
 case 486:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (! insidePHP) {
          REJECT;
@@ -21997,7 +22238,7 @@ YY_RULE_SETUP
 case 487:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       current->appendData(EntryKey::Source_Text, text);
 
@@ -22011,7 +22252,7 @@ YY_RULE_SETUP
 case 488:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insidePHP) {
          current->appendData(EntryKey::Source_Text, text);
@@ -22031,7 +22272,7 @@ YY_RULE_SETUP
 case 489:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       current->appendData(EntryKey::Source_Text, text);
 
@@ -22053,7 +22294,7 @@ case 491:
 YY_RULE_SETUP
 {
       // */ (editor syntax fix)
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       current->appendData(EntryKey::Source_Text, text);
       lastContext = YY_START;
@@ -22065,7 +22306,7 @@ case 492:
 YY_RULE_SETUP
 {
       // */ (editor syntax fix)
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       current->appendData(EntryKey::Source_Text, text);
       ++yyLineNr;
@@ -22077,7 +22318,7 @@ YY_RULE_SETUP
 case 493:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Source_Text, text);
 
       if (insidePHP) {
@@ -22094,7 +22335,7 @@ YY_RULE_SETUP
 case 494:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insidePHP) {
          // for PHP code single quotes are used for strings of arbitrary length
@@ -22108,7 +22349,7 @@ YY_RULE_SETUP
 case 495:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Source_Text, text);
       ++curlyCount;
    }
@@ -22116,7 +22357,7 @@ YY_RULE_SETUP
 case 496:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Source_Text, text);
       --curlyCount ;
    }
@@ -22124,7 +22365,7 @@ YY_RULE_SETUP
 case 497:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (curlyCount > 0)   {
          current->appendData(EntryKey::Source_Text, text);
@@ -22259,7 +22500,7 @@ case 498:
 /* rule 498 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       lineCount();
       if ( curlyCount >0 ) {
@@ -22285,7 +22526,7 @@ case 499:
 YY_RULE_SETUP
 {
       // late "const" or "volatile" keyword
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       lineCount();
 
       current->prependData(EntryKey::Member_Type, text);
@@ -22294,7 +22535,7 @@ YY_RULE_SETUP
 case 500:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       bool isEnum = current->m_traits.hasTrait(Entry::Virtue::Enum);
 
@@ -22324,7 +22565,7 @@ YY_RULE_SETUP
 case 501:
 YY_RULE_SETUP
 {
-      /* typedef of anonymous type */
+      // typedef of anonymous type
       current->m_entryName = QString("@%1").formatArg(anonCount);
       ++anonCount;
 
@@ -22353,7 +22594,7 @@ case 502:
 YY_RULE_SETUP
 {
       // the [] part could be improved
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       lineCount();
       int i   = 0;
@@ -22410,7 +22651,7 @@ YY_RULE_SETUP
 case 504:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (msName.isEmpty() && ! current->m_entryName.isEmpty()) {
          // see if the compound does not have a name or is inside another
@@ -22550,7 +22791,7 @@ YY_RULE_SETUP
 case 505:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       lastInitializerContext = YY_START;
       initBracketCount = 0;
@@ -22585,16 +22826,17 @@ case 508:
 /* rule 508 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Source_Text, text);
       lineCount();
    }
 	YY_BREAK
 case 509:
 /* rule 509 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_bp + 4);
 (yy_c_buf_p) = yy_cp = yy_bp + 4;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // end of Objective C block
@@ -22612,21 +22854,22 @@ YY_RULE_SETUP
 case 510:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Source_Text, text);
    }
 	YY_BREAK
 case 511:
 /* rule 511 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_bp + 1);
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 case 512:
 /* rule 512 can match eol */
 YY_RULE_SETUP
 {
       /* typedef void (A::*ptr_t)(args...) or int (*func(int))[], the ^ is for Obj-C blocks */
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insidePHP)    {
          // reference parameter
@@ -22647,7 +22890,7 @@ case 513:
 /* rule 513 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName = text;
 
       if (nameIsOperator(current->m_entryName)) {
@@ -22666,17 +22909,18 @@ YY_RULE_SETUP
 case 514:
 YY_RULE_SETUP
 {
-      // printf("error: FuncPtr `%c' unexpected at line %d of %s\n",*parse_cstyle_YYtext,yyLineNr,yyFileName);
+      // printf("error: FuncPtr `%c' unexpected at line %d of %s\n",*yytext,yyLineNr,yyFileName);
    }
 	YY_BREAK
 case 515:
 /* rule 515 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName += text;
       current->m_entryName = current->m_entryName.simplified();
       lineCount();
@@ -22686,7 +22930,7 @@ case 516:
 /* rule 516 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       lineCount();
       current->m_entryName += text[0];
    }
@@ -22694,22 +22938,23 @@ YY_RULE_SETUP
 case 517:
 YY_RULE_SETUP
 {
-      unput(*parse_cstyle_YYtext);
+      unput(*yytext);
       BEGIN( EndFuncPtr );
    }
 	YY_BREAK
 case 518:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName += text[0];
    }
 	YY_BREAK
 case 519:
 /* rule 519 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // a variable with extra braces
@@ -22720,9 +22965,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 520:
 /* rule 520 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // a function pointer
@@ -22733,9 +22979,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 521:
 /* rule 521 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // an array of variables
@@ -22750,7 +22997,7 @@ case 522:
 YY_RULE_SETUP
 {
       // a function returning a function or a function returning a pointer to an array
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args, text[0]);
 
       current->startBodyLine = yyLineNr;
@@ -22766,7 +23013,7 @@ YY_RULE_SETUP
 case 523:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       funcPtrType += text;
    }
 	YY_BREAK
@@ -22779,7 +23026,7 @@ YY_RULE_SETUP
 case 525:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args, text[0]);
       ++roundCount;
    }
@@ -22787,7 +23034,7 @@ YY_RULE_SETUP
 case 526:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args, text[0]);
 
       if ( roundCount ) {
@@ -22808,9 +23055,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 528:
 /* rule 528 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       lineCount();
@@ -22820,9 +23068,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 529:
 /* rule 529 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // function returning a pointer to an array
@@ -22837,14 +23086,14 @@ YY_RULE_SETUP
 case 530:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args, text[0]);
    }
 	YY_BREAK
 case 531:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Type, text[0]);
       roundCount++;
    }
@@ -22852,7 +23101,7 @@ YY_RULE_SETUP
 case 532:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Type, text[0]);
 
       if (roundCount) {
@@ -22881,19 +23130,20 @@ YY_RULE_SETUP
 case 535:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Type, text[0]);
    }
 	YY_BREAK
 case 536:
 /* rule 536 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_bp + 1);
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // for catching typedef void (__stdcall *f)() like definitions
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (current->getData(EntryKey::Member_Type).startsWith("typedef") && current->startBodyLine == -1) {
          current->startBodyLine = yyLineNr;
@@ -22918,7 +23168,7 @@ case 537:
 /* rule 537 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       lineCount();
       addType(current);
       funcPtrType = "(";
@@ -22930,7 +23180,7 @@ YY_RULE_SETUP
 case 538:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (! current->m_entryName.isEmpty()) {
          current->setData(EntryKey::Member_Args, text);
@@ -22957,7 +23207,7 @@ YY_RULE_SETUP
 case 539:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       addToArgs(text);
       fullArgString  += text;
@@ -22966,7 +23216,7 @@ YY_RULE_SETUP
 case 540:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       addToArgs(text);
       fullArgString  += text;
@@ -22975,7 +23225,7 @@ YY_RULE_SETUP
 case 541:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       addToArgs(text);
       fullArgString  += text;
@@ -22984,7 +23234,7 @@ YY_RULE_SETUP
 case 542:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       addToArgs(text);
       fullArgString += text;
@@ -23003,7 +23253,7 @@ case 544:
 /* rule 544 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       s_delimiter = text.mid(2);
       s_delimiter = s_delimiter.left(s_delimiter.length() - 1);
@@ -23023,7 +23273,7 @@ YY_RULE_SETUP
 case 545:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       addToArgs(text[0]);
       fullArgString += text[0];
@@ -23039,7 +23289,7 @@ YY_RULE_SETUP
          REJECT;
       }
 
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       addToArgs(text[0]);
       fullArgString  += text[0];
@@ -23052,7 +23302,7 @@ YY_RULE_SETUP
 case 547:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       addToArgs(text[0]);
       fullArgString += text[0];
@@ -23065,7 +23315,7 @@ YY_RULE_SETUP
 case 548:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       addToArgs(text[0]);
       fullArgString  += text[0];
@@ -23092,13 +23342,13 @@ case 549:
 YY_RULE_SETUP
 {
       // */ (editor syntax fix)
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (currentArgumentContext == DefineEnd) {
 
          // for defines we interpret a comment as documentation for the define
-         for (int i = parse_cstyle_YYleng - 1; i >= 0; i--) {
-            unput(parse_cstyle_YYtext[i]);
+         for (int i = yyleng - 1; i >= 0; i--) {
+            unput(yytext[i]);
          }
 
          QString dummy;
@@ -23145,7 +23395,7 @@ YY_RULE_SETUP
 	YY_BREAK
 /*
 <ReadFuncArgType,ReadTempArgs>"'#"  {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       if (insidePHP) {
          REJECT;
       }
@@ -23167,13 +23417,13 @@ case 553:
 YY_RULE_SETUP
 {
       // */ (editor syntax fix)
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       lineCount();
 
       if (currentArgumentContext == DefineEnd) {
          // for defines we interpret a comment as documentation for the define
-         for (int i = parse_cstyle_YYleng -1; i > 0; i--) {
-            unput(parse_cstyle_YYtext[i]);
+         for (int i = yyleng -1; i > 0; i--) {
+            unput(yytext[i]);
          }
 
          addToArgs(text[0]);
@@ -23210,14 +23460,14 @@ YY_RULE_SETUP
 case 555:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       fullArgString += text;
    }
 	YY_BREAK
 case 556:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       fullArgString += text;
 
       if (lastCopyArgChar.unicode() != 0) {
@@ -23230,7 +23480,7 @@ case 557:
 /* rule 557 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       fullArgString += text;
       lineCount();
 
@@ -23243,13 +23493,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 558:
 /* rule 558 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // verbatim command (which could contain nested comments)
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       s_docBlockName = text.mid(1);
       fullArgString += text;
@@ -23260,7 +23511,7 @@ YY_RULE_SETUP
 case 559:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       s_docBlockName = text.mid(1);
 
@@ -23282,13 +23533,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 560:
 /* rule 560 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // end of verbatim block
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       fullArgString += text;
 
       if (text[1] == 'f') {
@@ -23304,14 +23556,14 @@ YY_RULE_SETUP
 case 561:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       fullArgString += text;
    }
 	YY_BREAK
 case 562:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       fullArgString += text[0];
    }
 	YY_BREAK
@@ -23319,7 +23571,7 @@ case 563:
 /* rule 563 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       fullArgString += text[0];
       lineCount();
    }
@@ -23327,14 +23579,14 @@ YY_RULE_SETUP
 case 564:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       fullArgString += text[0];
    }
 	YY_BREAK
 case 565:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       warn(yyFileName, yyLineNr, "Ignoring %c brief command inside argument documentation", text[0].toLatin1());
       fullArgString += ' ';
    }
@@ -23342,7 +23594,7 @@ YY_RULE_SETUP
 case 566:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       addToArgs(text[0]);
       fullArgString += text[0];
@@ -23354,7 +23606,7 @@ YY_RULE_SETUP
 case 567:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       addToArgs(text[0]);
       fullArgString += text[0];
@@ -23368,7 +23620,7 @@ YY_RULE_SETUP
 case 568:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       addToArgs(text[0]);
       fullArgString += text[0];
@@ -23379,7 +23631,7 @@ YY_RULE_SETUP
 case 569:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       addToArgs(text[0]);
       fullArgString += text[0];
@@ -23394,7 +23646,7 @@ YY_RULE_SETUP
 case 570:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       addToArgs(text[0]);
       fullArgString += text[0];
@@ -23405,7 +23657,7 @@ YY_RULE_SETUP
 case 571:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       addToArgs(text[0]);
       fullArgString += text[0];
@@ -23420,7 +23672,7 @@ YY_RULE_SETUP
 case 572:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       addToArgs(text[0]);
       fullArgString += text[0];
@@ -23433,7 +23685,7 @@ YY_RULE_SETUP
 case 573:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       addToArgs(text[0]);
       fullArgString  += text[0];
@@ -23443,7 +23695,7 @@ YY_RULE_SETUP
 case 574:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       addToArgs(text[0]);
       fullArgString += text[0];
@@ -23462,7 +23714,7 @@ YY_RULE_SETUP
 case 575:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToArgs(text[0]);
       fullArgString  += text;
    }
@@ -23470,7 +23722,7 @@ YY_RULE_SETUP
 case 576:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToArgs(text[0]);
       fullArgString  += text[0];
       BEGIN( lastCopyArgStringContext );
@@ -23479,7 +23731,7 @@ YY_RULE_SETUP
 case 577:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToArgs(text[0]);
       fullArgString  += text[0];
       BEGIN( lastCopyArgStringContext );
@@ -23488,7 +23740,7 @@ YY_RULE_SETUP
 case 578:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insidePHP) {
          REJECT;
@@ -23501,7 +23753,7 @@ YY_RULE_SETUP
 case 579:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToArgs(text);
       fullArgString  += text;
 
@@ -23515,7 +23767,7 @@ case 580:
 /* rule 580 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       lineCount();
       addToArgs(text[0]);
       fullArgString  += text[0];
@@ -23524,7 +23776,7 @@ YY_RULE_SETUP
 case 581:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addToArgs(text[0]);
       fullArgString  += text[0];
    }
@@ -23533,7 +23785,7 @@ YY_RULE_SETUP
 case 582:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args,   text[0]);
       ++roundCount;
    }
@@ -23541,7 +23793,7 @@ YY_RULE_SETUP
 case 583:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args,   text[0]);
 
       if (roundCount) {
@@ -23563,7 +23815,7 @@ YY_RULE_SETUP
 case 584:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (text == ";" && insidePHP &&  ! containsWord(current->getData(EntryKey::Member_Type), "function") ) {
          current->reset();
@@ -23571,7 +23823,7 @@ YY_RULE_SETUP
          BEGIN( FindMembers );
 
       } else {
-         unput(*parse_cstyle_YYtext);
+         unput(*yytext);
          BEGIN( Function );
       }
    }
@@ -23752,7 +24004,7 @@ YY_RULE_SETUP
          REJECT;
       }
 
-      unput(*parse_cstyle_YYtext);
+      unput(*yytext);
       BEGIN(FuncQual);
    }
 	YY_BREAK
@@ -23773,7 +24025,7 @@ YY_RULE_SETUP
 case 602:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       ++roundCount;
       current->argList.trailingReturnType += text;
@@ -23783,7 +24035,7 @@ YY_RULE_SETUP
 case 603:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (roundCount > 0) {
         --roundCount;
@@ -23800,7 +24052,7 @@ YY_RULE_SETUP
 case 604:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       current->argList.trailingReturnType += text;
       current->appendData(EntryKey::Member_Args, text);
@@ -23810,7 +24062,7 @@ case 605:
 /* rule 605 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       lineCount();
       current->argList.trailingReturnType += text;
       current->appendData(EntryKey::Member_Args, " ");
@@ -23846,7 +24098,7 @@ YY_RULE_SETUP
 case 609:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insideCli && (current_root->section&Entry::COMPOUND_MASK)) {
          BEGIN(CliOverride);
@@ -23870,7 +24122,7 @@ YY_RULE_SETUP
 case 611:
 YY_RULE_SETUP
 {
-      unput(*parse_cstyle_YYtext);
+      unput(*yytext);
       BEGIN(FuncQual);
    }
 	YY_BREAK
@@ -23889,14 +24141,14 @@ YY_RULE_SETUP
 case 614:
 YY_RULE_SETUP
 {
-      unput(*parse_cstyle_YYtext);
+      unput(*yytext);
       BEGIN(FuncQual);
    }
 	YY_BREAK
 case 615:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args, text[0]);
 
       s_quotedEntry = current;
@@ -23910,7 +24162,7 @@ YY_RULE_SETUP
 case 616:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args, text[0]);
 
       if (insidePHP)    {
@@ -23925,7 +24177,7 @@ YY_RULE_SETUP
 case 617:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insidePHP) {
          REJECT;
@@ -23937,14 +24189,14 @@ YY_RULE_SETUP
 case 618:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args, text);
    }
 	YY_BREAK
 case 619:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args, text[0]);
    }
 	YY_BREAK
@@ -23952,7 +24204,7 @@ case 620:
 /* rule 620 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args, text[0]);
       lineCount();
    }
@@ -23960,7 +24212,7 @@ YY_RULE_SETUP
 case 621:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insideCpp && text == "requires") {
          // trailing requires clause
@@ -23993,7 +24245,7 @@ YY_RULE_SETUP
 case 622:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       QString oldStyleArgPtr;
       QString oldStyleArgName;
@@ -24025,7 +24277,7 @@ YY_RULE_SETUP
 case 623:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args, text);
    }
 	YY_BREAK
@@ -24040,14 +24292,14 @@ YY_RULE_SETUP
 case 625:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args, text[0]);
    }
 	YY_BREAK
 case 626:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args, text[0]);
    }
 	YY_BREAK
@@ -24058,7 +24310,7 @@ case 628:
 YY_RULE_SETUP
 {
       /* try-function-block */
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       insideTryBlock = true;
       lineCount();
@@ -24106,7 +24358,7 @@ YY_RULE_SETUP
 case 632:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Exception_Spec, text[0]);
       ++roundCount;
    }
@@ -24114,7 +24366,7 @@ YY_RULE_SETUP
 case 633:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Exception_Spec, text[0]);
 
       if (roundCount) {
@@ -24127,7 +24379,7 @@ YY_RULE_SETUP
 case 634:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Exception_Spec, text[0]);
    }
 	YY_BREAK
@@ -24156,14 +24408,14 @@ YY_RULE_SETUP
 case 638:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Exception_Spec, text[0]);
    }
 	YY_BREAK
 case 639:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       current->appendData(EntryKey::Member_Type, current->m_entryName);
       current->m_entryName = current->getData(EntryKey::Member_Args);
@@ -24185,7 +24437,7 @@ YY_RULE_SETUP
 case 641:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       current->m_entryName = current->m_entryName.simplified();
       current->setData(EntryKey::Member_Type, current->getData(EntryKey::Member_Type).simplified());
@@ -24392,9 +24644,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 651:
 /* rule 651 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_bp + 1);
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 case 652:
 /* rule 652 can match eol */
 YY_RULE_SETUP
@@ -24429,7 +24682,7 @@ case 653:
 YY_RULE_SETUP
 {
       // */ (editor syntax fix)
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       lineCount();
 
       if ( curlyCount ) {
@@ -24471,7 +24724,7 @@ YY_RULE_SETUP
 
       // */ (editor syntax fix)
       // desc is followed by another one
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       static const bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
       static const bool qt_auto_brief      = Config::getBool("qt-auto-brief");
@@ -24545,7 +24798,7 @@ case 660:
 /* rule 660 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       QString raw = text.trimmed();
       s_delimiter = raw.mid(2);
@@ -24781,7 +25034,7 @@ case 684:
 /* rule 684 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       sharpCount  = 0;
       current->m_entryName = text;
@@ -24842,7 +25095,7 @@ case 687:
 /* rule 687 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName += text;
 
       lineCount();
@@ -24866,7 +25119,7 @@ YY_RULE_SETUP
 case 688:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName += text;
 
       if (roundCount == 0) {
@@ -24877,7 +25130,7 @@ YY_RULE_SETUP
 case 689:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName += text;
    }
 	YY_BREAK
@@ -24886,7 +25139,7 @@ case 690:
 YY_RULE_SETUP
 {
       // forward declaration
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       bool isInterface      = current->m_traits.hasTrait(Entry::Virtue::Interface);
       bool isService        = current->m_traits.hasTrait(Entry::Virtue::Service);
@@ -24970,7 +25223,7 @@ case 691:
 /* rule 691 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName = text;
       lineCount();
 
@@ -25037,7 +25290,7 @@ YY_RULE_SETUP
 case 699:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName = text;
    }
 	YY_BREAK
@@ -25069,7 +25322,7 @@ case 702:
 YY_RULE_SETUP
 {
       // have a new scope such as a new class
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName = text;
 
       lineCount();
@@ -25091,7 +25344,7 @@ case 703:
 YY_RULE_SETUP
 {
       // C# style scope
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName = substitute(text, ".", "::");
       lineCount();
       BEGIN( ClassVar );
@@ -25099,12 +25352,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 704:
 /* rule 704 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insideIDL && text.startsWith("switch") && ! isId(text[6])) {
          // Corba IDL style union
@@ -25144,7 +25398,7 @@ case 706:
 /* rule 706 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insideCli) {
          if ( text[0] == 's')  {
@@ -25168,7 +25422,7 @@ YY_RULE_SETUP
 case 707:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       yyBegColNr  = yyColNr;
       yyBegLineNr = yyLineNr;
 
@@ -25222,7 +25476,7 @@ YY_RULE_SETUP
 case 708:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insideObjC && text[0] == '(') {
          // class category
@@ -25234,7 +25488,7 @@ YY_RULE_SETUP
 
       } else {
          // probably a function anyway
-         unput(*parse_cstyle_YYtext);
+         unput(*yytext);
          BEGIN( FindMembers );
       }
    }
@@ -25250,7 +25504,7 @@ YY_RULE_SETUP
 {
       // */ (editor syntax fix)
       // special comment
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       fullArgString.resize(0);
       lastCopyArgChar = '#';     // end marker
       lastCommentInArgContext = YY_START;
@@ -25297,7 +25551,7 @@ case 715:
 YY_RULE_SETUP
 {
       // parameter name
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->typeConstr.last().name = text;
    }
 	YY_BREAK
@@ -25312,7 +25566,7 @@ YY_RULE_SETUP
 case 717:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       if (current->typeConstr.last().type.isEmpty()) {
          // first type constraint for this parameter
 
@@ -25344,15 +25598,16 @@ YY_RULE_SETUP
 case 720:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName += text;
    }
 	YY_BREAK
 case 721:
 /* rule 721 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_bp + 1);
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       current->m_entryName += ')';
@@ -25361,9 +25616,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 722:
 /* rule 722 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_bp + 1);
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       current->m_entryName+=')';
@@ -25431,7 +25687,7 @@ YY_RULE_SETUP
 case 725:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (isTypedef) {
          // typedef of a class, put typedef keyword back
@@ -25457,12 +25713,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 726:
 /* rule 726 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_bp + 3);
 (yy_c_buf_p) = yy_cp = yy_bp + 3;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (! insideObjC) {
          REJECT;
@@ -25484,9 +25741,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 727:
 /* rule 727 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 case 728:
 /* rule 728 can match eol */
 case 729:
@@ -25496,7 +25754,7 @@ case 730:
 YY_RULE_SETUP
 {
       // */ (editor syntax fix)
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (! insideObjC) {
          REJECT;
@@ -25638,7 +25896,7 @@ YY_RULE_SETUP
 case 738:
 YY_RULE_SETUP
 {
-      unput(*parse_cstyle_YYtext);
+      unput(*yytext);
       BEGIN(Bases);
    }
 	YY_BREAK
@@ -25646,7 +25904,7 @@ case 739:
 YY_RULE_SETUP
 {
       // PHP namespace token, not sure if interspacing is allowed but it gives problems
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (! insidePHP) {
          REJECT;
@@ -25663,7 +25921,7 @@ case 740:
 /* rule 740 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       lineCount();
 
       if (insideCSharp && text.trimmed() == "where") {
@@ -25686,7 +25944,7 @@ case 741:
 YY_RULE_SETUP
 {
       // Java style class
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       QString name = substitute(text, ".","::");
 
       baseName += name;
@@ -25696,9 +25954,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 742:
 /* rule 742 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_bp + 1);
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       if (!insideObjC) {
@@ -25724,7 +25983,7 @@ YY_RULE_SETUP
 case 744:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName += text[0];
 
       sharpCount = 1;
@@ -25740,7 +25999,7 @@ case 745:
 /* rule 745 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       lineCount();
       sharpCount=1;
       roundCount=0;
@@ -25768,7 +26027,7 @@ YY_RULE_SETUP
 case 746:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       *specName += text[0];
 
       if (roundCount == 0) {
@@ -25779,7 +26038,7 @@ YY_RULE_SETUP
 case 747:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       *specName += text[0];
 
       if (roundCount == 0) {
@@ -25803,14 +26062,14 @@ YY_RULE_SETUP
 case 749:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       *specName += text;
    }
 	YY_BREAK
 case 750:
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
 (yy_c_buf_p) = yy_cp = yy_bp + 2;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       unput('>');
@@ -25821,7 +26080,7 @@ YY_RULE_SETUP
 case 751:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insideCSharp) {
          // for C# >> ends a nested template
@@ -25852,7 +26111,7 @@ YY_RULE_SETUP
 case 753:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       *specName += text[0];
       ++roundCount;
    }
@@ -25860,7 +26119,7 @@ YY_RULE_SETUP
 case 754:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       *specName += text[0];
       --roundCount;
    }
@@ -25868,28 +26127,28 @@ YY_RULE_SETUP
 case 755:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       *specName += text[0];
    }
 	YY_BREAK
 case 756:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       *specName += text[0];
    }
 	YY_BREAK
 case 757:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       *specName += text[0];
    }
 	YY_BREAK
 case 758:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       *specName += text[0];
       BEGIN(SpecializationSingleQuote);
    }
@@ -25897,7 +26156,7 @@ YY_RULE_SETUP
 case 759:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       *specName += text[0];
 
       BEGIN(SpecializationDoubleQuote);
@@ -25906,21 +26165,21 @@ YY_RULE_SETUP
 case 760:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       *specName += text[0];
    }
 	YY_BREAK
 case 761:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       *specName += text[0];
    }
 	YY_BREAK
 case 762:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       *specName += text[0];
 
       BEGIN(Specialization);
@@ -25929,14 +26188,14 @@ YY_RULE_SETUP
 case 763:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       *specName += text[0];
    }
 	YY_BREAK
 case 764:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       *specName += text[0];
 
       BEGIN(Specialization);
@@ -25945,14 +26204,14 @@ YY_RULE_SETUP
 case 765:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       *specName += text[0];
    }
 	YY_BREAK
 case 766:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       *specName += text[0];
    }
 	YY_BREAK
@@ -25981,7 +26240,7 @@ case 770:
 /* rule 770 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       lineCount();
 
       if (insideProtocolList) {
@@ -26087,7 +26346,7 @@ case 776:
 /* rule 776 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Source_Text, text);
       lineCount();
    }
@@ -26096,21 +26355,21 @@ case 777:
 YY_RULE_SETUP
 {
       // */ (editor syntax fix)
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Source_Text, text);
    }
 	YY_BREAK
 case 778:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Source_Text, text);
    }
 	YY_BREAK
 case 779:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (s_doxyComment) {
          insideCode = true;
@@ -26122,7 +26381,7 @@ YY_RULE_SETUP
 case 780:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (s_doxyComment) {
          insideCode = false;
@@ -26134,14 +26393,14 @@ YY_RULE_SETUP
 case 781:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Source_Text, text);
    }
 	YY_BREAK
 case 782:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       current->appendData(EntryKey::Source_Text, text);
 
@@ -26154,7 +26413,7 @@ YY_RULE_SETUP
 case 783:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Source_Text, text[0]);
    }
 	YY_BREAK
@@ -26163,7 +26422,7 @@ YY_RULE_SETUP
 {
 
       // */ (editor syntax fix)
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (! current->getData(EntryKey::Main_Docs).isEmpty()) {
          current->appendData(EntryKey::Main_Docs, "\n\n");
@@ -26197,7 +26456,7 @@ case 785:
 /* rule 785 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       // static const bool javadocBanner = Config::getBool("javadoc-banner");
       static const bool javadocBanner = false;
@@ -26242,13 +26501,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 786:
 /* rule 786 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // */ (editor syntax fix)
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       lastDocContext = YY_START;
 
@@ -26279,7 +26539,7 @@ YY_RULE_SETUP
 case 787:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       lastDocContext = YY_START;
 
@@ -26299,12 +26559,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 788:
 /* rule 788 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_bp + 3);
 (yy_c_buf_p) = yy_cp = yy_bp + 3;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       lastDocContext = YY_START;
 
@@ -26333,7 +26594,7 @@ YY_RULE_SETUP
 case 790:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       bool isAttribute = current->m_traits.hasTrait(Entry::Virtue::Attribute);
       QString tmpType  = current->getData(EntryKey::Member_Type);
@@ -26378,7 +26639,7 @@ YY_RULE_SETUP
                current->m_entryName = "[instance initializer]";
             }
 
-            unput(*parse_cstyle_YYtext);
+            unput(*yytext);
             BEGIN( Function );
 
          } else {
@@ -26563,7 +26824,7 @@ case 811:
 YY_RULE_SETUP
 {
       // continuation of multiline C++-style comment
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       s_docBlock += text;
 
@@ -26578,9 +26839,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 812:
 /* rule 812 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // ignore marker line
@@ -26593,7 +26855,7 @@ case 813:
 YY_RULE_SETUP
 {
       // next line is an end group marker
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       s_docBlock += text;
 
       handleCommentBlock(s_docBlock, current->getData(EntryKey::Brief_Docs).isEmpty());
@@ -26602,13 +26864,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 814:
 /* rule 814 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // whole line
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       s_docBlock += text;
 
       handleCommentBlock(s_docBlock, current->getData(EntryKey::Brief_Docs).isEmpty());
@@ -26627,24 +26890,26 @@ YY_RULE_SETUP
 	YY_BREAK
 case 816:
 /* rule 816 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       s_docBlock += QString(computeIndent(text, s_column), QChar(' '));
    }
 	YY_BREAK
 case 817:
 /* rule 817 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // start of a comment line
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       s_docBlock += QString(computeIndent(text, s_column), QChar(' '));
    }
 	YY_BREAK
@@ -26658,7 +26923,7 @@ case 819:
 YY_RULE_SETUP
 {
       // slashes in the middle of a comment block
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       s_docBlock += text;
    }
 	YY_BREAK
@@ -26667,20 +26932,21 @@ YY_RULE_SETUP
 {
       // */ (editor syntax fix)
       // start of a new comment in the middle of a comment block
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       s_docBlock += text;
    }
 	YY_BREAK
 case 821:
 /* rule 821 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // */ (editor syntax fix)
       // escaped command
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       s_docBlock += text;
    }
 	YY_BREAK
@@ -26688,7 +26954,7 @@ case 822:
 YY_RULE_SETUP
 {
       // */ (editor syntax fix)
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       s_docBlock += text;
       s_docBlockName = text.mid(1);
@@ -26706,7 +26972,7 @@ YY_RULE_SETUP
 case 823:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       s_docBlock     += text;
       s_docBlockName    = "<pre>";
@@ -26719,13 +26985,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 824:
 /* rule 824 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // verbatim command (which could contain nested comments)
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       s_docBlock   += text;
       s_docBlockName = text.mid(1);
@@ -26739,7 +27006,7 @@ YY_RULE_SETUP
 case 825:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       QString tmp  = substitute(text, "*", " ");
 
       s_docBlock     += tmp;
@@ -26758,7 +27025,7 @@ case 828:
 /* rule 828 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       QString tmp  = substitute(text, "*", " ");
 
       s_docBlock     += tmp;
@@ -26773,7 +27040,7 @@ YY_RULE_SETUP
 case 829:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insideCSharp) {
          s_docBlock     += text;
@@ -26791,7 +27058,7 @@ case 830:
 YY_RULE_SETUP
 {
       // any character that is not special
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       s_docBlock += text;
    }
 	YY_BREAK
@@ -26800,7 +27067,7 @@ case 831:
 YY_RULE_SETUP
 {
       // newline
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       lineCount();
       s_docBlock += text[0];
@@ -26810,7 +27077,7 @@ case 832:
 YY_RULE_SETUP
 {
       // command block
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       s_docBlock += text[0];
    }
 	YY_BREAK
@@ -26819,7 +27086,7 @@ case 833:
 YY_RULE_SETUP
 {
       // end of a <pre> block
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       s_docBlock += text;
 
@@ -26832,7 +27099,7 @@ case 834:
 YY_RULE_SETUP
 {
       // end of a <code> block
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       s_docBlock += text;
 
@@ -26844,7 +27111,7 @@ YY_RULE_SETUP
 case 835:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       s_docBlock += text;
       BEGIN(DocBlock);
@@ -26852,13 +27119,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 836:
 /* rule 836 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // end of verbatim block
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       s_docBlock += text;
 
@@ -26872,7 +27140,7 @@ case 837:
 YY_RULE_SETUP
 {
       // start of a comment line
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (s_docBlockName == "verbatim") {
          REJECT;
@@ -26890,7 +27158,7 @@ case 838:
 YY_RULE_SETUP
 {
       // start of a comment line with two *'s
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (s_docBlockName == "code") {
          s_docBlock += QString(computeIndent(text, 0), QChar(' '));
@@ -26903,7 +27171,7 @@ case 839:
 YY_RULE_SETUP
 {
       // Assume *var or *(... is part of source code
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (s_docBlockName == "code") {
          s_docBlock += QString(computeIndent(text, -1), QChar(' ')) + "*";
@@ -26918,7 +27186,7 @@ case 840:
 YY_RULE_SETUP
 {
       // start of a comment line with one *
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (s_docBlockName == "code") {
 
@@ -26941,7 +27209,7 @@ YY_RULE_SETUP
 case 841:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       QString tmp  = substitute(text, "*", " ");
 
       s_docBlock += tmp;
@@ -26954,7 +27222,7 @@ YY_RULE_SETUP
 case 842:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       QString tmp  = substitute(text, "*", " ");
 
       s_docBlock += tmp;
@@ -26969,7 +27237,7 @@ YY_RULE_SETUP
 {
       // */ (editor syntax fix)
       // any character that is not special
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       s_docBlock += text;
    }
 	YY_BREAK
@@ -26977,7 +27245,7 @@ case 844:
 YY_RULE_SETUP
 {
       // */ (editor syntax fix)
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (text[1] == '*') {
          s_nestedComment = true;
@@ -26994,7 +27262,7 @@ case 845:
 YY_RULE_SETUP
 {
       // newline
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       s_docBlock += text[0];
       lineCount();
@@ -27004,7 +27272,7 @@ case 846:
 YY_RULE_SETUP
 {
       // any other character
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       s_docBlock += text[0];
    }
 	YY_BREAK
@@ -27019,14 +27287,14 @@ case YY_STATE_EOF(DocCopyBlock):
 case 847:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName += text;
    }
 	YY_BREAK
 case 848:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args, text[0]);
 
       fullArgString = current->getData(EntryKey::Member_Args);
@@ -27042,7 +27310,7 @@ YY_RULE_SETUP
 case 849:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       current->appendData(EntryKey::Member_Type, current->m_entryName + text);
       current->m_entryName = "";
@@ -27053,14 +27321,14 @@ case 850:
 /* rule 850 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName += text;
    }
 	YY_BREAK
 case 851:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args, text[0]);
 
       fullArgString = current->getData(EntryKey::Member_Args);
@@ -27083,7 +27351,7 @@ YY_RULE_SETUP
 case 853:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName += text;
    }
 	YY_BREAK
@@ -27146,21 +27414,21 @@ YY_RULE_SETUP
 case 862:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Exception_Spec, text[0]);
    }
 	YY_BREAK
 case 863:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args, text[0]);
    }
 	YY_BREAK
 case 864:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName += text[0];
    }
 	YY_BREAK
@@ -27184,9 +27452,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 867:
 /* rule 867 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up parse_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       BEGIN( lastCContext ) ;
@@ -27495,7 +27764,7 @@ case YY_STATE_EOF(RequiresClause):
 case YY_STATE_EOF(RequiresExpression):
 case YY_STATE_EOF(ConceptName):
 {
-      QString text = QString::fromUtf8(parse_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (insideCSharp && s_fakeNS != 0) {
          --s_fakeNS;
@@ -27527,15 +27796,15 @@ ECHO;
 			{
 			/* We're scanning a new file or input source.  It's
 			 * possible that this happened because the user
-			 * just pointed parse_cstyle_YYin at a new source and called
-			 * parse_cstyle_YYlex().  If so, then we have to assure
+			 * just pointed yyin at a new source and called
+			 * yylex().  If so, then we have to assure
 			 * consistency between YY_CURRENT_BUFFER and our
 			 * globals.  Here is the right place to do so, because
 			 * this is the first action (other than possibly a
 			 * back-up) that will match for the new input source.
 			 */
 			(yy_n_chars) = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
-			YY_CURRENT_BUFFER_LVALUE->yy_input_file = parse_cstyle_YYin;
+			YY_CURRENT_BUFFER_LVALUE->yy_input_file = yyin;
 			YY_CURRENT_BUFFER_LVALUE->yy_buffer_status = YY_BUFFER_NORMAL;
 			}
 
@@ -27588,11 +27857,11 @@ ECHO;
 				{
 				(yy_did_buffer_switch_on_eof) = 0;
 
-				if ( parse_cstyle_YYwrap( ) )
+				if ( yywrap(  ) )
 					{
 					/* Note: because we've taken care in
 					 * yy_get_next_buffer() to have set up
-					 * parse_cstyle_YYtext, we can now set up
+					 * yytext, we can now set up
 					 * yy_c_buf_p so that if some total
 					 * hoser (like flex itself) wants to
 					 * call the scanner after we return the
@@ -27641,7 +27910,8 @@ ECHO;
 			"fatal flex scanner internal error--no action found" );
 	} /* end of action switch */
 		} /* end of scanning one token */
-} /* end of parse_cstyle_YYlex */
+	} /* end of user's declarations */
+} /* end of yylex */
 
 /* yy_get_next_buffer - try to read in a new buffer
  *
@@ -27683,7 +27953,7 @@ static int yy_get_next_buffer (void)
 	/* Try to read more data. */
 
 	/* First move last chars to start of buffer. */
-	number_to_move = (int) ((yy_c_buf_p) - (yytext_ptr)) - 1;
+	number_to_move = (int) ((yy_c_buf_p) - (yytext_ptr) - 1);
 
 	for ( i = 0; i < number_to_move; ++i )
 		*(dest++) = *(source++);
@@ -27712,7 +27982,7 @@ static int yy_get_next_buffer (void)
 
 		/* Read in more data. */
 		YY_INPUT( (&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
-			(yy_n_chars), (size_t) num_to_read );
+			(yy_n_chars), num_to_read );
 
 		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
 		}
@@ -27722,7 +27992,7 @@ static int yy_get_next_buffer (void)
 		if ( number_to_move == YY_MORE_ADJ )
 			{
 			ret_val = EOB_ACT_END_OF_FILE;
-			parse_cstyle_YYrestart(parse_cstyle_YYin  );
+			yyrestart( yyin  );
 			}
 
 		else
@@ -27736,12 +28006,15 @@ static int yy_get_next_buffer (void)
 	else
 		ret_val = EOB_ACT_CONTINUE_SCAN;
 
-	if ((yy_size_t) ((yy_n_chars) + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
+	if (((yy_n_chars) + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
 		/* Extend the array by 50%, plus the number we really need. */
-		yy_size_t new_size = (yy_n_chars) + number_to_move + ((yy_n_chars) >> 1);
-		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) parse_cstyle_YYrealloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size  );
+		int new_size = (yy_n_chars) + number_to_move + ((yy_n_chars) >> 1);
+		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) yyrealloc(
+			(void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf, (yy_size_t) new_size  );
 		if ( ! YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
 			YY_FATAL_ERROR( "out of dynamic memory in yy_get_next_buffer()" );
+		/* "- 2" to take care of EOB's */
+		YY_CURRENT_BUFFER_LVALUE->yy_buf_size = (int) (new_size - 2);
 	}
 
 	(yy_n_chars) += number_to_move;
@@ -27773,9 +28046,9 @@ static int yy_get_next_buffer (void)
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
 			if ( yy_current_state >= 5915 )
-				yy_c = yy_meta[(unsigned int) yy_c];
+				yy_c = yy_meta[yy_c];
 			}
-		yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
+		yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 		*(yy_state_ptr)++ = yy_current_state;
 		}
 
@@ -27796,15 +28069,17 @@ static int yy_get_next_buffer (void)
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
 		if ( yy_current_state >= 5915 )
-			yy_c = yy_meta[(unsigned int) yy_c];
+			yy_c = yy_meta[yy_c];
 		}
-	yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
+	yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 	yy_is_jam = (yy_current_state == 5914);
 	if ( ! yy_is_jam )
 		*(yy_state_ptr)++ = yy_current_state;
 
-	return yy_is_jam ? 0 : yy_current_state;
+		return yy_is_jam ? 0 : yy_current_state;
 }
+
+#ifndef YY_NO_UNPUT
 
     static void yyunput (int c, char * yy_bp )
 {
@@ -27812,7 +28087,7 @@ static int yy_get_next_buffer (void)
     
     yy_cp = (yy_c_buf_p);
 
-	/* undo effects of setting up parse_cstyle_YYtext */
+	/* undo effects of setting up yytext */
 	*yy_cp = (yy_hold_char);
 
 	if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
@@ -27830,7 +28105,7 @@ static int yy_get_next_buffer (void)
 		yy_cp += (int) (dest - source);
 		yy_bp += (int) (dest - source);
 		YY_CURRENT_BUFFER_LVALUE->yy_n_chars =
-			(yy_n_chars) = YY_CURRENT_BUFFER_LVALUE->yy_buf_size;
+			(yy_n_chars) = (int) YY_CURRENT_BUFFER_LVALUE->yy_buf_size;
 
 		if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
 			YY_FATAL_ERROR( "flex scanner push-back overflow" );
@@ -27842,6 +28117,8 @@ static int yy_get_next_buffer (void)
 	(yy_hold_char) = *yy_cp;
 	(yy_c_buf_p) = yy_cp;
 }
+
+#endif
 
 #ifndef YY_NO_INPUT
 #ifdef __cplusplus
@@ -27867,7 +28144,7 @@ static int yy_get_next_buffer (void)
 
 		else
 			{ /* need more input */
-			int offset = (yy_c_buf_p) - (yytext_ptr);
+			int offset = (int) ((yy_c_buf_p) - (yytext_ptr));
 			++(yy_c_buf_p);
 
 			switch ( yy_get_next_buffer(  ) )
@@ -27884,14 +28161,14 @@ static int yy_get_next_buffer (void)
 					 */
 
 					/* Reset buffer status. */
-					parse_cstyle_YYrestart(parse_cstyle_YYin );
+					yyrestart( yyin );
 
 					/*FALLTHROUGH*/
 
 				case EOB_ACT_END_OF_FILE:
 					{
-					if ( parse_cstyle_YYwrap( ) )
-						return EOF;
+					if ( yywrap(  ) )
+						return 0;
 
 					if ( ! (yy_did_buffer_switch_on_eof) )
 						YY_NEW_FILE;
@@ -27910,7 +28187,7 @@ static int yy_get_next_buffer (void)
 		}
 
 	c = *(unsigned char *) (yy_c_buf_p);	/* cast for 8-bit char's */
-	*(yy_c_buf_p) = '\0';	/* preserve parse_cstyle_YYtext */
+	*(yy_c_buf_p) = '\0';	/* preserve yytext */
 	(yy_hold_char) = *++(yy_c_buf_p);
 
 	YY_CURRENT_BUFFER_LVALUE->yy_at_bol = (c == '\n');
@@ -27924,32 +28201,32 @@ static int yy_get_next_buffer (void)
  * 
  * @note This function does not reset the start condition to @c INITIAL .
  */
-    void parse_cstyle_YYrestart  (FILE * input_file )
+    void yyrestart  (FILE * input_file )
 {
     
 	if ( ! YY_CURRENT_BUFFER ){
-        parse_cstyle_YYensure_buffer_stack ();
+        yyensure_buffer_stack ();
 		YY_CURRENT_BUFFER_LVALUE =
-            parse_cstyle_YY_create_buffer(parse_cstyle_YYin,YY_BUF_SIZE );
+            yy_create_buffer( yyin, YY_BUF_SIZE );
 	}
 
-	parse_cstyle_YY_init_buffer(YY_CURRENT_BUFFER,input_file );
-	parse_cstyle_YY_load_buffer_state( );
+	yy_init_buffer( YY_CURRENT_BUFFER, input_file );
+	yy_load_buffer_state(  );
 }
 
 /** Switch to a different input buffer.
  * @param new_buffer The new input buffer.
  * 
  */
-    void parse_cstyle_YY_switch_to_buffer  (YY_BUFFER_STATE  new_buffer )
+    void yy_switch_to_buffer  (YY_BUFFER_STATE  new_buffer )
 {
     
 	/* TODO. We should be able to replace this entire function body
 	 * with
-	 *		parse_cstyle_YYpop_buffer_state();
-	 *		parse_cstyle_YYpush_buffer_state(new_buffer);
+	 *		yypop_buffer_state();
+	 *		yypush_buffer_state(new_buffer);
      */
-	parse_cstyle_YYensure_buffer_stack ();
+	yyensure_buffer_stack ();
 	if ( YY_CURRENT_BUFFER == new_buffer )
 		return;
 
@@ -27962,21 +28239,21 @@ static int yy_get_next_buffer (void)
 		}
 
 	YY_CURRENT_BUFFER_LVALUE = new_buffer;
-	parse_cstyle_YY_load_buffer_state( );
+	yy_load_buffer_state(  );
 
 	/* We don't actually know whether we did this switch during
-	 * EOF (parse_cstyle_YYwrap()) processing, but the only time this flag
-	 * is looked at is after parse_cstyle_YYwrap() is called, so it's safe
+	 * EOF (yywrap()) processing, but the only time this flag
+	 * is looked at is after yywrap() is called, so it's safe
 	 * to go ahead and always set it.
 	 */
 	(yy_did_buffer_switch_on_eof) = 1;
 }
 
-static void parse_cstyle_YY_load_buffer_state  (void)
+static void yy_load_buffer_state  (void)
 {
     	(yy_n_chars) = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
 	(yytext_ptr) = (yy_c_buf_p) = YY_CURRENT_BUFFER_LVALUE->yy_buf_pos;
-	parse_cstyle_YYin = YY_CURRENT_BUFFER_LVALUE->yy_input_file;
+	yyin = YY_CURRENT_BUFFER_LVALUE->yy_input_file;
 	(yy_hold_char) = *(yy_c_buf_p);
 }
 
@@ -27986,35 +28263,35 @@ static void parse_cstyle_YY_load_buffer_state  (void)
  * 
  * @return the allocated buffer state.
  */
-    YY_BUFFER_STATE parse_cstyle_YY_create_buffer  (FILE * file, int  size )
+    YY_BUFFER_STATE yy_create_buffer  (FILE * file, int  size )
 {
 	YY_BUFFER_STATE b;
     
-	b = (YY_BUFFER_STATE) parse_cstyle_YYalloc(sizeof( struct yy_buffer_state )  );
+	b = (YY_BUFFER_STATE) yyalloc( sizeof( struct yy_buffer_state )  );
 	if ( ! b )
-		YY_FATAL_ERROR( "out of dynamic memory in parse_cstyle_YY_create_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
 
 	b->yy_buf_size = size;
 
 	/* yy_ch_buf has to be 2 characters longer than the size given because
 	 * we need to put in 2 end-of-buffer characters.
 	 */
-	b->yy_ch_buf = (char *) parse_cstyle_YYalloc(b->yy_buf_size + 2  );
+	b->yy_ch_buf = (char *) yyalloc( (yy_size_t) (b->yy_buf_size + 2)  );
 	if ( ! b->yy_ch_buf )
-		YY_FATAL_ERROR( "out of dynamic memory in parse_cstyle_YY_create_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
 
 	b->yy_is_our_buffer = 1;
 
-	parse_cstyle_YY_init_buffer(b,file );
+	yy_init_buffer( b, file );
 
 	return b;
 }
 
 /** Destroy the buffer.
- * @param b a buffer created with parse_cstyle_YY_create_buffer()
+ * @param b a buffer created with yy_create_buffer()
  * 
  */
-    void parse_cstyle_YY_delete_buffer (YY_BUFFER_STATE  b )
+    void yy_delete_buffer (YY_BUFFER_STATE  b )
 {
     
 	if ( ! b )
@@ -28024,27 +28301,27 @@ static void parse_cstyle_YY_load_buffer_state  (void)
 		YY_CURRENT_BUFFER_LVALUE = (YY_BUFFER_STATE) 0;
 
 	if ( b->yy_is_our_buffer )
-		parse_cstyle_YYfree((void *) b->yy_ch_buf  );
+		yyfree( (void *) b->yy_ch_buf  );
 
-	parse_cstyle_YYfree((void *) b  );
+	yyfree( (void *) b  );
 }
 
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
- * such as during a parse_cstyle_YYrestart() or at EOF.
+ * such as during a yyrestart() or at EOF.
  */
-    static void parse_cstyle_YY_init_buffer  (YY_BUFFER_STATE  b, FILE * file )
+    static void yy_init_buffer  (YY_BUFFER_STATE  b, FILE * file )
 
 {
 	int oerrno = errno;
     
-	parse_cstyle_YY_flush_buffer(b );
+	yy_flush_buffer( b );
 
 	b->yy_input_file = file;
 	b->yy_fill_buffer = 1;
 
-    /* If b is the current buffer, then parse_cstyle_YY_init_buffer was _probably_
-     * called from parse_cstyle_YYrestart() or through yy_get_next_buffer.
+    /* If b is the current buffer, then yy_init_buffer was _probably_
+     * called from yyrestart() or through yy_get_next_buffer.
      * In that case, we don't want to reset the lineno or column.
      */
     if (b != YY_CURRENT_BUFFER){
@@ -28061,7 +28338,7 @@ static void parse_cstyle_YY_load_buffer_state  (void)
  * @param b the buffer state to be flushed, usually @c YY_CURRENT_BUFFER.
  * 
  */
-    void parse_cstyle_YY_flush_buffer (YY_BUFFER_STATE  b )
+    void yy_flush_buffer (YY_BUFFER_STATE  b )
 {
     	if ( ! b )
 		return;
@@ -28081,7 +28358,7 @@ static void parse_cstyle_YY_load_buffer_state  (void)
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
 	if ( b == YY_CURRENT_BUFFER )
-		parse_cstyle_YY_load_buffer_state( );
+		yy_load_buffer_state(  );
 }
 
 /** Pushes the new state onto the stack. The new state becomes
@@ -28090,14 +28367,14 @@ static void parse_cstyle_YY_load_buffer_state  (void)
  *  @param new_buffer The new state.
  *  
  */
-void parse_cstyle_YYpush_buffer_state (YY_BUFFER_STATE new_buffer )
+void yypush_buffer_state (YY_BUFFER_STATE new_buffer )
 {
-    	if (new_buffer == NULL)
+    	if (new_buffer == nullptr)
 		return;
 
-	parse_cstyle_YYensure_buffer_stack();
+	yyensure_buffer_stack();
 
-	/* This block is copied from parse_cstyle_YY_switch_to_buffer. */
+	/* This block is copied from yy_switch_to_buffer. */
 	if ( YY_CURRENT_BUFFER )
 		{
 		/* Flush out information for old buffer. */
@@ -28111,8 +28388,8 @@ void parse_cstyle_YYpush_buffer_state (YY_BUFFER_STATE new_buffer )
 		(yy_buffer_stack_top)++;
 	YY_CURRENT_BUFFER_LVALUE = new_buffer;
 
-	/* copied from parse_cstyle_YY_switch_to_buffer. */
-	parse_cstyle_YY_load_buffer_state( );
+	/* copied from yy_switch_to_buffer. */
+	yy_load_buffer_state(  );
 	(yy_did_buffer_switch_on_eof) = 1;
 }
 
@@ -28120,18 +28397,18 @@ void parse_cstyle_YYpush_buffer_state (YY_BUFFER_STATE new_buffer )
  *  The next element becomes the new top.
  *  
  */
-void parse_cstyle_YYpop_buffer_state (void)
+void yypop_buffer_state (void)
 {
     	if (!YY_CURRENT_BUFFER)
 		return;
 
-	parse_cstyle_YY_delete_buffer(YY_CURRENT_BUFFER );
-	YY_CURRENT_BUFFER_LVALUE = NULL;
+	yy_delete_buffer(YY_CURRENT_BUFFER );
+	YY_CURRENT_BUFFER_LVALUE = nullptr;
 	if ((yy_buffer_stack_top) > 0)
 		--(yy_buffer_stack_top);
 
 	if (YY_CURRENT_BUFFER) {
-		parse_cstyle_YY_load_buffer_state( );
+		yy_load_buffer_state(  );
 		(yy_did_buffer_switch_on_eof) = 1;
 	}
 }
@@ -28139,9 +28416,9 @@ void parse_cstyle_YYpop_buffer_state (void)
 /* Allocates the stack if it does not exist.
  *  Guarantees space for at least one push.
  */
-static void parse_cstyle_YYensure_buffer_stack (void)
+static void yyensure_buffer_stack (void)
 {
-	int num_to_alloc;
+	yy_size_t num_to_alloc;
     
 	if (!(yy_buffer_stack)) {
 
@@ -28149,15 +28426,15 @@ static void parse_cstyle_YYensure_buffer_stack (void)
 		 * scanner will even need a stack. We use 2 instead of 1 to avoid an
 		 * immediate realloc on the next call.
          */
-		num_to_alloc = 1;
-		(yy_buffer_stack) = (struct yy_buffer_state**)parse_cstyle_YYalloc
+      num_to_alloc = 1; /* After all that talk, this was set to 1 anyways... */
+		(yy_buffer_stack) = (struct yy_buffer_state**)yyalloc
 								(num_to_alloc * sizeof(struct yy_buffer_state*)
 								);
 		if ( ! (yy_buffer_stack) )
-			YY_FATAL_ERROR( "out of dynamic memory in parse_cstyle_YYensure_buffer_stack()" );
-								  
+			YY_FATAL_ERROR( "out of dynamic memory in yyensure_buffer_stack()" );
+
 		memset((yy_buffer_stack), 0, num_to_alloc * sizeof(struct yy_buffer_state*));
-				
+
 		(yy_buffer_stack_max) = num_to_alloc;
 		(yy_buffer_stack_top) = 0;
 		return;
@@ -28166,15 +28443,15 @@ static void parse_cstyle_YYensure_buffer_stack (void)
 	if ((yy_buffer_stack_top) >= ((yy_buffer_stack_max)) - 1){
 
 		/* Increase the buffer to prepare for a possible push. */
-		int grow_size = 8 /* arbitrary grow size */;
+		yy_size_t grow_size = 8 /* arbitrary grow size */;
 
 		num_to_alloc = (yy_buffer_stack_max) + grow_size;
-		(yy_buffer_stack) = (struct yy_buffer_state**)parse_cstyle_YYrealloc
+		(yy_buffer_stack) = (struct yy_buffer_state**)yyrealloc
 								((yy_buffer_stack),
 								num_to_alloc * sizeof(struct yy_buffer_state*)
 								);
 		if ( ! (yy_buffer_stack) )
-			YY_FATAL_ERROR( "out of dynamic memory in parse_cstyle_YYensure_buffer_stack()" );
+			YY_FATAL_ERROR( "out of dynamic memory in yyensure_buffer_stack()" );
 
 		/* zero only the new slots.*/
 		memset((yy_buffer_stack) + (yy_buffer_stack_max), 0, grow_size * sizeof(struct yy_buffer_state*));
@@ -28186,9 +28463,9 @@ static void parse_cstyle_YYensure_buffer_stack (void)
  * @param base the character buffer
  * @param size the size in bytes of the character buffer
  * 
- * @return the newly allocated buffer state object. 
+ * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE parse_cstyle_YY_scan_buffer  (char * base, yy_size_t  size )
+YY_BUFFER_STATE yy_scan_buffer  (char * base, yy_size_t  size )
 {
 	YY_BUFFER_STATE b;
     
@@ -28196,49 +28473,49 @@ YY_BUFFER_STATE parse_cstyle_YY_scan_buffer  (char * base, yy_size_t  size )
 	     base[size-2] != YY_END_OF_BUFFER_CHAR ||
 	     base[size-1] != YY_END_OF_BUFFER_CHAR )
 		/* They forgot to leave room for the EOB's. */
-		return 0;
+		return nullptr;
 
-	b = (YY_BUFFER_STATE) parse_cstyle_YYalloc(sizeof( struct yy_buffer_state )  );
+	b = (YY_BUFFER_STATE) yyalloc( sizeof( struct yy_buffer_state )  );
 	if ( ! b )
-		YY_FATAL_ERROR( "out of dynamic memory in parse_cstyle_YY_scan_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_scan_buffer()" );
 
-	b->yy_buf_size = size - 2;	/* "- 2" to take care of EOB's */
+	b->yy_buf_size = (int) (size - 2);	/* "- 2" to take care of EOB's */
 	b->yy_buf_pos = b->yy_ch_buf = base;
 	b->yy_is_our_buffer = 0;
-	b->yy_input_file = 0;
+	b->yy_input_file = nullptr;
 	b->yy_n_chars = b->yy_buf_size;
 	b->yy_is_interactive = 0;
 	b->yy_at_bol = 1;
 	b->yy_fill_buffer = 0;
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
-	parse_cstyle_YY_switch_to_buffer(b  );
+	yy_switch_to_buffer( b  );
 
 	return b;
 }
 
-/** Setup the input buffer state to scan a string. The next call to parse_cstyle_YYlex() will
+/** Setup the input buffer state to scan a string. The next call to yylex() will
  * scan from a @e copy of @a str.
  * @param yystr a NUL-terminated string to scan
  * 
  * @return the newly allocated buffer state object.
  * @note If you want to scan bytes that may contain NUL values, then use
- *       parse_cstyle_YY_scan_bytes() instead.
+ *       yy_scan_bytes() instead.
  */
-YY_BUFFER_STATE parse_cstyle_YY_scan_string (yyconst char * yystr )
+YY_BUFFER_STATE yy_scan_string (const char * yystr )
 {
     
-	return parse_cstyle_YY_scan_bytes(yystr,strlen(yystr) );
+	return yy_scan_bytes( yystr, (int) strlen(yystr) );
 }
 
-/** Setup the input buffer state to scan the given bytes. The next call to parse_cstyle_YYlex() will
+/** Setup the input buffer state to scan the given bytes. The next call to yylex() will
  * scan from a @e copy of @a bytes.
  * @param yybytes the byte buffer to scan
  * @param _yybytes_len the number of bytes in the buffer pointed to by @a bytes.
  * 
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE parse_cstyle_YY_scan_bytes  (yyconst char * yybytes, int  _yybytes_len )
+YY_BUFFER_STATE yy_scan_bytes  (const char * yybytes, int  _yybytes_len )
 {
 	YY_BUFFER_STATE b;
 	char *buf;
@@ -28246,19 +28523,19 @@ YY_BUFFER_STATE parse_cstyle_YY_scan_bytes  (yyconst char * yybytes, int  _yybyt
 	int i;
     
 	/* Get memory for full buffer, including space for trailing EOB's. */
-	n = _yybytes_len + 2;
-	buf = (char *) parse_cstyle_YYalloc(n  );
+	n = (yy_size_t) (_yybytes_len + 2);
+	buf = (char *) yyalloc( n  );
 	if ( ! buf )
-		YY_FATAL_ERROR( "out of dynamic memory in parse_cstyle_YY_scan_bytes()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_scan_bytes()" );
 
 	for ( i = 0; i < _yybytes_len; ++i )
 		buf[i] = yybytes[i];
 
 	buf[_yybytes_len] = buf[_yybytes_len+1] = YY_END_OF_BUFFER_CHAR;
 
-	b = parse_cstyle_YY_scan_buffer(buf,n );
+	b = yy_scan_buffer( buf, n );
 	if ( ! b )
-		YY_FATAL_ERROR( "bad buffer in parse_cstyle_YY_scan_bytes()" );
+		YY_FATAL_ERROR( "bad buffer in yy_scan_bytes()" );
 
 	/* It's okay to grow etc. this buffer, and we should throw it
 	 * away when we're done.
@@ -28272,9 +28549,9 @@ YY_BUFFER_STATE parse_cstyle_YY_scan_bytes  (yyconst char * yybytes, int  _yybyt
 #define YY_EXIT_FAILURE 2
 #endif
 
-static void yy_fatal_error (yyconst char* msg )
+static void yynoreturn yy_fatal_error (const char* msg )
 {
-    	(void) fprintf( stderr, "%s\n", msg );
+			fprintf( stderr, "%s\n", msg );
 	exit( YY_EXIT_FAILURE );
 }
 
@@ -28284,14 +28561,14 @@ static void yy_fatal_error (yyconst char* msg )
 #define yyless(n) \
 	do \
 		{ \
-		/* Undo effects of setting up parse_cstyle_YYtext. */ \
+		/* Undo effects of setting up yytext. */ \
         int yyless_macro_arg = (n); \
         YY_LESS_LINENO(yyless_macro_arg);\
-		parse_cstyle_YYtext[parse_cstyle_YYleng] = (yy_hold_char); \
-		(yy_c_buf_p) = parse_cstyle_YYtext + yyless_macro_arg; \
+		yytext[yyleng] = (yy_hold_char); \
+		(yy_c_buf_p) = yytext + yyless_macro_arg; \
 		(yy_hold_char) = *(yy_c_buf_p); \
 		*(yy_c_buf_p) = '\0'; \
-		parse_cstyle_YYleng = yyless_macro_arg; \
+		yyleng = yyless_macro_arg; \
 		} \
 	while ( 0 )
 
@@ -28300,91 +28577,91 @@ static void yy_fatal_error (yyconst char* msg )
 /** Get the current line number.
  * 
  */
-int parse_cstyle_YYget_lineno  (void)
+int yyget_lineno  (void)
 {
-        
-    return parse_cstyle_YYlineno;
+    
+    return yylineno;
 }
 
 /** Get the input stream.
  * 
  */
-FILE *parse_cstyle_YYget_in  (void)
+FILE *yyget_in  (void)
 {
-        return parse_cstyle_YYin;
+        return yyin;
 }
 
 /** Get the output stream.
  * 
  */
-FILE *parse_cstyle_YYget_out  (void)
+FILE *yyget_out  (void)
 {
-        return parse_cstyle_YYout;
+        return yyout;
 }
 
 /** Get the length of the current token.
  * 
  */
-int parse_cstyle_YYget_leng  (void)
+int yyget_leng  (void)
 {
-        return parse_cstyle_YYleng;
+        return yyleng;
 }
 
 /** Get the current token.
  * 
  */
 
-char *parse_cstyle_YYget_text  (void)
+char *yyget_text  (void)
 {
-        return parse_cstyle_YYtext;
+        return yytext;
 }
 
 /** Set the current line number.
- * @param line_number
+ * @param _line_number line number
  * 
  */
-void parse_cstyle_YYset_lineno (int  line_number )
+void yyset_lineno (int  _line_number )
 {
     
-    parse_cstyle_YYlineno = line_number;
+    yylineno = _line_number;
 }
 
 /** Set the input stream. This does not discard the current
  * input buffer.
- * @param in_str A readable stream.
+ * @param _in_str A readable stream.
  * 
- * @see parse_cstyle_YY_switch_to_buffer
+ * @see yy_switch_to_buffer
  */
-void parse_cstyle_YYset_in (FILE *  in_str )
+void yyset_in (FILE *  _in_str )
 {
-        parse_cstyle_YYin = in_str ;
+        yyin = _in_str ;
 }
 
-void parse_cstyle_YYset_out (FILE *  out_str )
+void yyset_out (FILE *  _out_str )
 {
-        parse_cstyle_YYout = out_str ;
+        yyout = _out_str ;
 }
 
-int parse_cstyle_YYget_debug  (void)
+int yyget_debug  (void)
 {
-        return parse_cstyle_YY_flex_debug;
+        return yy_flex_debug;
 }
 
-void parse_cstyle_YYset_debug (int  bdebug )
+void yyset_debug (int  _bdebug )
 {
-        parse_cstyle_YY_flex_debug = bdebug ;
+        yy_flex_debug = _bdebug ;
 }
 
 static int yy_init_globals (void)
 {
         /* Initialization is the same as for the non-reentrant scanner.
-     * This function is called from parse_cstyle_YYlex_destroy(), so don't allocate here.
+     * This function is called from yylex_destroy(), so don't allocate here.
      */
 
-    (yy_buffer_stack) = 0;
+    (yy_buffer_stack) = nullptr;
     (yy_buffer_stack_top) = 0;
     (yy_buffer_stack_max) = 0;
-    (yy_c_buf_p) = (char *) 0;
+    (yy_c_buf_p) = nullptr;
     (yy_init) = 0;
     (yy_start) = 0;
 
@@ -28395,39 +28672,39 @@ static int yy_init_globals (void)
 
 /* Defined in main.c */
 #ifdef YY_STDINIT
-    parse_cstyle_YYin = stdin;
-    parse_cstyle_YYout = stdout;
+    yyin = stdin;
+    yyout = stdout;
 #else
-    parse_cstyle_YYin = (FILE *) 0;
-    parse_cstyle_YYout = (FILE *) 0;
+    yyin = nullptr;
+    yyout = nullptr;
 #endif
 
     /* For future reference: Set errno on error, since we are called by
-     * parse_cstyle_YYlex_init()
+     * yylex_init()
      */
     return 0;
 }
 
-/* parse_cstyle_YYlex_destroy is for both reentrant and non-reentrant scanners. */
-int parse_cstyle_YYlex_destroy  (void)
+/* yylex_destroy is for both reentrant and non-reentrant scanners. */
+int yylex_destroy  (void)
 {
     
     /* Pop the buffer stack, destroying each element. */
 	while(YY_CURRENT_BUFFER){
-		parse_cstyle_YY_delete_buffer(YY_CURRENT_BUFFER  );
-		YY_CURRENT_BUFFER_LVALUE = NULL;
-		parse_cstyle_YYpop_buffer_state();
+		yy_delete_buffer( YY_CURRENT_BUFFER  );
+		YY_CURRENT_BUFFER_LVALUE = nullptr;
+		yypop_buffer_state();
 	}
 
 	/* Destroy the stack itself. */
-	parse_cstyle_YYfree((yy_buffer_stack) );
-	(yy_buffer_stack) = NULL;
+	yyfree((yy_buffer_stack) );
+	(yy_buffer_stack) = nullptr;
 
-    parse_cstyle_YYfree ( (yy_state_buf) );
-    (yy_state_buf)  = NULL;
+    yyfree ( (yy_state_buf) );
+    (yy_state_buf)  = nullptr;
 
     /* Reset the globals. This is important in a non-reentrant scanner so the next time
-     * parse_cstyle_YYlex() is called, initialization will occur. */
+     * yylex() is called, initialization will occur. */
     yy_init_globals( );
 
     return 0;
@@ -28438,8 +28715,9 @@ int parse_cstyle_YYlex_destroy  (void)
  */
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char* s1, yyconst char * s2, int n )
+static void yy_flex_strncpy (char* s1, const char * s2, int n )
 {
+		
 	int i;
 	for ( i = 0; i < n; ++i )
 		s1[i] = s2[i];
@@ -28447,7 +28725,7 @@ static void yy_flex_strncpy (char* s1, yyconst char * s2, int n )
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen (yyconst char * s )
+static int yy_flex_strlen (const char * s )
 {
 	int n;
 	for ( n = 0; s[n]; ++n )
@@ -28457,13 +28735,14 @@ static int yy_flex_strlen (yyconst char * s )
 }
 #endif
 
-void *parse_cstyle_YYalloc (yy_size_t  size )
+void *yyalloc (yy_size_t  size )
 {
-	return (void *) malloc( size );
+			return malloc(size);
 }
 
-void *parse_cstyle_YYrealloc  (void * ptr, yy_size_t  size )
+void *yyrealloc  (void * ptr, yy_size_t  size )
 {
+		
 	/* The cast to (char *) in the following accommodates both
 	 * implementations that use char* generic pointers, and those
 	 * that use void* generic pointers.  It works with the latter
@@ -28471,12 +28750,12 @@ void *parse_cstyle_YYrealloc  (void * ptr, yy_size_t  size )
 	 * any pointer type to void*, and deal with argument conversions
 	 * as though doing an assignment.
 	 */
-	return (void *) realloc( (char *) ptr, size );
+	return realloc(ptr, size);
 }
 
-void parse_cstyle_YYfree (void * ptr )
+void yyfree (void * ptr )
 {
-	free( (char *) ptr );	/* see parse_cstyle_YYrealloc() for (char *) cast */
+			free( (char *) ptr );	/* see yyrealloc() for (char *) cast */
 }
 
 #define YYTABLES_NAME "yytables"
@@ -28624,7 +28903,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
 {
    static const bool groupNested = Config::getBool("group-nested-compounds");
 
-   // safter to make a temp copy
+   // safer to make a temp copy
    const QVector<QSharedPointer<Entry>> tmpChildren = rt->children();
 
    for (const auto &ce : tmpChildren) {
@@ -28637,7 +28916,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
          s_inputString   = ce->getData(EntryKey::Source_Text);
          s_inputPosition = 0;
 
-         parse_cstyle_YYrestart(parse_cstyle_YYin );
+         yyrestart( yyin );
 
          bool isEnumTrait = ce->m_traits.hasTrait(Entry::Virtue::Enum);
 
@@ -28737,7 +29016,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
 
          groupEnterCompound(yyFileName, yyLineNr, ce->m_entryName);
 
-         parse_cstyle_YYlex();
+         yylex();
          s_lexInit = true;
 
          groupLeaveCompound(yyFileName, yyLineNr, ce->m_entryName);
@@ -28755,7 +29034,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
 void cstyleFreeParser()
 {
    if (s_lexInit) {
-      parse_cstyle_YYlex_destroy();
+      yylex_destroy();
    }
 }
 
@@ -28800,7 +29079,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QStringLi
          initEntry();
       }
 
-      parse_cstyle_YYrestart(parse_cstyle_YYin);
+      yyrestart(yyin);
 
       if (insidePHP) {
          BEGIN( FindMembersPHP );
@@ -28809,7 +29088,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QStringLi
          BEGIN( FindMembers );
       }
 
-      parse_cstyle_YYlex();
+      yylex();
       s_lexInit = true;
 
       if (YY_START == Comment) {
@@ -28849,7 +29128,7 @@ static void parsePrototype(const QString &text)
 
    // save scanner state
    orgState = YY_CURRENT_BUFFER;
-   parse_cstyle_YY_switch_to_buffer(parse_cstyle_YY_create_buffer(parse_cstyle_YYin,YY_BUF_SIZE));
+   yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
    orgInputString   = s_inputString;
    orgInputPosition = s_inputPosition;
 
@@ -28858,10 +29137,10 @@ static void parsePrototype(const QString &text)
    s_inputPosition = 0;
    s_column        = 0;
 
-   parse_cstyle_YYrestart(parse_cstyle_YYin );
+   yyrestart( yyin );
    BEGIN(Prototype);
 
-   parse_cstyle_YYlex();
+   yylex();
    s_lexInit = true;
 
    current->m_entryName = current->m_entryName.trimmed();
@@ -28872,8 +29151,8 @@ static void parsePrototype(const QString &text)
 
    // restore original scanner state
    YY_BUFFER_STATE tmpState = YY_CURRENT_BUFFER;
-   parse_cstyle_YY_switch_to_buffer(orgState);
-   parse_cstyle_YY_delete_buffer(tmpState);
+   yy_switch_to_buffer(orgState);
+   yy_delete_buffer(tmpState);
 
    s_inputString   = orgInputString;
    s_inputPosition = orgInputPosition;
@@ -28908,9 +29187,9 @@ void CPP_Parser::parseInput(const QString &fileName, const QString &fileBuffer,
    } else {
       s_thisParser = this;
 
-      printlex(parse_cstyle_YY_flex_debug, true, __FILE__, fileName);
+      printlex(yy_flex_debug, true, __FILE__, fileName);
       ::parseMain(fileName, fileBuffer, includedFiles, root);
-      printlex(parse_cstyle_YY_flex_debug, false, __FILE__, fileName);
+      printlex(yy_flex_debug, false, __FILE__, fileName);
    }
 }
 

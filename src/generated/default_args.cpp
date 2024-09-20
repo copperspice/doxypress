@@ -22,11 +22,17 @@
 
 #define yy_create_buffer default_argsYY_create_buffer
 #define yy_delete_buffer default_argsYY_delete_buffer
-#define yy_flex_debug default_argsYY_flex_debug
+#define yy_scan_buffer default_argsYY_scan_buffer
+#define yy_scan_string default_argsYY_scan_string
+#define yy_scan_bytes default_argsYY_scan_bytes
 #define yy_init_buffer default_argsYY_init_buffer
 #define yy_flush_buffer default_argsYY_flush_buffer
 #define yy_load_buffer_state default_argsYY_load_buffer_state
 #define yy_switch_to_buffer default_argsYY_switch_to_buffer
+#define yypush_buffer_state default_argsYYpush_buffer_state
+#define yypop_buffer_state default_argsYYpop_buffer_state
+#define yyensure_buffer_stack default_argsYYensure_buffer_stack
+#define yy_flex_debug default_argsYY_flex_debug
 #define yyin default_argsYYin
 #define yyleng default_argsYYleng
 #define yylex default_argsYYlex
@@ -41,10 +47,244 @@
 
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
-#define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 35
+#define YY_FLEX_MINOR_VERSION 6
+#define YY_FLEX_SUBMINOR_VERSION 4
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
+#endif
+
+#ifdef yy_create_buffer
+#define default_argsYY_create_buffer_ALREADY_DEFINED
+#else
+#define yy_create_buffer default_argsYY_create_buffer
+#endif
+
+#ifdef yy_delete_buffer
+#define default_argsYY_delete_buffer_ALREADY_DEFINED
+#else
+#define yy_delete_buffer default_argsYY_delete_buffer
+#endif
+
+#ifdef yy_scan_buffer
+#define default_argsYY_scan_buffer_ALREADY_DEFINED
+#else
+#define yy_scan_buffer default_argsYY_scan_buffer
+#endif
+
+#ifdef yy_scan_string
+#define default_argsYY_scan_string_ALREADY_DEFINED
+#else
+#define yy_scan_string default_argsYY_scan_string
+#endif
+
+#ifdef yy_scan_bytes
+#define default_argsYY_scan_bytes_ALREADY_DEFINED
+#else
+#define yy_scan_bytes default_argsYY_scan_bytes
+#endif
+
+#ifdef yy_init_buffer
+#define default_argsYY_init_buffer_ALREADY_DEFINED
+#else
+#define yy_init_buffer default_argsYY_init_buffer
+#endif
+
+#ifdef yy_flush_buffer
+#define default_argsYY_flush_buffer_ALREADY_DEFINED
+#else
+#define yy_flush_buffer default_argsYY_flush_buffer
+#endif
+
+#ifdef yy_load_buffer_state
+#define default_argsYY_load_buffer_state_ALREADY_DEFINED
+#else
+#define yy_load_buffer_state default_argsYY_load_buffer_state
+#endif
+
+#ifdef yy_switch_to_buffer
+#define default_argsYY_switch_to_buffer_ALREADY_DEFINED
+#else
+#define yy_switch_to_buffer default_argsYY_switch_to_buffer
+#endif
+
+#ifdef yypush_buffer_state
+#define default_argsYYpush_buffer_state_ALREADY_DEFINED
+#else
+#define yypush_buffer_state default_argsYYpush_buffer_state
+#endif
+
+#ifdef yypop_buffer_state
+#define default_argsYYpop_buffer_state_ALREADY_DEFINED
+#else
+#define yypop_buffer_state default_argsYYpop_buffer_state
+#endif
+
+#ifdef yyensure_buffer_stack
+#define default_argsYYensure_buffer_stack_ALREADY_DEFINED
+#else
+#define yyensure_buffer_stack default_argsYYensure_buffer_stack
+#endif
+
+#ifdef yylex
+#define default_argsYYlex_ALREADY_DEFINED
+#else
+#define yylex default_argsYYlex
+#endif
+
+#ifdef yyrestart
+#define default_argsYYrestart_ALREADY_DEFINED
+#else
+#define yyrestart default_argsYYrestart
+#endif
+
+#ifdef yylex_init
+#define default_argsYYlex_init_ALREADY_DEFINED
+#else
+#define yylex_init default_argsYYlex_init
+#endif
+
+#ifdef yylex_init_extra
+#define default_argsYYlex_init_extra_ALREADY_DEFINED
+#else
+#define yylex_init_extra default_argsYYlex_init_extra
+#endif
+
+#ifdef yylex_destroy
+#define default_argsYYlex_destroy_ALREADY_DEFINED
+#else
+#define yylex_destroy default_argsYYlex_destroy
+#endif
+
+#ifdef yyget_debug
+#define default_argsYYget_debug_ALREADY_DEFINED
+#else
+#define yyget_debug default_argsYYget_debug
+#endif
+
+#ifdef yyset_debug
+#define default_argsYYset_debug_ALREADY_DEFINED
+#else
+#define yyset_debug default_argsYYset_debug
+#endif
+
+#ifdef yyget_extra
+#define default_argsYYget_extra_ALREADY_DEFINED
+#else
+#define yyget_extra default_argsYYget_extra
+#endif
+
+#ifdef yyset_extra
+#define default_argsYYset_extra_ALREADY_DEFINED
+#else
+#define yyset_extra default_argsYYset_extra
+#endif
+
+#ifdef yyget_in
+#define default_argsYYget_in_ALREADY_DEFINED
+#else
+#define yyget_in default_argsYYget_in
+#endif
+
+#ifdef yyset_in
+#define default_argsYYset_in_ALREADY_DEFINED
+#else
+#define yyset_in default_argsYYset_in
+#endif
+
+#ifdef yyget_out
+#define default_argsYYget_out_ALREADY_DEFINED
+#else
+#define yyget_out default_argsYYget_out
+#endif
+
+#ifdef yyset_out
+#define default_argsYYset_out_ALREADY_DEFINED
+#else
+#define yyset_out default_argsYYset_out
+#endif
+
+#ifdef yyget_leng
+#define default_argsYYget_leng_ALREADY_DEFINED
+#else
+#define yyget_leng default_argsYYget_leng
+#endif
+
+#ifdef yyget_text
+#define default_argsYYget_text_ALREADY_DEFINED
+#else
+#define yyget_text default_argsYYget_text
+#endif
+
+#ifdef yyget_lineno
+#define default_argsYYget_lineno_ALREADY_DEFINED
+#else
+#define yyget_lineno default_argsYYget_lineno
+#endif
+
+#ifdef yyset_lineno
+#define default_argsYYset_lineno_ALREADY_DEFINED
+#else
+#define yyset_lineno default_argsYYset_lineno
+#endif
+
+#ifdef yywrap
+#define default_argsYYwrap_ALREADY_DEFINED
+#else
+#define yywrap default_argsYYwrap
+#endif
+
+#ifdef yyalloc
+#define default_argsYYalloc_ALREADY_DEFINED
+#else
+#define yyalloc default_argsYYalloc
+#endif
+
+#ifdef yyrealloc
+#define default_argsYYrealloc_ALREADY_DEFINED
+#else
+#define yyrealloc default_argsYYrealloc
+#endif
+
+#ifdef yyfree
+#define default_argsYYfree_ALREADY_DEFINED
+#else
+#define yyfree default_argsYYfree
+#endif
+
+#ifdef yytext
+#define default_argsYYtext_ALREADY_DEFINED
+#else
+#define yytext default_argsYYtext
+#endif
+
+#ifdef yyleng
+#define default_argsYYleng_ALREADY_DEFINED
+#else
+#define yyleng default_argsYYleng
+#endif
+
+#ifdef yyin
+#define default_argsYYin_ALREADY_DEFINED
+#else
+#define yyin default_argsYYin
+#endif
+
+#ifdef yyout
+#define default_argsYYout_ALREADY_DEFINED
+#else
+#define yyout default_argsYYout
+#endif
+
+#ifdef yy_flex_debug
+#define default_argsYY_flex_debug_ALREADY_DEFINED
+#else
+#define yy_flex_debug default_argsYY_flex_debug
+#endif
+
+#ifdef yylineno
+#define default_argsYYlineno_ALREADY_DEFINED
+#else
+#define yylineno default_argsYYlineno
 #endif
 
 /* First, we deal with  platform-specific or compiler-specific issues. */
@@ -117,60 +357,48 @@ typedef unsigned int flex_uint32_t;
 #define UINT32_MAX             (4294967295U)
 #endif
 
+#ifndef SIZE_MAX
+#define SIZE_MAX               (~(size_t)0)
+#endif
+
 #endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
-#ifdef __cplusplus
+/* begin standard C++ headers. */
 
-/* The "const" storage-class-modifier is valid. */
-#define YY_USE_CONST
-
-#else	/* ! __cplusplus */
-
-/* C99 requires __STDC__ to be defined as 1. */
-#if defined (__STDC__)
-
-#define YY_USE_CONST
-
-#endif	/* defined (__STDC__) */
-#endif	/* ! __cplusplus */
-
-#ifdef YY_USE_CONST
+/* TODO: this is always defined, so inline it */
 #define yyconst const
+
+#if defined(__GNUC__) && __GNUC__ >= 3
+#define yynoreturn __attribute__((__noreturn__))
 #else
-#define yyconst
+#define yynoreturn
 #endif
 
 /* Returned upon end-of-file. */
 #define YY_NULL 0
 
-/* Promotes a possibly negative, possibly signed char to an unsigned
- * integer for use as an array index.  If the signed char is negative,
- * we want to instead treat it as an 8-bit unsigned char, hence the
- * double cast.
+/* Promotes a possibly negative, possibly signed char to an
+ *   integer in range [0..255] for use as an array index.
  */
-#define YY_SC_TO_UI(c) ((unsigned int) (unsigned char) c)
+#define YY_SC_TO_UI(c) ((YY_CHAR) (c))
 
 /* Enter a start condition.  This macro really ought to take a parameter,
  * but we do it the disgusting crufty way forced on us by the ()-less
  * definition of BEGIN.
  */
 #define BEGIN (yy_start) = 1 + 2 *
-
 /* Translate the current start state into a value that can be later handed
  * to BEGIN to return to the state.  The YYSTATE alias is for lex
  * compatibility.
  */
 #define YY_START (((yy_start) - 1) / 2)
 #define YYSTATE YY_START
-
 /* Action number for EOF rule of a given start state. */
 #define YY_STATE_EOF(state) (YY_END_OF_BUFFER + state + 1)
-
 /* Special action meaning "start processing a new file". */
-#define YY_NEW_FILE default_argsYYrestart(default_argsYYin  )
-
+#define YY_NEW_FILE yyrestart( yyin  )
 #define YY_END_OF_BUFFER_CHAR 0
 
 /* Size of default input buffer. */
@@ -195,36 +423,36 @@ typedef unsigned int flex_uint32_t;
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
-extern int default_argsYYleng;
+#ifndef YY_TYPEDEF_YY_SIZE_T
+#define YY_TYPEDEF_YY_SIZE_T
+typedef size_t yy_size_t;
+#endif
 
-extern FILE *default_argsYYin, *default_argsYYout;
+extern int yyleng;
+
+extern FILE *yyin, *yyout;
 
 #define EOB_ACT_CONTINUE_SCAN 0
 #define EOB_ACT_END_OF_FILE 1
 #define EOB_ACT_LAST_MATCH 2
-
+    
     #define YY_LESS_LINENO(n)
+    #define YY_LINENO_REWIND_TO(ptr)
     
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
 	do \
 		{ \
-		/* Undo effects of setting up default_argsYYtext. */ \
+		/* Undo effects of setting up yytext. */ \
         int yyless_macro_arg = (n); \
         YY_LESS_LINENO(yyless_macro_arg);\
 		*yy_cp = (yy_hold_char); \
 		YY_RESTORE_YY_MORE_OFFSET \
 		(yy_c_buf_p) = yy_cp = yy_bp + yyless_macro_arg - YY_MORE_ADJ; \
-		YY_DO_BEFORE_ACTION; /* set up default_argsYYtext again */ \
+		YY_DO_BEFORE_ACTION; /* set up yytext again */ \
 		} \
 	while ( 0 )
-
 #define unput(c) yyunput( c, (yytext_ptr)  )
-
-#ifndef YY_TYPEDEF_YY_SIZE_T
-#define YY_TYPEDEF_YY_SIZE_T
-typedef size_t yy_size_t;
-#endif
 
 #ifndef YY_STRUCT_YY_BUFFER_STATE
 #define YY_STRUCT_YY_BUFFER_STATE
@@ -238,7 +466,7 @@ struct yy_buffer_state
 	/* Size of input buffer in bytes, not including room for EOB
 	 * characters.
 	 */
-	yy_size_t yy_buf_size;
+	int yy_buf_size;
 
 	/* Number of characters read into yy_ch_buf, not including EOB
 	 * characters.
@@ -266,7 +494,7 @@ struct yy_buffer_state
 
     int yy_bs_lineno; /**< The line count. */
     int yy_bs_column; /**< The column count. */
-    
+
 	/* Whether to try to fill the input buffer when we reach the
 	 * end of it.
 	 */
@@ -283,8 +511,8 @@ struct yy_buffer_state
 	 * possible backing-up.
 	 *
 	 * When we actually see the EOF, we change the status to "new"
-	 * (via default_argsYYrestart()), so that the user can continue scanning by
-	 * just pointing default_argsYYin at a new input file.
+	 * (via yyrestart()), so that the user can continue scanning by
+	 * just pointing yyin at a new input file.
 	 */
 #define YY_BUFFER_EOF_PENDING 2
 
@@ -294,117 +522,112 @@ struct yy_buffer_state
 /* Stack of input buffers. */
 static size_t yy_buffer_stack_top = 0; /**< index of top of stack. */
 static size_t yy_buffer_stack_max = 0; /**< capacity of stack. */
-static YY_BUFFER_STATE * yy_buffer_stack = 0; /**< Stack as an array. */
+static YY_BUFFER_STATE * yy_buffer_stack = nullptr; /**< Stack as an array. */
 
 /* We provide macros for accessing buffer states in case in the
  * future we want to put the buffer states in a more general
  * "scanner state".
  *
- * Returns the top of the stack, or NULL.
+ * Returns the top of the stack, or nullptr.
  */
 #define YY_CURRENT_BUFFER ( (yy_buffer_stack) \
                           ? (yy_buffer_stack)[(yy_buffer_stack_top)] \
-                          : NULL)
-
+                          : nullptr)
 /* Same as previous macro, but useful when we know that the buffer stack is not
- * NULL or when we need an lvalue. For internal use only.
+ * nullptr or when we need an lvalue. For internal use only.
  */
 #define YY_CURRENT_BUFFER_LVALUE (yy_buffer_stack)[(yy_buffer_stack_top)]
 
-/* yy_hold_char holds the character lost when default_argsYYtext is formed. */
+/* yy_hold_char holds the character lost when yytext is formed. */
 static char yy_hold_char;
 static int yy_n_chars;		/* number of characters read into yy_ch_buf */
-int default_argsYYleng;
+int yyleng;
 
 /* Points to current character in buffer. */
-static char *yy_c_buf_p = (char *) 0;
+static char *yy_c_buf_p = nullptr;
 static int yy_init = 0;		/* whether we need to initialize */
 static int yy_start = 0;	/* start state number */
 
-/* Flag which is used to allow default_argsYYwrap()'s to do buffer switches
- * instead of setting up a fresh default_argsYYin.  A bit of a hack ...
+/* Flag which is used to allow yywrap()'s to do buffer switches
+ * instead of setting up a fresh yyin.  A bit of a hack ...
  */
 static int yy_did_buffer_switch_on_eof;
 
-void default_argsYYrestart (FILE *input_file  );
-void default_argsYY_switch_to_buffer (YY_BUFFER_STATE new_buffer  );
-YY_BUFFER_STATE default_argsYY_create_buffer (FILE *file,int size  );
-void default_argsYY_delete_buffer (YY_BUFFER_STATE b  );
-void default_argsYY_flush_buffer (YY_BUFFER_STATE b  );
-void default_argsYYpush_buffer_state (YY_BUFFER_STATE new_buffer  );
-void default_argsYYpop_buffer_state (void );
+void yyrestart ( FILE *input_file  );
+void yy_switch_to_buffer ( YY_BUFFER_STATE new_buffer  );
+YY_BUFFER_STATE yy_create_buffer ( FILE *file, int size  );
+void yy_delete_buffer ( YY_BUFFER_STATE b  );
+void yy_flush_buffer ( YY_BUFFER_STATE b  );
+void yypush_buffer_state ( YY_BUFFER_STATE new_buffer  );
+void yypop_buffer_state ( void );
 
-static void default_argsYYensure_buffer_stack (void );
-static void default_argsYY_load_buffer_state (void );
-static void default_argsYY_init_buffer (YY_BUFFER_STATE b,FILE *file  );
+static void yyensure_buffer_stack ( void );
+static void yy_load_buffer_state ( void );
+static void yy_init_buffer ( YY_BUFFER_STATE b, FILE *file  );
+#define YY_FLUSH_BUFFER yy_flush_buffer( YY_CURRENT_BUFFER )
 
-#define YY_FLUSH_BUFFER default_argsYY_flush_buffer(YY_CURRENT_BUFFER )
+YY_BUFFER_STATE yy_scan_buffer ( char *base, yy_size_t size  );
+YY_BUFFER_STATE yy_scan_string ( const char *yy_str  );
+YY_BUFFER_STATE yy_scan_bytes ( const char *bytes, int len  );
 
-YY_BUFFER_STATE default_argsYY_scan_buffer (char *base,yy_size_t size  );
-YY_BUFFER_STATE default_argsYY_scan_string (yyconst char *yy_str  );
-YY_BUFFER_STATE default_argsYY_scan_bytes (yyconst char *bytes,int len  );
+void *yyalloc ( yy_size_t  );
+void *yyrealloc ( void *, yy_size_t  );
+void yyfree ( void *  );
 
-void *default_argsYYalloc (yy_size_t  );
-void *default_argsYYrealloc (void *,yy_size_t  );
-void default_argsYYfree (void *  );
-
-#define yy_new_buffer default_argsYY_create_buffer
-
+#define yy_new_buffer yy_create_buffer
 #define yy_set_interactive(is_interactive) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){ \
-        default_argsYYensure_buffer_stack (); \
+        yyensure_buffer_stack (); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-            default_argsYY_create_buffer(default_argsYYin,YY_BUF_SIZE ); \
+            yy_create_buffer( yyin, YY_BUF_SIZE ); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_is_interactive = is_interactive; \
 	}
-
 #define yy_set_bol(at_bol) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){\
-        default_argsYYensure_buffer_stack (); \
+        yyensure_buffer_stack (); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-            default_argsYY_create_buffer(default_argsYYin,YY_BUF_SIZE ); \
+            yy_create_buffer( yyin, YY_BUF_SIZE ); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_at_bol = at_bol; \
 	}
-
 #define YY_AT_BOL() (YY_CURRENT_BUFFER_LVALUE->yy_at_bol)
 
 /* Begin user sect3 */
 
-#define default_argsYYwrap(n) 1
+#define default_argsYYwrap() (/*CONSTCOND*/1)
 #define YY_SKIP_YYWRAP
+typedef flex_uint8_t YY_CHAR;
 
-typedef unsigned char YY_CHAR;
-
-FILE *default_argsYYin = (FILE *) 0, *default_argsYYout = (FILE *) 0;
+FILE *yyin = nullptr, *yyout = nullptr;
 
 typedef int yy_state_type;
 
-extern int default_argsYYlineno;
+extern int yylineno;
+int yylineno = 1;
 
-int default_argsYYlineno = 1;
+extern char *yytext;
+#ifdef yytext_ptr
+#undef yytext_ptr
+#endif
+#define yytext_ptr yytext
 
-extern char *default_argsYYtext;
-#define yytext_ptr default_argsYYtext
-
-static yy_state_type yy_get_previous_state (void );
-static yy_state_type yy_try_NUL_trans (yy_state_type current_state  );
-static int yy_get_next_buffer (void );
-static void yy_fatal_error (yyconst char msg[]  );
+static yy_state_type yy_get_previous_state ( void );
+static yy_state_type yy_try_NUL_trans ( yy_state_type current_state  );
+static int yy_get_next_buffer ( void );
+static void yynoreturn yy_fatal_error ( const char* msg  );
 
 /* Done after the current pattern has been matched and before the
- * corresponding action - sets up default_argsYYtext.
+ * corresponding action - sets up yytext.
  */
 #define YY_DO_BEFORE_ACTION \
 	(yytext_ptr) = yy_bp; \
-	default_argsYYleng = (size_t) (yy_cp - yy_bp); \
+	yyleng = (int) (yy_cp - yy_bp); \
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
-
 #define YY_NUM_RULES 66
 #define YY_END_OF_BUFFER 67
 /* This struct is not used in this scanner,
@@ -414,7 +637,7 @@ struct yy_trans_info
 	flex_int32_t yy_verify;
 	flex_int32_t yy_nxt;
 	};
-static yyconst flex_int16_t yy_acclist[362] =
+static const flex_int16_t yy_acclist[362] =
     {   0,
         2,    2,   67,   65,   66,   64,   66,   65,   66,    1,
        65,   66,   40,   65,   66,   32,   40,   65,   66,   40,
@@ -458,7 +681,7 @@ static yyconst flex_int16_t yy_acclist[362] =
        31
     } ;
 
-static yyconst flex_int16_t yy_accept[285] =
+static const flex_int16_t yy_accept[285] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    2,
@@ -493,7 +716,7 @@ static yyconst flex_int16_t yy_accept[285] =
       361,  362,  362,  362
     } ;
 
-static yyconst flex_int32_t yy_ec[256] =
+static const YY_CHAR yy_ec[256] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    2,    3,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -525,7 +748,7 @@ static yyconst flex_int32_t yy_ec[256] =
        23,   23,   23,   23,   23
     } ;
 
-static yyconst flex_int32_t yy_meta[48] =
+static const YY_CHAR yy_meta[48] =
     {   0,
         1,    2,    3,    1,    1,    4,    1,    1,    5,    6,
         7,    1,    1,    1,    8,    8,    8,    8,    9,    1,
@@ -534,7 +757,7 @@ static yyconst flex_int32_t yy_meta[48] =
         4,    4,    4,    4,    4,    1,    1
     } ;
 
-static yyconst flex_int16_t yy_base[339] =
+static const flex_int16_t yy_base[339] =
     {   0,
         0,    1,    2,    3,    5,   21,   18,   26,   49,    0,
       892,  887,   88,   91,   94,   99,   96,  101,  148,    0,
@@ -575,7 +798,7 @@ static yyconst flex_int16_t yy_base[339] =
       936,  945,  954,  963,  972,  981,  990,  999
     } ;
 
-static yyconst flex_int16_t yy_def[339] =
+static const flex_int16_t yy_def[339] =
     {   0,
       284,  284,  284,  284,  285,  285,  285,  285,  283,    9,
         9,    9,    9,    9,    9,    9,    9,    9,  283,   19,
@@ -616,7 +839,7 @@ static yyconst flex_int16_t yy_def[339] =
       283,  283,  283,  283,  283,  283,  283,  283
     } ;
 
-static yyconst flex_int16_t yy_nxt[1057] =
+static const flex_int16_t yy_nxt[1057] =
     {   0,
       283,  283,   37,   37,   37,   37,  283,   37,  101,   41,
        39,   39,  187,   38,   38,   38,   38,   42,   43,  102,
@@ -736,7 +959,7 @@ static yyconst flex_int16_t yy_nxt[1057] =
       283,  283,  283,  283,  283,  283
     } ;
 
-static yyconst flex_int16_t yy_chk[1057] =
+static const flex_int16_t yy_chk[1057] =
     {   0,
         0,    0,    1,    2,    3,    4,    0,    5,   29,    5,
         3,    4,  282,    1,    2,    3,    4,    5,    5,   29,
@@ -856,8 +1079,8 @@ static yyconst flex_int16_t yy_chk[1057] =
       283,  283,  283,  283,  283,  283
     } ;
 
-extern int default_argsYY_flex_debug;
-int default_argsYY_flex_debug = 0;
+extern int yy_flex_debug;
+int yy_flex_debug = 0;
 
 static yy_state_type *yy_state_buf=0, *yy_state_ptr=0;
 static char *yy_full_match;
@@ -869,7 +1092,7 @@ static int *yy_full_state;
 #define YY_TRAILING_HEAD_MASK 0x4000
 #define REJECT \
 { \
-*yy_cp = (yy_hold_char); /* undo effects of setting up default_argsYYtext */ \
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */ \
 yy_cp = (yy_full_match); /* restore poss. backed-over text */ \
 (yy_lp) = (yy_full_lp); /* restore orig. accepting pos. */ \
 (yy_state_ptr) = (yy_full_state); /* restore orig. state */ \
@@ -881,7 +1104,7 @@ goto find_rule; \
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
-char *default_argsYYtext;
+char *yytext;
 /*************************************************************************
  *
  * Copyright (c) 2014-2024 Barbara Geller & Ansel Sermersheim
@@ -889,18 +1112,19 @@ char *default_argsYYtext;
 
 *************************************************************************/
 
-#include <QRegularExpression>
-#include <QStringList>
-
-#include <stdio.h>
-#include <assert.h>
-#include <ctype.h>
+#include <default_args.h>
 
 #include <arguments.h>
-#include <default_args.h>
 #include <entry.h>
 #include <message.h>
 #include <util.h>
+
+#include <QRegularExpression>
+#include <QStringList>
+
+#include <assert.h>
+#include <ctype.h>
+#include <stdio.h>
 
 #define YY_NO_INPUT 1
 
@@ -1015,41 +1239,41 @@ static bool checkSpecialType(QString &name)
  */
 #include <unistd.h>
 #endif
-
+    
 #ifndef YY_EXTRA_TYPE
 #define YY_EXTRA_TYPE void *
 #endif
 
-static int yy_init_globals (void );
+static int yy_init_globals ( void );
 
 /* Accessor methods to globals.
    These are made visible to non-reentrant scanners for convenience. */
 
-int default_argsYYlex_destroy (void );
+int yylex_destroy ( void );
 
-int default_argsYYget_debug (void );
+int yyget_debug ( void );
 
-void default_argsYYset_debug (int debug_flag  );
+void yyset_debug ( int debug_flag  );
 
-YY_EXTRA_TYPE default_argsYYget_extra (void );
+YY_EXTRA_TYPE yyget_extra ( void );
 
-void default_argsYYset_extra (YY_EXTRA_TYPE user_defined  );
+void yyset_extra ( YY_EXTRA_TYPE user_defined  );
 
-FILE *default_argsYYget_in (void );
+FILE *yyget_in ( void );
 
-void default_argsYYset_in  (FILE * in_str  );
+void yyset_in  ( FILE * _in_str  );
 
-FILE *default_argsYYget_out (void );
+FILE *yyget_out ( void );
 
-void default_argsYYset_out  (FILE * out_str  );
+void yyset_out  ( FILE * _out_str  );
 
-int default_argsYYget_leng (void );
+			int yyget_leng ( void );
 
-char *default_argsYYget_text (void );
+char *yyget_text ( void );
 
-int default_argsYYget_lineno (void );
+int yyget_lineno ( void );
 
-void default_argsYYset_lineno (int line_number  );
+void yyset_lineno ( int _line_number  );
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -1057,28 +1281,31 @@ void default_argsYYset_lineno (int line_number  );
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int default_argsYYwrap (void );
+extern "C" int yywrap ( void );
 #else
-extern int default_argsYYwrap (void );
+extern int yywrap ( void );
 #endif
 #endif
 
-    static void yyunput (int c,char *buf_ptr  );
+#ifndef YY_NO_UNPUT
     
+    static void yyunput ( int c, char *buf_ptr  );
+    
+#endif
+
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char *,yyconst char *,int );
+static void yy_flex_strncpy ( char *, const char *, int );
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen (yyconst char * );
+static int yy_flex_strlen ( const char * );
 #endif
 
 #ifndef YY_NO_INPUT
-
 #ifdef __cplusplus
-static int yyinput (void );
+static int yyinput ( void );
 #else
-static int input (void );
+static int input ( void );
 #endif
 
 #endif
@@ -1098,7 +1325,7 @@ static int input (void );
 /* This used to be an fputs(), but since the string might contain NUL's,
  * we now use fwrite().
  */
-#define ECHO do { if (fwrite( default_argsYYtext, default_argsYYleng, 1, default_argsYYout )) {} } while (0)
+#define ECHO do { if (fwrite( yytext, (size_t) yyleng, 1, yyout )) {} } while (0)
 #endif
 
 /* Gets input and stuffs it into "buf".  number of characters read, or YY_NULL,
@@ -1109,20 +1336,20 @@ static int input (void );
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
 		{ \
 		int c = '*'; \
-		size_t n; \
+		int n; \
 		for ( n = 0; n < max_size && \
-			     (c = getc( default_argsYYin )) != EOF && c != '\n'; ++n ) \
+			     (c = getc( yyin )) != EOF && c != '\n'; ++n ) \
 			buf[n] = (char) c; \
 		if ( c == '\n' ) \
 			buf[n++] = (char) c; \
-		if ( c == EOF && ferror( default_argsYYin ) ) \
+		if ( c == EOF && ferror( yyin ) ) \
 			YY_FATAL_ERROR( "input in flex scanner failed" ); \
 		result = n; \
 		} \
 	else \
 		{ \
 		errno=0; \
-		while ( (result = fread(buf, 1, max_size, default_argsYYin))==0 && ferror(default_argsYYin)) \
+		while ( (result = (int) fread(buf, 1, (yy_size_t) max_size, yyin)) == 0 && ferror(yyin)) \
 			{ \
 			if( errno != EINTR) \
 				{ \
@@ -1130,7 +1357,7 @@ static int input (void );
 				break; \
 				} \
 			errno=0; \
-			clearerr(default_argsYYin); \
+			clearerr(yyin); \
 			} \
 		}\
 \
@@ -1163,12 +1390,12 @@ static int input (void );
 #ifndef YY_DECL
 #define YY_DECL_IS_OURS 1
 
-extern int default_argsYYlex (void);
+extern int yylex (void);
 
-#define YY_DECL int default_argsYYlex (void)
+#define YY_DECL int yylex (void)
 #endif /* !YY_DECL */
 
-/* Code executed at the beginning of each rule, after default_argsYYtext and default_argsYYleng
+/* Code executed at the beginning of each rule, after yytext and yyleng
  * have been set up.
  */
 #ifndef YY_USER_ACTION
@@ -1177,7 +1404,7 @@ extern int default_argsYYlex (void);
 
 /* Code executed at the end of each rule. */
 #ifndef YY_BREAK
-#define YY_BREAK break;
+#define YY_BREAK /*LINTED*/break;
 #endif
 
 #define YY_RULE_SETUP \
@@ -1201,33 +1428,35 @@ YY_DECL
 
         /* Create the reject buffer large enough to save one state per allowed character. */
         if ( ! (yy_state_buf) )
-            (yy_state_buf) = (yy_state_type *)default_argsYYalloc(YY_STATE_BUF_SIZE  );
+            (yy_state_buf) = (yy_state_type *)yyalloc(YY_STATE_BUF_SIZE  );
             if ( ! (yy_state_buf) )
-                YY_FATAL_ERROR( "out of dynamic memory in default_argsYYlex()" );
+                YY_FATAL_ERROR( "out of dynamic memory in yylex()" );
 
 		if ( ! (yy_start) )
 			(yy_start) = 1;	/* first start state */
 
-		if ( ! default_argsYYin )
-			default_argsYYin = stdin;
+		if ( ! yyin )
+			yyin = stdin;
 
-		if ( ! default_argsYYout )
-			default_argsYYout = stdout;
+		if ( ! yyout )
+			yyout = stdout;
 
 		if ( ! YY_CURRENT_BUFFER ) {
-			default_argsYYensure_buffer_stack ();
+			yyensure_buffer_stack ();
 			YY_CURRENT_BUFFER_LVALUE =
-				default_argsYY_create_buffer(default_argsYYin,YY_BUF_SIZE );
+				yy_create_buffer( yyin, YY_BUF_SIZE );
 		}
 
-		default_argsYY_load_buffer_state( );
+		yy_load_buffer_state(  );
 		}
 
-	while ( 1 )		/* loops until end-of-file is reached */
+	{
+
+	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
 		yy_cp = (yy_c_buf_p);
 
-		/* Support of default_argsYYtext. */
+		/* Support of yytext. */
 		*yy_cp = (yy_hold_char);
 
 		/* yy_bp points to the position in yy_ch_buf of the start of
@@ -1243,14 +1472,14 @@ YY_DECL
 yy_match:
 		do
 			{
-			YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)];
+			YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)] ;
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
 				if ( yy_current_state >= 284 )
-					yy_c = yy_meta[(unsigned int) yy_c];
+					yy_c = yy_meta[yy_c];
 				}
-			yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
+			yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 			*(yy_state_ptr)++ = yy_current_state;
 			++yy_cp;
 			}
@@ -1320,7 +1549,7 @@ case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (s_curArgTypeName.trimmed().isEmpty()) {
          // for M$-ID
@@ -1336,21 +1565,21 @@ YY_RULE_SETUP
 case 4:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       s_curArgDefValue += text;
    }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       s_curArgDefValue += text;
    }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       s_curArgDefValue += text;
    }
 	YY_BREAK
@@ -1358,7 +1587,7 @@ case 7:
 /* rule 7 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       s_curArgDefValue += text;
 
       int i = text.indexOf('"');
@@ -1371,7 +1600,7 @@ YY_RULE_SETUP
 case 8:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       s_curArgDefValue += text[0];
       BEGIN( CopyArgString );
    }
@@ -1381,7 +1610,7 @@ case 9:
 YY_RULE_SETUP
 {
       // function pointer as argument
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       s_curArgTypeName += text;
 
       // s_curArgTypeName = s_curArgTypeName.simplifyWhiteSpace();
@@ -1391,7 +1620,7 @@ YY_RULE_SETUP
 case 10:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       s_curArgName = text;
    }
 	YY_BREAK
@@ -1399,7 +1628,7 @@ case 11:
 YY_RULE_SETUP
 {
       // function pointer
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       s_curArgTypeName += text;
 
       s_readArgContext = ReadFuncArgType;
@@ -1409,13 +1638,13 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 case 12:
-*yy_cp = (yy_hold_char); /* undo effects of setting up default_argsYYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
-YY_DO_BEFORE_ACTION; /* set up default_argsYYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // pointer to fixed size array
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
 
       s_curArgTypeName += text;
       s_curArgTypeName += s_curArgName;
@@ -1441,14 +1670,14 @@ case 14:
 YY_RULE_SETUP
 {
       // handle operators
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       s_curArgTypeName += text;
    }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (YY_START == ReadFuncArgType) {
          s_curArgTypeName += text[0];
@@ -1485,7 +1714,7 @@ YY_RULE_SETUP
 case 16:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       s_argRoundCount++;
       *s_copyArgValue += text[0];
    }
@@ -1493,7 +1722,7 @@ YY_RULE_SETUP
 case 17:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       *s_copyArgValue += text;
 
       if (s_argRoundCount > 0) {
@@ -1510,12 +1739,12 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 case 18:
-*yy_cp = (yy_hold_char); /* undo effects of setting up default_argsYYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
-YY_DO_BEFORE_ACTION; /* set up default_argsYYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       *s_copyArgValue += text[0];
 
       if (s_argRoundCount > 0) {
@@ -1530,7 +1759,7 @@ YY_RULE_SETUP
 case 19:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       *s_copyArgValue += text[0];
       ++s_argSquareCount;
    }
@@ -1538,7 +1767,7 @@ YY_RULE_SETUP
 case 20:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       *s_copyArgValue += text;
 
       if (s_argSquareCount > 0) {
@@ -1549,12 +1778,12 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 case 21:
-*yy_cp = (yy_hold_char); /* undo effects of setting up default_argsYYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
-YY_DO_BEFORE_ACTION; /* set up default_argsYYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       *s_copyArgValue += text[0];
 
       if (s_argSquareCount > 0)  {
@@ -1567,7 +1796,7 @@ YY_RULE_SETUP
 case 22:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (s_argRoundCount > 0) {
          *s_copyArgValue += text;
@@ -1580,7 +1809,7 @@ YY_RULE_SETUP
 case 23:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (s_argRoundCount > 0) {
          *s_copyArgValue += text;
@@ -1593,7 +1822,7 @@ YY_RULE_SETUP
 case 24:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
 
       // do not count '<' inside '(' for code like: "< typename A = (i < 6) >"
       if (s_argRoundCount == 0) {
@@ -1606,7 +1835,7 @@ YY_RULE_SETUP
 case 25:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       *s_copyArgValue += text[0];
 
       if (s_argSharpCount == 0 && s_argRoundCount > 0) {
@@ -1624,7 +1853,7 @@ YY_RULE_SETUP
 case 26:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
 
       *s_copyArgValue += text[0];
       ++s_argRoundCount;
@@ -1633,7 +1862,7 @@ YY_RULE_SETUP
 case 27:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
 
       *s_copyArgValue += text[0];
       --s_argRoundCount;
@@ -1642,7 +1871,7 @@ YY_RULE_SETUP
 case 28:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
 
       *s_copyArgValue += text[0];
       ++s_argCurlyCount;
@@ -1651,7 +1880,7 @@ YY_RULE_SETUP
 case 29:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       *s_copyArgValue += text[0];
 
       if (s_argCurlyCount > 0) {
@@ -1665,7 +1894,7 @@ YY_RULE_SETUP
 case 30:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       s_curArgDefValue += text;
    }
 	YY_BREAK
@@ -1673,7 +1902,7 @@ case 31:
 /* rule 31 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       s_curArgDefValue += text;
 
       QString delimiter = text.mid(1);
@@ -1687,7 +1916,7 @@ YY_RULE_SETUP
 case 32:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       s_curArgDefValue += text[0];
       BEGIN( ReadFuncArgDef );
    }
@@ -1702,7 +1931,7 @@ case 34:
 YY_RULE_SETUP
 {
       // */ (editor syntax fix)
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
 
       s_lastDocContext = YY_START;
       s_lastDocChar    = text[0];
@@ -1718,7 +1947,7 @@ YY_RULE_SETUP
 case 35:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (text[0] == ')' && s_curArgTypeName.trimmed().isEmpty()) {
          s_curArgTypeName += text[0];
@@ -1863,7 +2092,7 @@ YY_RULE_SETUP
 case 37:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (YY_START == ReadFuncArgType && s_curArgArray == "[]") {
          // Java style array
@@ -1878,49 +2107,49 @@ YY_RULE_SETUP
 case 38:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       s_curArgTypeName += text[0];
    }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       s_curArgDefValue += text;
    }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       s_curArgDefValue += text[0];
    }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       *s_copyArgValue += text;
    }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       *s_copyArgValue += text[0];
    }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
 {
-      unput(*default_argsYYtext);
+      unput(*yytext);
       BEGIN(s_lastExtendsContext);
    }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       s_curTypeConstraint += text;
    }
 	YY_BREAK
@@ -1976,19 +2205,19 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 case 53:
-*yy_cp = (yy_hold_char); /* undo effects of setting up default_argsYYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
-YY_DO_BEFORE_ACTION; /* set up default_argsYYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
-      unput(*default_argsYYtext);
+      unput(*yytext);
       BEGIN(FuncQual);
    }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       s_argList.trailingReturnType += text;
    }
 	YY_BREAK
@@ -1996,7 +2225,7 @@ case 55:
 /* rule 55 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       s_argList.trailingReturnType += text;
    }
 	YY_BREAK
@@ -2006,21 +2235,21 @@ YY_RULE_SETUP
 {
       // for functions returning a pointer to an array,
       // i.e. ")[]" in "int (*f(int))[4]" with argsString="(int))[4]"
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       s_extraTypeChars = text;
    }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       s_curArgDocs += text;
    }
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       s_curArgDocs += text;
    }
 	YY_BREAK
@@ -2047,14 +2276,14 @@ case 61:
 /* rule 61 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       s_curArgDocs += text[0];
    }
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(default_argsYYtext);
+      QString text = QString::fromUtf8(yytext);
       s_curArgDocs += text[0];
    }
 	YY_BREAK
@@ -2065,7 +2294,7 @@ YY_RULE_SETUP
    s_lastDocContext = YY_START;
    s_lastDocChar    = 0;
 
-   if (default_argsYYtext[1] == '/')  {
+   if (yytext[1] == '/')  {
       BEGIN( ReadDocLine );
    } else {
       BEGIN( ReadDocBlock );
@@ -2117,15 +2346,15 @@ ECHO;
 			{
 			/* We're scanning a new file or input source.  It's
 			 * possible that this happened because the user
-			 * just pointed default_argsYYin at a new source and called
-			 * default_argsYYlex().  If so, then we have to assure
+			 * just pointed yyin at a new source and called
+			 * yylex().  If so, then we have to assure
 			 * consistency between YY_CURRENT_BUFFER and our
 			 * globals.  Here is the right place to do so, because
 			 * this is the first action (other than possibly a
 			 * back-up) that will match for the new input source.
 			 */
 			(yy_n_chars) = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
-			YY_CURRENT_BUFFER_LVALUE->yy_input_file = default_argsYYin;
+			YY_CURRENT_BUFFER_LVALUE->yy_input_file = yyin;
 			YY_CURRENT_BUFFER_LVALUE->yy_buffer_status = YY_BUFFER_NORMAL;
 			}
 
@@ -2178,11 +2407,11 @@ ECHO;
 				{
 				(yy_did_buffer_switch_on_eof) = 0;
 
-				if ( default_argsYYwrap( ) )
+				if ( yywrap(  ) )
 					{
 					/* Note: because we've taken care in
 					 * yy_get_next_buffer() to have set up
-					 * default_argsYYtext, we can now set up
+					 * yytext, we can now set up
 					 * yy_c_buf_p so that if some total
 					 * hoser (like flex itself) wants to
 					 * call the scanner after we return the
@@ -2231,7 +2460,8 @@ ECHO;
 			"fatal flex scanner internal error--no action found" );
 	} /* end of action switch */
 		} /* end of scanning one token */
-} /* end of default_argsYYlex */
+	} /* end of user's declarations */
+} /* end of yylex */
 
 /* yy_get_next_buffer - try to read in a new buffer
  *
@@ -2273,7 +2503,7 @@ static int yy_get_next_buffer (void)
 	/* Try to read more data. */
 
 	/* First move last chars to start of buffer. */
-	number_to_move = (int) ((yy_c_buf_p) - (yytext_ptr)) - 1;
+	number_to_move = (int) ((yy_c_buf_p) - (yytext_ptr) - 1);
 
 	for ( i = 0; i < number_to_move; ++i )
 		*(dest++) = *(source++);
@@ -2302,7 +2532,7 @@ static int yy_get_next_buffer (void)
 
 		/* Read in more data. */
 		YY_INPUT( (&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
-			(yy_n_chars), (size_t) num_to_read );
+			(yy_n_chars), num_to_read );
 
 		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
 		}
@@ -2312,7 +2542,7 @@ static int yy_get_next_buffer (void)
 		if ( number_to_move == YY_MORE_ADJ )
 			{
 			ret_val = EOB_ACT_END_OF_FILE;
-			default_argsYYrestart(default_argsYYin  );
+			yyrestart( yyin  );
 			}
 
 		else
@@ -2326,12 +2556,15 @@ static int yy_get_next_buffer (void)
 	else
 		ret_val = EOB_ACT_CONTINUE_SCAN;
 
-	if ((yy_size_t) ((yy_n_chars) + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
+	if (((yy_n_chars) + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
 		/* Extend the array by 50%, plus the number we really need. */
-		yy_size_t new_size = (yy_n_chars) + number_to_move + ((yy_n_chars) >> 1);
-		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) default_argsYYrealloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size  );
+		int new_size = (yy_n_chars) + number_to_move + ((yy_n_chars) >> 1);
+		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) yyrealloc(
+			(void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf, (yy_size_t) new_size  );
 		if ( ! YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
 			YY_FATAL_ERROR( "out of dynamic memory in yy_get_next_buffer()" );
+		/* "- 2" to take care of EOB's */
+		YY_CURRENT_BUFFER_LVALUE->yy_buf_size = (int) (new_size - 2);
 	}
 
 	(yy_n_chars) += number_to_move;
@@ -2362,9 +2595,9 @@ static int yy_get_next_buffer (void)
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
 			if ( yy_current_state >= 284 )
-				yy_c = yy_meta[(unsigned int) yy_c];
+				yy_c = yy_meta[yy_c];
 			}
-		yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
+		yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 		*(yy_state_ptr)++ = yy_current_state;
 		}
 
@@ -2385,15 +2618,17 @@ static int yy_get_next_buffer (void)
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
 		if ( yy_current_state >= 284 )
-			yy_c = yy_meta[(unsigned int) yy_c];
+			yy_c = yy_meta[yy_c];
 		}
-	yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
+	yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 	yy_is_jam = (yy_current_state == 283);
 	if ( ! yy_is_jam )
 		*(yy_state_ptr)++ = yy_current_state;
 
-	return yy_is_jam ? 0 : yy_current_state;
+		return yy_is_jam ? 0 : yy_current_state;
 }
+
+#ifndef YY_NO_UNPUT
 
     static void yyunput (int c, char * yy_bp )
 {
@@ -2401,7 +2636,7 @@ static int yy_get_next_buffer (void)
     
     yy_cp = (yy_c_buf_p);
 
-	/* undo effects of setting up default_argsYYtext */
+	/* undo effects of setting up yytext */
 	*yy_cp = (yy_hold_char);
 
 	if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
@@ -2419,7 +2654,7 @@ static int yy_get_next_buffer (void)
 		yy_cp += (int) (dest - source);
 		yy_bp += (int) (dest - source);
 		YY_CURRENT_BUFFER_LVALUE->yy_n_chars =
-			(yy_n_chars) = YY_CURRENT_BUFFER_LVALUE->yy_buf_size;
+			(yy_n_chars) = (int) YY_CURRENT_BUFFER_LVALUE->yy_buf_size;
 
 		if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
 			YY_FATAL_ERROR( "flex scanner push-back overflow" );
@@ -2431,6 +2666,8 @@ static int yy_get_next_buffer (void)
 	(yy_hold_char) = *yy_cp;
 	(yy_c_buf_p) = yy_cp;
 }
+
+#endif
 
 #ifndef YY_NO_INPUT
 #ifdef __cplusplus
@@ -2456,7 +2693,7 @@ static int yy_get_next_buffer (void)
 
 		else
 			{ /* need more input */
-			int offset = (yy_c_buf_p) - (yytext_ptr);
+			int offset = (int) ((yy_c_buf_p) - (yytext_ptr));
 			++(yy_c_buf_p);
 
 			switch ( yy_get_next_buffer(  ) )
@@ -2473,14 +2710,14 @@ static int yy_get_next_buffer (void)
 					 */
 
 					/* Reset buffer status. */
-					default_argsYYrestart(default_argsYYin );
+					yyrestart( yyin );
 
 					/*FALLTHROUGH*/
 
 				case EOB_ACT_END_OF_FILE:
 					{
-					if ( default_argsYYwrap( ) )
-						return EOF;
+					if ( yywrap(  ) )
+						return 0;
 
 					if ( ! (yy_did_buffer_switch_on_eof) )
 						YY_NEW_FILE;
@@ -2499,7 +2736,7 @@ static int yy_get_next_buffer (void)
 		}
 
 	c = *(unsigned char *) (yy_c_buf_p);	/* cast for 8-bit char's */
-	*(yy_c_buf_p) = '\0';	/* preserve default_argsYYtext */
+	*(yy_c_buf_p) = '\0';	/* preserve yytext */
 	(yy_hold_char) = *++(yy_c_buf_p);
 
 	return c;
@@ -2511,32 +2748,32 @@ static int yy_get_next_buffer (void)
  * 
  * @note This function does not reset the start condition to @c INITIAL .
  */
-    void default_argsYYrestart  (FILE * input_file )
+    void yyrestart  (FILE * input_file )
 {
     
 	if ( ! YY_CURRENT_BUFFER ){
-        default_argsYYensure_buffer_stack ();
+        yyensure_buffer_stack ();
 		YY_CURRENT_BUFFER_LVALUE =
-            default_argsYY_create_buffer(default_argsYYin,YY_BUF_SIZE );
+            yy_create_buffer( yyin, YY_BUF_SIZE );
 	}
 
-	default_argsYY_init_buffer(YY_CURRENT_BUFFER,input_file );
-	default_argsYY_load_buffer_state( );
+	yy_init_buffer( YY_CURRENT_BUFFER, input_file );
+	yy_load_buffer_state(  );
 }
 
 /** Switch to a different input buffer.
  * @param new_buffer The new input buffer.
  * 
  */
-    void default_argsYY_switch_to_buffer  (YY_BUFFER_STATE  new_buffer )
+    void yy_switch_to_buffer  (YY_BUFFER_STATE  new_buffer )
 {
     
 	/* TODO. We should be able to replace this entire function body
 	 * with
-	 *		default_argsYYpop_buffer_state();
-	 *		default_argsYYpush_buffer_state(new_buffer);
+	 *		yypop_buffer_state();
+	 *		yypush_buffer_state(new_buffer);
      */
-	default_argsYYensure_buffer_stack ();
+	yyensure_buffer_stack ();
 	if ( YY_CURRENT_BUFFER == new_buffer )
 		return;
 
@@ -2549,21 +2786,21 @@ static int yy_get_next_buffer (void)
 		}
 
 	YY_CURRENT_BUFFER_LVALUE = new_buffer;
-	default_argsYY_load_buffer_state( );
+	yy_load_buffer_state(  );
 
 	/* We don't actually know whether we did this switch during
-	 * EOF (default_argsYYwrap()) processing, but the only time this flag
-	 * is looked at is after default_argsYYwrap() is called, so it's safe
+	 * EOF (yywrap()) processing, but the only time this flag
+	 * is looked at is after yywrap() is called, so it's safe
 	 * to go ahead and always set it.
 	 */
 	(yy_did_buffer_switch_on_eof) = 1;
 }
 
-static void default_argsYY_load_buffer_state  (void)
+static void yy_load_buffer_state  (void)
 {
     	(yy_n_chars) = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
 	(yytext_ptr) = (yy_c_buf_p) = YY_CURRENT_BUFFER_LVALUE->yy_buf_pos;
-	default_argsYYin = YY_CURRENT_BUFFER_LVALUE->yy_input_file;
+	yyin = YY_CURRENT_BUFFER_LVALUE->yy_input_file;
 	(yy_hold_char) = *(yy_c_buf_p);
 }
 
@@ -2573,35 +2810,35 @@ static void default_argsYY_load_buffer_state  (void)
  * 
  * @return the allocated buffer state.
  */
-    YY_BUFFER_STATE default_argsYY_create_buffer  (FILE * file, int  size )
+    YY_BUFFER_STATE yy_create_buffer  (FILE * file, int  size )
 {
 	YY_BUFFER_STATE b;
     
-	b = (YY_BUFFER_STATE) default_argsYYalloc(sizeof( struct yy_buffer_state )  );
+	b = (YY_BUFFER_STATE) yyalloc( sizeof( struct yy_buffer_state )  );
 	if ( ! b )
-		YY_FATAL_ERROR( "out of dynamic memory in default_argsYY_create_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
 
 	b->yy_buf_size = size;
 
 	/* yy_ch_buf has to be 2 characters longer than the size given because
 	 * we need to put in 2 end-of-buffer characters.
 	 */
-	b->yy_ch_buf = (char *) default_argsYYalloc(b->yy_buf_size + 2  );
+	b->yy_ch_buf = (char *) yyalloc( (yy_size_t) (b->yy_buf_size + 2)  );
 	if ( ! b->yy_ch_buf )
-		YY_FATAL_ERROR( "out of dynamic memory in default_argsYY_create_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
 
 	b->yy_is_our_buffer = 1;
 
-	default_argsYY_init_buffer(b,file );
+	yy_init_buffer( b, file );
 
 	return b;
 }
 
 /** Destroy the buffer.
- * @param b a buffer created with default_argsYY_create_buffer()
+ * @param b a buffer created with yy_create_buffer()
  * 
  */
-    void default_argsYY_delete_buffer (YY_BUFFER_STATE  b )
+    void yy_delete_buffer (YY_BUFFER_STATE  b )
 {
     
 	if ( ! b )
@@ -2611,27 +2848,27 @@ static void default_argsYY_load_buffer_state  (void)
 		YY_CURRENT_BUFFER_LVALUE = (YY_BUFFER_STATE) 0;
 
 	if ( b->yy_is_our_buffer )
-		default_argsYYfree((void *) b->yy_ch_buf  );
+		yyfree( (void *) b->yy_ch_buf  );
 
-	default_argsYYfree((void *) b  );
+	yyfree( (void *) b  );
 }
 
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
- * such as during a default_argsYYrestart() or at EOF.
+ * such as during a yyrestart() or at EOF.
  */
-    static void default_argsYY_init_buffer  (YY_BUFFER_STATE  b, FILE * file )
+    static void yy_init_buffer  (YY_BUFFER_STATE  b, FILE * file )
 
 {
 	int oerrno = errno;
     
-	default_argsYY_flush_buffer(b );
+	yy_flush_buffer( b );
 
 	b->yy_input_file = file;
 	b->yy_fill_buffer = 1;
 
-    /* If b is the current buffer, then default_argsYY_init_buffer was _probably_
-     * called from default_argsYYrestart() or through yy_get_next_buffer.
+    /* If b is the current buffer, then yy_init_buffer was _probably_
+     * called from yyrestart() or through yy_get_next_buffer.
      * In that case, we don't want to reset the lineno or column.
      */
     if (b != YY_CURRENT_BUFFER){
@@ -2648,7 +2885,7 @@ static void default_argsYY_load_buffer_state  (void)
  * @param b the buffer state to be flushed, usually @c YY_CURRENT_BUFFER.
  * 
  */
-    void default_argsYY_flush_buffer (YY_BUFFER_STATE  b )
+    void yy_flush_buffer (YY_BUFFER_STATE  b )
 {
     	if ( ! b )
 		return;
@@ -2668,7 +2905,7 @@ static void default_argsYY_load_buffer_state  (void)
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
 	if ( b == YY_CURRENT_BUFFER )
-		default_argsYY_load_buffer_state( );
+		yy_load_buffer_state(  );
 }
 
 /** Pushes the new state onto the stack. The new state becomes
@@ -2677,14 +2914,14 @@ static void default_argsYY_load_buffer_state  (void)
  *  @param new_buffer The new state.
  *  
  */
-void default_argsYYpush_buffer_state (YY_BUFFER_STATE new_buffer )
+void yypush_buffer_state (YY_BUFFER_STATE new_buffer )
 {
-    	if (new_buffer == NULL)
+    	if (new_buffer == nullptr)
 		return;
 
-	default_argsYYensure_buffer_stack();
+	yyensure_buffer_stack();
 
-	/* This block is copied from default_argsYY_switch_to_buffer. */
+	/* This block is copied from yy_switch_to_buffer. */
 	if ( YY_CURRENT_BUFFER )
 		{
 		/* Flush out information for old buffer. */
@@ -2698,8 +2935,8 @@ void default_argsYYpush_buffer_state (YY_BUFFER_STATE new_buffer )
 		(yy_buffer_stack_top)++;
 	YY_CURRENT_BUFFER_LVALUE = new_buffer;
 
-	/* copied from default_argsYY_switch_to_buffer. */
-	default_argsYY_load_buffer_state( );
+	/* copied from yy_switch_to_buffer. */
+	yy_load_buffer_state(  );
 	(yy_did_buffer_switch_on_eof) = 1;
 }
 
@@ -2707,18 +2944,18 @@ void default_argsYYpush_buffer_state (YY_BUFFER_STATE new_buffer )
  *  The next element becomes the new top.
  *  
  */
-void default_argsYYpop_buffer_state (void)
+void yypop_buffer_state (void)
 {
     	if (!YY_CURRENT_BUFFER)
 		return;
 
-	default_argsYY_delete_buffer(YY_CURRENT_BUFFER );
-	YY_CURRENT_BUFFER_LVALUE = NULL;
+	yy_delete_buffer(YY_CURRENT_BUFFER );
+	YY_CURRENT_BUFFER_LVALUE = nullptr;
 	if ((yy_buffer_stack_top) > 0)
 		--(yy_buffer_stack_top);
 
 	if (YY_CURRENT_BUFFER) {
-		default_argsYY_load_buffer_state( );
+		yy_load_buffer_state(  );
 		(yy_did_buffer_switch_on_eof) = 1;
 	}
 }
@@ -2726,9 +2963,9 @@ void default_argsYYpop_buffer_state (void)
 /* Allocates the stack if it does not exist.
  *  Guarantees space for at least one push.
  */
-static void default_argsYYensure_buffer_stack (void)
+static void yyensure_buffer_stack (void)
 {
-	int num_to_alloc;
+	yy_size_t num_to_alloc;
     
 	if (!(yy_buffer_stack)) {
 
@@ -2736,15 +2973,15 @@ static void default_argsYYensure_buffer_stack (void)
 		 * scanner will even need a stack. We use 2 instead of 1 to avoid an
 		 * immediate realloc on the next call.
          */
-		num_to_alloc = 1;
-		(yy_buffer_stack) = (struct yy_buffer_state**)default_argsYYalloc
+      num_to_alloc = 1; /* After all that talk, this was set to 1 anyways... */
+		(yy_buffer_stack) = (struct yy_buffer_state**)yyalloc
 								(num_to_alloc * sizeof(struct yy_buffer_state*)
 								);
 		if ( ! (yy_buffer_stack) )
-			YY_FATAL_ERROR( "out of dynamic memory in default_argsYYensure_buffer_stack()" );
-								  
+			YY_FATAL_ERROR( "out of dynamic memory in yyensure_buffer_stack()" );
+
 		memset((yy_buffer_stack), 0, num_to_alloc * sizeof(struct yy_buffer_state*));
-				
+
 		(yy_buffer_stack_max) = num_to_alloc;
 		(yy_buffer_stack_top) = 0;
 		return;
@@ -2753,15 +2990,15 @@ static void default_argsYYensure_buffer_stack (void)
 	if ((yy_buffer_stack_top) >= ((yy_buffer_stack_max)) - 1){
 
 		/* Increase the buffer to prepare for a possible push. */
-		int grow_size = 8 /* arbitrary grow size */;
+		yy_size_t grow_size = 8 /* arbitrary grow size */;
 
 		num_to_alloc = (yy_buffer_stack_max) + grow_size;
-		(yy_buffer_stack) = (struct yy_buffer_state**)default_argsYYrealloc
+		(yy_buffer_stack) = (struct yy_buffer_state**)yyrealloc
 								((yy_buffer_stack),
 								num_to_alloc * sizeof(struct yy_buffer_state*)
 								);
 		if ( ! (yy_buffer_stack) )
-			YY_FATAL_ERROR( "out of dynamic memory in default_argsYYensure_buffer_stack()" );
+			YY_FATAL_ERROR( "out of dynamic memory in yyensure_buffer_stack()" );
 
 		/* zero only the new slots.*/
 		memset((yy_buffer_stack) + (yy_buffer_stack_max), 0, grow_size * sizeof(struct yy_buffer_state*));
@@ -2773,9 +3010,9 @@ static void default_argsYYensure_buffer_stack (void)
  * @param base the character buffer
  * @param size the size in bytes of the character buffer
  * 
- * @return the newly allocated buffer state object. 
+ * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE default_argsYY_scan_buffer  (char * base, yy_size_t  size )
+YY_BUFFER_STATE yy_scan_buffer  (char * base, yy_size_t  size )
 {
 	YY_BUFFER_STATE b;
     
@@ -2783,49 +3020,49 @@ YY_BUFFER_STATE default_argsYY_scan_buffer  (char * base, yy_size_t  size )
 	     base[size-2] != YY_END_OF_BUFFER_CHAR ||
 	     base[size-1] != YY_END_OF_BUFFER_CHAR )
 		/* They forgot to leave room for the EOB's. */
-		return 0;
+		return nullptr;
 
-	b = (YY_BUFFER_STATE) default_argsYYalloc(sizeof( struct yy_buffer_state )  );
+	b = (YY_BUFFER_STATE) yyalloc( sizeof( struct yy_buffer_state )  );
 	if ( ! b )
-		YY_FATAL_ERROR( "out of dynamic memory in default_argsYY_scan_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_scan_buffer()" );
 
-	b->yy_buf_size = size - 2;	/* "- 2" to take care of EOB's */
+	b->yy_buf_size = (int) (size - 2);	/* "- 2" to take care of EOB's */
 	b->yy_buf_pos = b->yy_ch_buf = base;
 	b->yy_is_our_buffer = 0;
-	b->yy_input_file = 0;
+	b->yy_input_file = nullptr;
 	b->yy_n_chars = b->yy_buf_size;
 	b->yy_is_interactive = 0;
 	b->yy_at_bol = 1;
 	b->yy_fill_buffer = 0;
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
-	default_argsYY_switch_to_buffer(b  );
+	yy_switch_to_buffer( b  );
 
 	return b;
 }
 
-/** Setup the input buffer state to scan a string. The next call to default_argsYYlex() will
+/** Setup the input buffer state to scan a string. The next call to yylex() will
  * scan from a @e copy of @a str.
  * @param yystr a NUL-terminated string to scan
  * 
  * @return the newly allocated buffer state object.
  * @note If you want to scan bytes that may contain NUL values, then use
- *       default_argsYY_scan_bytes() instead.
+ *       yy_scan_bytes() instead.
  */
-YY_BUFFER_STATE default_argsYY_scan_string (yyconst char * yystr )
+YY_BUFFER_STATE yy_scan_string (const char * yystr )
 {
     
-	return default_argsYY_scan_bytes(yystr,strlen(yystr) );
+	return yy_scan_bytes( yystr, (int) strlen(yystr) );
 }
 
-/** Setup the input buffer state to scan the given bytes. The next call to default_argsYYlex() will
+/** Setup the input buffer state to scan the given bytes. The next call to yylex() will
  * scan from a @e copy of @a bytes.
  * @param yybytes the byte buffer to scan
  * @param _yybytes_len the number of bytes in the buffer pointed to by @a bytes.
  * 
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE default_argsYY_scan_bytes  (yyconst char * yybytes, int  _yybytes_len )
+YY_BUFFER_STATE yy_scan_bytes  (const char * yybytes, int  _yybytes_len )
 {
 	YY_BUFFER_STATE b;
 	char *buf;
@@ -2833,19 +3070,19 @@ YY_BUFFER_STATE default_argsYY_scan_bytes  (yyconst char * yybytes, int  _yybyte
 	int i;
     
 	/* Get memory for full buffer, including space for trailing EOB's. */
-	n = _yybytes_len + 2;
-	buf = (char *) default_argsYYalloc(n  );
+	n = (yy_size_t) (_yybytes_len + 2);
+	buf = (char *) yyalloc( n  );
 	if ( ! buf )
-		YY_FATAL_ERROR( "out of dynamic memory in default_argsYY_scan_bytes()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_scan_bytes()" );
 
 	for ( i = 0; i < _yybytes_len; ++i )
 		buf[i] = yybytes[i];
 
 	buf[_yybytes_len] = buf[_yybytes_len+1] = YY_END_OF_BUFFER_CHAR;
 
-	b = default_argsYY_scan_buffer(buf,n );
+	b = yy_scan_buffer( buf, n );
 	if ( ! b )
-		YY_FATAL_ERROR( "bad buffer in default_argsYY_scan_bytes()" );
+		YY_FATAL_ERROR( "bad buffer in yy_scan_bytes()" );
 
 	/* It's okay to grow etc. this buffer, and we should throw it
 	 * away when we're done.
@@ -2859,9 +3096,9 @@ YY_BUFFER_STATE default_argsYY_scan_bytes  (yyconst char * yybytes, int  _yybyte
 #define YY_EXIT_FAILURE 2
 #endif
 
-static void yy_fatal_error (yyconst char* msg )
+static void yynoreturn yy_fatal_error (const char* msg )
 {
-    	(void) fprintf( stderr, "%s\n", msg );
+			fprintf( stderr, "%s\n", msg );
 	exit( YY_EXIT_FAILURE );
 }
 
@@ -2871,14 +3108,14 @@ static void yy_fatal_error (yyconst char* msg )
 #define yyless(n) \
 	do \
 		{ \
-		/* Undo effects of setting up default_argsYYtext. */ \
+		/* Undo effects of setting up yytext. */ \
         int yyless_macro_arg = (n); \
         YY_LESS_LINENO(yyless_macro_arg);\
-		default_argsYYtext[default_argsYYleng] = (yy_hold_char); \
-		(yy_c_buf_p) = default_argsYYtext + yyless_macro_arg; \
+		yytext[yyleng] = (yy_hold_char); \
+		(yy_c_buf_p) = yytext + yyless_macro_arg; \
 		(yy_hold_char) = *(yy_c_buf_p); \
 		*(yy_c_buf_p) = '\0'; \
-		default_argsYYleng = yyless_macro_arg; \
+		yyleng = yyless_macro_arg; \
 		} \
 	while ( 0 )
 
@@ -2887,91 +3124,91 @@ static void yy_fatal_error (yyconst char* msg )
 /** Get the current line number.
  * 
  */
-int default_argsYYget_lineno  (void)
+int yyget_lineno  (void)
 {
-        
-    return default_argsYYlineno;
+    
+    return yylineno;
 }
 
 /** Get the input stream.
  * 
  */
-FILE *default_argsYYget_in  (void)
+FILE *yyget_in  (void)
 {
-        return default_argsYYin;
+        return yyin;
 }
 
 /** Get the output stream.
  * 
  */
-FILE *default_argsYYget_out  (void)
+FILE *yyget_out  (void)
 {
-        return default_argsYYout;
+        return yyout;
 }
 
 /** Get the length of the current token.
  * 
  */
-int default_argsYYget_leng  (void)
+int yyget_leng  (void)
 {
-        return default_argsYYleng;
+        return yyleng;
 }
 
 /** Get the current token.
  * 
  */
 
-char *default_argsYYget_text  (void)
+char *yyget_text  (void)
 {
-        return default_argsYYtext;
+        return yytext;
 }
 
 /** Set the current line number.
- * @param line_number
+ * @param _line_number line number
  * 
  */
-void default_argsYYset_lineno (int  line_number )
+void yyset_lineno (int  _line_number )
 {
     
-    default_argsYYlineno = line_number;
+    yylineno = _line_number;
 }
 
 /** Set the input stream. This does not discard the current
  * input buffer.
- * @param in_str A readable stream.
+ * @param _in_str A readable stream.
  * 
- * @see default_argsYY_switch_to_buffer
+ * @see yy_switch_to_buffer
  */
-void default_argsYYset_in (FILE *  in_str )
+void yyset_in (FILE *  _in_str )
 {
-        default_argsYYin = in_str ;
+        yyin = _in_str ;
 }
 
-void default_argsYYset_out (FILE *  out_str )
+void yyset_out (FILE *  _out_str )
 {
-        default_argsYYout = out_str ;
+        yyout = _out_str ;
 }
 
-int default_argsYYget_debug  (void)
+int yyget_debug  (void)
 {
-        return default_argsYY_flex_debug;
+        return yy_flex_debug;
 }
 
-void default_argsYYset_debug (int  bdebug )
+void yyset_debug (int  _bdebug )
 {
-        default_argsYY_flex_debug = bdebug ;
+        yy_flex_debug = _bdebug ;
 }
 
 static int yy_init_globals (void)
 {
         /* Initialization is the same as for the non-reentrant scanner.
-     * This function is called from default_argsYYlex_destroy(), so don't allocate here.
+     * This function is called from yylex_destroy(), so don't allocate here.
      */
 
-    (yy_buffer_stack) = 0;
+    (yy_buffer_stack) = nullptr;
     (yy_buffer_stack_top) = 0;
     (yy_buffer_stack_max) = 0;
-    (yy_c_buf_p) = (char *) 0;
+    (yy_c_buf_p) = nullptr;
     (yy_init) = 0;
     (yy_start) = 0;
 
@@ -2982,39 +3219,39 @@ static int yy_init_globals (void)
 
 /* Defined in main.c */
 #ifdef YY_STDINIT
-    default_argsYYin = stdin;
-    default_argsYYout = stdout;
+    yyin = stdin;
+    yyout = stdout;
 #else
-    default_argsYYin = (FILE *) 0;
-    default_argsYYout = (FILE *) 0;
+    yyin = nullptr;
+    yyout = nullptr;
 #endif
 
     /* For future reference: Set errno on error, since we are called by
-     * default_argsYYlex_init()
+     * yylex_init()
      */
     return 0;
 }
 
-/* default_argsYYlex_destroy is for both reentrant and non-reentrant scanners. */
-int default_argsYYlex_destroy  (void)
+/* yylex_destroy is for both reentrant and non-reentrant scanners. */
+int yylex_destroy  (void)
 {
     
     /* Pop the buffer stack, destroying each element. */
 	while(YY_CURRENT_BUFFER){
-		default_argsYY_delete_buffer(YY_CURRENT_BUFFER  );
-		YY_CURRENT_BUFFER_LVALUE = NULL;
-		default_argsYYpop_buffer_state();
+		yy_delete_buffer( YY_CURRENT_BUFFER  );
+		YY_CURRENT_BUFFER_LVALUE = nullptr;
+		yypop_buffer_state();
 	}
 
 	/* Destroy the stack itself. */
-	default_argsYYfree((yy_buffer_stack) );
-	(yy_buffer_stack) = NULL;
+	yyfree((yy_buffer_stack) );
+	(yy_buffer_stack) = nullptr;
 
-    default_argsYYfree ( (yy_state_buf) );
-    (yy_state_buf)  = NULL;
+    yyfree ( (yy_state_buf) );
+    (yy_state_buf)  = nullptr;
 
     /* Reset the globals. This is important in a non-reentrant scanner so the next time
-     * default_argsYYlex() is called, initialization will occur. */
+     * yylex() is called, initialization will occur. */
     yy_init_globals( );
 
     return 0;
@@ -3025,8 +3262,9 @@ int default_argsYYlex_destroy  (void)
  */
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char* s1, yyconst char * s2, int n )
+static void yy_flex_strncpy (char* s1, const char * s2, int n )
 {
+		
 	int i;
 	for ( i = 0; i < n; ++i )
 		s1[i] = s2[i];
@@ -3034,7 +3272,7 @@ static void yy_flex_strncpy (char* s1, yyconst char * s2, int n )
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen (yyconst char * s )
+static int yy_flex_strlen (const char * s )
 {
 	int n;
 	for ( n = 0; s[n]; ++n )
@@ -3044,13 +3282,14 @@ static int yy_flex_strlen (yyconst char * s )
 }
 #endif
 
-void *default_argsYYalloc (yy_size_t  size )
+void *yyalloc (yy_size_t  size )
 {
-	return (void *) malloc( size );
+			return malloc(size);
 }
 
-void *default_argsYYrealloc  (void * ptr, yy_size_t  size )
+void *yyrealloc  (void * ptr, yy_size_t  size )
 {
+		
 	/* The cast to (char *) in the following accommodates both
 	 * implementations that use char* generic pointers, and those
 	 * that use void* generic pointers.  It works with the latter
@@ -3058,12 +3297,12 @@ void *default_argsYYrealloc  (void * ptr, yy_size_t  size )
 	 * any pointer type to void*, and deal with argument conversions
 	 * as though doing an assignment.
 	 */
-	return (void *) realloc( (char *) ptr, size );
+	return realloc(ptr, size);
 }
 
-void default_argsYYfree (void * ptr )
+void yyfree (void * ptr )
 {
-	free( (char *) ptr );	/* see default_argsYYrealloc() for (char *) cast */
+			free( (char *) ptr );	/* see yyrealloc() for (char *) cast */
 }
 
 #define YYTABLES_NAME "yytables"
@@ -3115,9 +3354,9 @@ ArgumentList stringToArgumentList(SrcLangExt lang, QString &extraTypeChars,
 
    s_lastDocChar   = '\0';
 
-   default_argsYYrestart(default_argsYYin );
+   yyrestart( yyin );
    BEGIN( Start );
-   default_argsYYlex();
+   yylex();
 
    extraTypeChars = s_extraTypeChars;
 

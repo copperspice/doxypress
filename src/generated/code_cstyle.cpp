@@ -22,11 +22,17 @@
 
 #define yy_create_buffer code_cstyle_YY_create_buffer
 #define yy_delete_buffer code_cstyle_YY_delete_buffer
-#define yy_flex_debug code_cstyle_YY_flex_debug
+#define yy_scan_buffer code_cstyle_YY_scan_buffer
+#define yy_scan_string code_cstyle_YY_scan_string
+#define yy_scan_bytes code_cstyle_YY_scan_bytes
 #define yy_init_buffer code_cstyle_YY_init_buffer
 #define yy_flush_buffer code_cstyle_YY_flush_buffer
 #define yy_load_buffer_state code_cstyle_YY_load_buffer_state
 #define yy_switch_to_buffer code_cstyle_YY_switch_to_buffer
+#define yypush_buffer_state code_cstyle_YYpush_buffer_state
+#define yypop_buffer_state code_cstyle_YYpop_buffer_state
+#define yyensure_buffer_stack code_cstyle_YYensure_buffer_stack
+#define yy_flex_debug code_cstyle_YY_flex_debug
 #define yyin code_cstyle_YYin
 #define yyleng code_cstyle_YYleng
 #define yylex code_cstyle_YYlex
@@ -41,10 +47,244 @@
 
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
-#define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 35
+#define YY_FLEX_MINOR_VERSION 6
+#define YY_FLEX_SUBMINOR_VERSION 4
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
+#endif
+
+#ifdef yy_create_buffer
+#define code_cstyle_YY_create_buffer_ALREADY_DEFINED
+#else
+#define yy_create_buffer code_cstyle_YY_create_buffer
+#endif
+
+#ifdef yy_delete_buffer
+#define code_cstyle_YY_delete_buffer_ALREADY_DEFINED
+#else
+#define yy_delete_buffer code_cstyle_YY_delete_buffer
+#endif
+
+#ifdef yy_scan_buffer
+#define code_cstyle_YY_scan_buffer_ALREADY_DEFINED
+#else
+#define yy_scan_buffer code_cstyle_YY_scan_buffer
+#endif
+
+#ifdef yy_scan_string
+#define code_cstyle_YY_scan_string_ALREADY_DEFINED
+#else
+#define yy_scan_string code_cstyle_YY_scan_string
+#endif
+
+#ifdef yy_scan_bytes
+#define code_cstyle_YY_scan_bytes_ALREADY_DEFINED
+#else
+#define yy_scan_bytes code_cstyle_YY_scan_bytes
+#endif
+
+#ifdef yy_init_buffer
+#define code_cstyle_YY_init_buffer_ALREADY_DEFINED
+#else
+#define yy_init_buffer code_cstyle_YY_init_buffer
+#endif
+
+#ifdef yy_flush_buffer
+#define code_cstyle_YY_flush_buffer_ALREADY_DEFINED
+#else
+#define yy_flush_buffer code_cstyle_YY_flush_buffer
+#endif
+
+#ifdef yy_load_buffer_state
+#define code_cstyle_YY_load_buffer_state_ALREADY_DEFINED
+#else
+#define yy_load_buffer_state code_cstyle_YY_load_buffer_state
+#endif
+
+#ifdef yy_switch_to_buffer
+#define code_cstyle_YY_switch_to_buffer_ALREADY_DEFINED
+#else
+#define yy_switch_to_buffer code_cstyle_YY_switch_to_buffer
+#endif
+
+#ifdef yypush_buffer_state
+#define code_cstyle_YYpush_buffer_state_ALREADY_DEFINED
+#else
+#define yypush_buffer_state code_cstyle_YYpush_buffer_state
+#endif
+
+#ifdef yypop_buffer_state
+#define code_cstyle_YYpop_buffer_state_ALREADY_DEFINED
+#else
+#define yypop_buffer_state code_cstyle_YYpop_buffer_state
+#endif
+
+#ifdef yyensure_buffer_stack
+#define code_cstyle_YYensure_buffer_stack_ALREADY_DEFINED
+#else
+#define yyensure_buffer_stack code_cstyle_YYensure_buffer_stack
+#endif
+
+#ifdef yylex
+#define code_cstyle_YYlex_ALREADY_DEFINED
+#else
+#define yylex code_cstyle_YYlex
+#endif
+
+#ifdef yyrestart
+#define code_cstyle_YYrestart_ALREADY_DEFINED
+#else
+#define yyrestart code_cstyle_YYrestart
+#endif
+
+#ifdef yylex_init
+#define code_cstyle_YYlex_init_ALREADY_DEFINED
+#else
+#define yylex_init code_cstyle_YYlex_init
+#endif
+
+#ifdef yylex_init_extra
+#define code_cstyle_YYlex_init_extra_ALREADY_DEFINED
+#else
+#define yylex_init_extra code_cstyle_YYlex_init_extra
+#endif
+
+#ifdef yylex_destroy
+#define code_cstyle_YYlex_destroy_ALREADY_DEFINED
+#else
+#define yylex_destroy code_cstyle_YYlex_destroy
+#endif
+
+#ifdef yyget_debug
+#define code_cstyle_YYget_debug_ALREADY_DEFINED
+#else
+#define yyget_debug code_cstyle_YYget_debug
+#endif
+
+#ifdef yyset_debug
+#define code_cstyle_YYset_debug_ALREADY_DEFINED
+#else
+#define yyset_debug code_cstyle_YYset_debug
+#endif
+
+#ifdef yyget_extra
+#define code_cstyle_YYget_extra_ALREADY_DEFINED
+#else
+#define yyget_extra code_cstyle_YYget_extra
+#endif
+
+#ifdef yyset_extra
+#define code_cstyle_YYset_extra_ALREADY_DEFINED
+#else
+#define yyset_extra code_cstyle_YYset_extra
+#endif
+
+#ifdef yyget_in
+#define code_cstyle_YYget_in_ALREADY_DEFINED
+#else
+#define yyget_in code_cstyle_YYget_in
+#endif
+
+#ifdef yyset_in
+#define code_cstyle_YYset_in_ALREADY_DEFINED
+#else
+#define yyset_in code_cstyle_YYset_in
+#endif
+
+#ifdef yyget_out
+#define code_cstyle_YYget_out_ALREADY_DEFINED
+#else
+#define yyget_out code_cstyle_YYget_out
+#endif
+
+#ifdef yyset_out
+#define code_cstyle_YYset_out_ALREADY_DEFINED
+#else
+#define yyset_out code_cstyle_YYset_out
+#endif
+
+#ifdef yyget_leng
+#define code_cstyle_YYget_leng_ALREADY_DEFINED
+#else
+#define yyget_leng code_cstyle_YYget_leng
+#endif
+
+#ifdef yyget_text
+#define code_cstyle_YYget_text_ALREADY_DEFINED
+#else
+#define yyget_text code_cstyle_YYget_text
+#endif
+
+#ifdef yyget_lineno
+#define code_cstyle_YYget_lineno_ALREADY_DEFINED
+#else
+#define yyget_lineno code_cstyle_YYget_lineno
+#endif
+
+#ifdef yyset_lineno
+#define code_cstyle_YYset_lineno_ALREADY_DEFINED
+#else
+#define yyset_lineno code_cstyle_YYset_lineno
+#endif
+
+#ifdef yywrap
+#define code_cstyle_YYwrap_ALREADY_DEFINED
+#else
+#define yywrap code_cstyle_YYwrap
+#endif
+
+#ifdef yyalloc
+#define code_cstyle_YYalloc_ALREADY_DEFINED
+#else
+#define yyalloc code_cstyle_YYalloc
+#endif
+
+#ifdef yyrealloc
+#define code_cstyle_YYrealloc_ALREADY_DEFINED
+#else
+#define yyrealloc code_cstyle_YYrealloc
+#endif
+
+#ifdef yyfree
+#define code_cstyle_YYfree_ALREADY_DEFINED
+#else
+#define yyfree code_cstyle_YYfree
+#endif
+
+#ifdef yytext
+#define code_cstyle_YYtext_ALREADY_DEFINED
+#else
+#define yytext code_cstyle_YYtext
+#endif
+
+#ifdef yyleng
+#define code_cstyle_YYleng_ALREADY_DEFINED
+#else
+#define yyleng code_cstyle_YYleng
+#endif
+
+#ifdef yyin
+#define code_cstyle_YYin_ALREADY_DEFINED
+#else
+#define yyin code_cstyle_YYin
+#endif
+
+#ifdef yyout
+#define code_cstyle_YYout_ALREADY_DEFINED
+#else
+#define yyout code_cstyle_YYout
+#endif
+
+#ifdef yy_flex_debug
+#define code_cstyle_YY_flex_debug_ALREADY_DEFINED
+#else
+#define yy_flex_debug code_cstyle_YY_flex_debug
+#endif
+
+#ifdef yylineno
+#define code_cstyle_YYlineno_ALREADY_DEFINED
+#else
+#define yylineno code_cstyle_YYlineno
 #endif
 
 /* First, we deal with  platform-specific or compiler-specific issues. */
@@ -117,60 +357,48 @@ typedef unsigned int flex_uint32_t;
 #define UINT32_MAX             (4294967295U)
 #endif
 
+#ifndef SIZE_MAX
+#define SIZE_MAX               (~(size_t)0)
+#endif
+
 #endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
-#ifdef __cplusplus
+/* begin standard C++ headers. */
 
-/* The "const" storage-class-modifier is valid. */
-#define YY_USE_CONST
-
-#else	/* ! __cplusplus */
-
-/* C99 requires __STDC__ to be defined as 1. */
-#if defined (__STDC__)
-
-#define YY_USE_CONST
-
-#endif	/* defined (__STDC__) */
-#endif	/* ! __cplusplus */
-
-#ifdef YY_USE_CONST
+/* TODO: this is always defined, so inline it */
 #define yyconst const
+
+#if defined(__GNUC__) && __GNUC__ >= 3
+#define yynoreturn __attribute__((__noreturn__))
 #else
-#define yyconst
+#define yynoreturn
 #endif
 
 /* Returned upon end-of-file. */
 #define YY_NULL 0
 
-/* Promotes a possibly negative, possibly signed char to an unsigned
- * integer for use as an array index.  If the signed char is negative,
- * we want to instead treat it as an 8-bit unsigned char, hence the
- * double cast.
+/* Promotes a possibly negative, possibly signed char to an
+ *   integer in range [0..255] for use as an array index.
  */
-#define YY_SC_TO_UI(c) ((unsigned int) (unsigned char) c)
+#define YY_SC_TO_UI(c) ((YY_CHAR) (c))
 
 /* Enter a start condition.  This macro really ought to take a parameter,
  * but we do it the disgusting crufty way forced on us by the ()-less
  * definition of BEGIN.
  */
 #define BEGIN (yy_start) = 1 + 2 *
-
 /* Translate the current start state into a value that can be later handed
  * to BEGIN to return to the state.  The YYSTATE alias is for lex
  * compatibility.
  */
 #define YY_START (((yy_start) - 1) / 2)
 #define YYSTATE YY_START
-
 /* Action number for EOF rule of a given start state. */
 #define YY_STATE_EOF(state) (YY_END_OF_BUFFER + state + 1)
-
 /* Special action meaning "start processing a new file". */
-#define YY_NEW_FILE code_cstyle_YYrestart(code_cstyle_YYin  )
-
+#define YY_NEW_FILE yyrestart( yyin  )
 #define YY_END_OF_BUFFER_CHAR 0
 
 /* Size of default input buffer. */
@@ -195,36 +423,36 @@ typedef unsigned int flex_uint32_t;
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
-extern int code_cstyle_YYleng;
+#ifndef YY_TYPEDEF_YY_SIZE_T
+#define YY_TYPEDEF_YY_SIZE_T
+typedef size_t yy_size_t;
+#endif
 
-extern FILE *code_cstyle_YYin, *code_cstyle_YYout;
+extern int yyleng;
+
+extern FILE *yyin, *yyout;
 
 #define EOB_ACT_CONTINUE_SCAN 0
 #define EOB_ACT_END_OF_FILE 1
 #define EOB_ACT_LAST_MATCH 2
-
+    
     #define YY_LESS_LINENO(n)
+    #define YY_LINENO_REWIND_TO(ptr)
     
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
 	do \
 		{ \
-		/* Undo effects of setting up code_cstyle_YYtext. */ \
+		/* Undo effects of setting up yytext. */ \
         int yyless_macro_arg = (n); \
         YY_LESS_LINENO(yyless_macro_arg);\
 		*yy_cp = (yy_hold_char); \
 		YY_RESTORE_YY_MORE_OFFSET \
 		(yy_c_buf_p) = yy_cp = yy_bp + yyless_macro_arg - YY_MORE_ADJ; \
-		YY_DO_BEFORE_ACTION; /* set up code_cstyle_YYtext again */ \
+		YY_DO_BEFORE_ACTION; /* set up yytext again */ \
 		} \
 	while ( 0 )
-
 #define unput(c) yyunput( c, (yytext_ptr)  )
-
-#ifndef YY_TYPEDEF_YY_SIZE_T
-#define YY_TYPEDEF_YY_SIZE_T
-typedef size_t yy_size_t;
-#endif
 
 #ifndef YY_STRUCT_YY_BUFFER_STATE
 #define YY_STRUCT_YY_BUFFER_STATE
@@ -238,7 +466,7 @@ struct yy_buffer_state
 	/* Size of input buffer in bytes, not including room for EOB
 	 * characters.
 	 */
-	yy_size_t yy_buf_size;
+	int yy_buf_size;
 
 	/* Number of characters read into yy_ch_buf, not including EOB
 	 * characters.
@@ -266,7 +494,7 @@ struct yy_buffer_state
 
     int yy_bs_lineno; /**< The line count. */
     int yy_bs_column; /**< The column count. */
-    
+
 	/* Whether to try to fill the input buffer when we reach the
 	 * end of it.
 	 */
@@ -283,8 +511,8 @@ struct yy_buffer_state
 	 * possible backing-up.
 	 *
 	 * When we actually see the EOF, we change the status to "new"
-	 * (via code_cstyle_YYrestart()), so that the user can continue scanning by
-	 * just pointing code_cstyle_YYin at a new input file.
+	 * (via yyrestart()), so that the user can continue scanning by
+	 * just pointing yyin at a new input file.
 	 */
 #define YY_BUFFER_EOF_PENDING 2
 
@@ -294,117 +522,112 @@ struct yy_buffer_state
 /* Stack of input buffers. */
 static size_t yy_buffer_stack_top = 0; /**< index of top of stack. */
 static size_t yy_buffer_stack_max = 0; /**< capacity of stack. */
-static YY_BUFFER_STATE * yy_buffer_stack = 0; /**< Stack as an array. */
+static YY_BUFFER_STATE * yy_buffer_stack = nullptr; /**< Stack as an array. */
 
 /* We provide macros for accessing buffer states in case in the
  * future we want to put the buffer states in a more general
  * "scanner state".
  *
- * Returns the top of the stack, or NULL.
+ * Returns the top of the stack, or nullptr.
  */
 #define YY_CURRENT_BUFFER ( (yy_buffer_stack) \
                           ? (yy_buffer_stack)[(yy_buffer_stack_top)] \
-                          : NULL)
-
+                          : nullptr)
 /* Same as previous macro, but useful when we know that the buffer stack is not
- * NULL or when we need an lvalue. For internal use only.
+ * nullptr or when we need an lvalue. For internal use only.
  */
 #define YY_CURRENT_BUFFER_LVALUE (yy_buffer_stack)[(yy_buffer_stack_top)]
 
-/* yy_hold_char holds the character lost when code_cstyle_YYtext is formed. */
+/* yy_hold_char holds the character lost when yytext is formed. */
 static char yy_hold_char;
 static int yy_n_chars;		/* number of characters read into yy_ch_buf */
-int code_cstyle_YYleng;
+int yyleng;
 
 /* Points to current character in buffer. */
-static char *yy_c_buf_p = (char *) 0;
+static char *yy_c_buf_p = nullptr;
 static int yy_init = 0;		/* whether we need to initialize */
 static int yy_start = 0;	/* start state number */
 
-/* Flag which is used to allow code_cstyle_YYwrap()'s to do buffer switches
- * instead of setting up a fresh code_cstyle_YYin.  A bit of a hack ...
+/* Flag which is used to allow yywrap()'s to do buffer switches
+ * instead of setting up a fresh yyin.  A bit of a hack ...
  */
 static int yy_did_buffer_switch_on_eof;
 
-void code_cstyle_YYrestart (FILE *input_file  );
-void code_cstyle_YY_switch_to_buffer (YY_BUFFER_STATE new_buffer  );
-YY_BUFFER_STATE code_cstyle_YY_create_buffer (FILE *file,int size  );
-void code_cstyle_YY_delete_buffer (YY_BUFFER_STATE b  );
-void code_cstyle_YY_flush_buffer (YY_BUFFER_STATE b  );
-void code_cstyle_YYpush_buffer_state (YY_BUFFER_STATE new_buffer  );
-void code_cstyle_YYpop_buffer_state (void );
+void yyrestart ( FILE *input_file  );
+void yy_switch_to_buffer ( YY_BUFFER_STATE new_buffer  );
+YY_BUFFER_STATE yy_create_buffer ( FILE *file, int size  );
+void yy_delete_buffer ( YY_BUFFER_STATE b  );
+void yy_flush_buffer ( YY_BUFFER_STATE b  );
+void yypush_buffer_state ( YY_BUFFER_STATE new_buffer  );
+void yypop_buffer_state ( void );
 
-static void code_cstyle_YYensure_buffer_stack (void );
-static void code_cstyle_YY_load_buffer_state (void );
-static void code_cstyle_YY_init_buffer (YY_BUFFER_STATE b,FILE *file  );
+static void yyensure_buffer_stack ( void );
+static void yy_load_buffer_state ( void );
+static void yy_init_buffer ( YY_BUFFER_STATE b, FILE *file  );
+#define YY_FLUSH_BUFFER yy_flush_buffer( YY_CURRENT_BUFFER )
 
-#define YY_FLUSH_BUFFER code_cstyle_YY_flush_buffer(YY_CURRENT_BUFFER )
+YY_BUFFER_STATE yy_scan_buffer ( char *base, yy_size_t size  );
+YY_BUFFER_STATE yy_scan_string ( const char *yy_str  );
+YY_BUFFER_STATE yy_scan_bytes ( const char *bytes, int len  );
 
-YY_BUFFER_STATE code_cstyle_YY_scan_buffer (char *base,yy_size_t size  );
-YY_BUFFER_STATE code_cstyle_YY_scan_string (yyconst char *yy_str  );
-YY_BUFFER_STATE code_cstyle_YY_scan_bytes (yyconst char *bytes,int len  );
+void *yyalloc ( yy_size_t  );
+void *yyrealloc ( void *, yy_size_t  );
+void yyfree ( void *  );
 
-void *code_cstyle_YYalloc (yy_size_t  );
-void *code_cstyle_YYrealloc (void *,yy_size_t  );
-void code_cstyle_YYfree (void *  );
-
-#define yy_new_buffer code_cstyle_YY_create_buffer
-
+#define yy_new_buffer yy_create_buffer
 #define yy_set_interactive(is_interactive) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){ \
-        code_cstyle_YYensure_buffer_stack (); \
+        yyensure_buffer_stack (); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-            code_cstyle_YY_create_buffer(code_cstyle_YYin,YY_BUF_SIZE ); \
+            yy_create_buffer( yyin, YY_BUF_SIZE ); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_is_interactive = is_interactive; \
 	}
-
 #define yy_set_bol(at_bol) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){\
-        code_cstyle_YYensure_buffer_stack (); \
+        yyensure_buffer_stack (); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-            code_cstyle_YY_create_buffer(code_cstyle_YYin,YY_BUF_SIZE ); \
+            yy_create_buffer( yyin, YY_BUF_SIZE ); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_at_bol = at_bol; \
 	}
-
 #define YY_AT_BOL() (YY_CURRENT_BUFFER_LVALUE->yy_at_bol)
 
 /* Begin user sect3 */
 
-#define code_cstyle_YYwrap(n) 1
+#define code_cstyle_YYwrap() (/*CONSTCOND*/1)
 #define YY_SKIP_YYWRAP
+typedef flex_uint8_t YY_CHAR;
 
-typedef unsigned char YY_CHAR;
-
-FILE *code_cstyle_YYin = (FILE *) 0, *code_cstyle_YYout = (FILE *) 0;
+FILE *yyin = nullptr, *yyout = nullptr;
 
 typedef int yy_state_type;
 
-extern int code_cstyle_YYlineno;
+extern int yylineno;
+int yylineno = 1;
 
-int code_cstyle_YYlineno = 1;
+extern char *yytext;
+#ifdef yytext_ptr
+#undef yytext_ptr
+#endif
+#define yytext_ptr yytext
 
-extern char *code_cstyle_YYtext;
-#define yytext_ptr code_cstyle_YYtext
-
-static yy_state_type yy_get_previous_state (void );
-static yy_state_type yy_try_NUL_trans (yy_state_type current_state  );
-static int yy_get_next_buffer (void );
-static void yy_fatal_error (yyconst char msg[]  );
+static yy_state_type yy_get_previous_state ( void );
+static yy_state_type yy_try_NUL_trans ( yy_state_type current_state  );
+static int yy_get_next_buffer ( void );
+static void yynoreturn yy_fatal_error ( const char* msg  );
 
 /* Done after the current pattern has been matched and before the
- * corresponding action - sets up code_cstyle_YYtext.
+ * corresponding action - sets up yytext.
  */
 #define YY_DO_BEFORE_ACTION \
 	(yytext_ptr) = yy_bp; \
-	code_cstyle_YYleng = (size_t) (yy_cp - yy_bp); \
+	yyleng = (int) (yy_cp - yy_bp); \
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
-
 #define YY_NUM_RULES 239
 #define YY_END_OF_BUFFER 240
 /* This struct is not used in this scanner,
@@ -414,7 +637,7 @@ struct yy_trans_info
 	flex_int32_t yy_verify;
 	flex_int32_t yy_nxt;
 	};
-static yyconst flex_int16_t yy_acclist[8254] =
+static const flex_int16_t yy_acclist[8254] =
     {   0,
       113,  113,  114,  114,16436,  101,  101,  178,  178,  148,
       148,  240,  238,  239,  236,  239,    1,  238,  239,  234,
@@ -1326,7 +1549,7 @@ static yyconst flex_int16_t yy_acclist[8254] =
     16493,    6, 8298
     } ;
 
-static yyconst flex_int16_t yy_accept[4104] =
+static const flex_int16_t yy_accept[4104] =
     {   0,
         1,    1,    1,    2,    3,    4,    5,    5,    5,    5,
         5,    5,    5,    5,    5,    5,    5,    5,    5,    5,
@@ -1782,7 +2005,7 @@ static yyconst flex_int16_t yy_accept[4104] =
      8252, 8254, 8254
     } ;
 
-static yyconst flex_int32_t yy_ec[256] =
+static const YY_CHAR yy_ec[256] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    2,    3,
         1,    1,    4,    1,    1,    1,    1,    1,    1,    1,
@@ -1814,7 +2037,7 @@ static yyconst flex_int32_t yy_ec[256] =
        89,   89,   89,   89,   89
     } ;
 
-static yyconst flex_int32_t yy_meta[90] =
+static const YY_CHAR yy_meta[90] =
     {   0,
         1,    2,    3,    4,    5,    1,    6,    1,    7,    1,
         1,    8,    9,   10,   11,    1,   12,   13,   14,   15,
@@ -1827,7 +2050,7 @@ static yyconst flex_int32_t yy_meta[90] =
        22,   22,   22,   27,    1,   28,   29,   30,   30
     } ;
 
-static yyconst flex_int32_t yy_base[4737] =
+static const flex_int32_t yy_base[4737] =
     {   0,
         0,    3,    8,   62,   67,  121,  124,  178,  150,  204,
       232,  258,  261,  286,  304,  329,  332,  375,  464,   24,
@@ -2352,7 +2575,7 @@ static yyconst flex_int32_t yy_base[4737] =
     47667,47697,47727,47757,47787,47817
     } ;
 
-static yyconst flex_int16_t yy_def[4737] =
+static const flex_int16_t yy_def[4737] =
     {   0,
      4103, 4103, 4104, 4104, 4105, 4105, 4106, 4106, 4107, 4107,
      4108, 4108, 4109, 4109, 4110, 4110, 4103, 4103, 4102,   19,
@@ -2877,7 +3100,7 @@ static yyconst flex_int16_t yy_def[4737] =
      4102, 4102, 4102, 4102, 4102, 4102
     } ;
 
-static yyconst flex_int16_t yy_nxt[47938] =
+static const flex_int16_t yy_nxt[47938] =
     {   0,
      4102, 4102,   79,   80,   86,   79,   80,   86,  651,  652,
        79,   80,   81,   82,   89,   81,   82,  663,  609,   83,
@@ -8154,7 +8377,7 @@ static yyconst flex_int16_t yy_nxt[47938] =
      4102, 4102, 4102, 4102, 4102, 4102, 4102
     } ;
 
-static yyconst flex_int16_t yy_chk[47938] =
+static const flex_int16_t yy_chk[47938] =
     {   0,
         0,    0,    1,    1,    2,    2,    2,    2,  126,  126,
         3,    3,    1,    1,    3,    2,    2,  137,   83,    1,
@@ -13431,8 +13654,8 @@ static yyconst flex_int16_t yy_chk[47938] =
      4102, 4102, 4102, 4102, 4102, 4102, 4102
     } ;
 
-extern int code_cstyle_YY_flex_debug;
-int code_cstyle_YY_flex_debug = 0;
+extern int yy_flex_debug;
+int yy_flex_debug = 0;
 
 static yy_state_type *yy_state_buf=0, *yy_state_ptr=0;
 static char *yy_full_match;
@@ -13444,7 +13667,7 @@ static int *yy_full_state;
 #define YY_TRAILING_HEAD_MASK 0x4000
 #define REJECT \
 { \
-*yy_cp = (yy_hold_char); /* undo effects of setting up code_cstyle_YYtext */ \
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */ \
 yy_cp = (yy_full_match); /* restore poss. backed-over text */ \
 (yy_lp) = (yy_full_lp); /* restore orig. accepting pos. */ \
 (yy_state_ptr) = (yy_full_state); /* restore orig. state */ \
@@ -13456,19 +13679,13 @@ goto find_rule; \
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
-char *code_cstyle_YYtext;
+char *yytext;
 /*************************************************************************
  *
  * Copyright (c) 2014-2024 Barbara Geller & Ansel Sermersheim
  * Copyright (c) 1997-2014 Dimitri van Heesch
  *
 *************************************************************************/
-
-#include <QDir>
-
-#include <stdio.h>
-#include <assert.h>
-#include <ctype.h>
 
 #include <code_cstyle_internal.h>
 
@@ -13481,6 +13698,12 @@ char *code_cstyle_YYtext;
 #include <stringmap.h>
 #include <tooltip.h>
 #include <util.h>
+
+#include <QDir>
+
+#include <assert.h>
+#include <ctype.h>
+#include <stdio.h>
 
 // Toggle for some debugging info
 // #define DBG_CTX(x) fprintf x
@@ -13706,7 +13929,7 @@ void VariableContext::addVariable(const QString &type, const QString &name)
       QString templateArgs(ltype.right(ltype.length() - i));
 
       if ( ( (varType = g_codeClassSDict.find(typeName)) ||
-             (varType = getResolvedClass(g_currentDefinition, g_sourceFileDef, typeName, 0, 0, true, true)) ) &&
+             (varType = getResolvedClass(g_currentDefinition, g_sourceFileDef, typeName, nullptr, nullptr, true, true)) ) &&
               ! varType->getTemplateArgumentList().listEmpty() ) {
 
          // look for class definitions inside the code block, otherwise look for global class definitions
@@ -14045,7 +14268,7 @@ static void addParmType()
    }
 
    if (!g_parmType.isEmpty()) {
-      g_parmType += ' ' ;
+      g_parmType += ' ';
    }
 
    g_parmType += g_parmName;
@@ -14100,15 +14323,15 @@ static QSharedPointer<ClassDef> stripClassName(const QString &s, QSharedPointer<
       QString clName = className + templSpec;
       QSharedPointer<ClassDef> cd;
 
-      if (!g_classScope.isEmpty()) {
+      if (! g_classScope.isEmpty()) {
          cd = getResolvedClass(d, g_sourceFileDef, g_classScope + "::" + clName);
       }
 
-      if (cd == 0) {
+      if (cd == nullptr) {
          cd = getResolvedClass(d, g_sourceFileDef, clName);
       }
 
-      if (cd) {
+      if (cd != nullptr) {
          return cd;
       }
    }
@@ -14369,7 +14592,7 @@ static void generateClassOrGlobalLink(CodeGenerator &ol, const QString &clName, 
 
    bool isLocal = false;
 
-   if (! s_prefix_this || (lcd = g_theVarContext.findVariable(className)) == 0) {
+   if (! s_prefix_this || (lcd = g_theVarContext.findVariable(className)) == nullptr) {
       // not a local variable
       QSharedPointer<Definition> d = g_currentDefinition;
 
@@ -14457,7 +14680,7 @@ static void generateClassOrGlobalLink(CodeGenerator &ol, const QString &clName, 
          }
 
          if (d && d->isLinkable() && md->isLinkable() && g_currentMemberDef && g_collectXRefs) {
-            addDocCrossReference(g_currentMemberDef, md) ;
+            addDocCrossReference(g_currentMemberDef, md);
          }
       }
 
@@ -14643,7 +14866,7 @@ static void generateMemberLink(CodeGenerator &ol, const QString &varName, const 
 
          QSharedPointer<MemberName> vmn = Doxy_Globals::memberNameSDict.find(varName);
 
-         if (vmn == 0) {
+         if (vmn == nullptr) {
             int vi;
             QString vn = varName;
 
@@ -14878,7 +15101,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
 
          QSharedPointer<ClassDef> cd = g_theVarContext.findVariable(ctx->objectTypeOrName);
 
-         if (cd == 0) {
+         if (cd == nullptr) {
             // not a local variable
             if (ctx->objectTypeOrName == "self") {
 
@@ -14894,7 +15117,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                // found class
                ctx->method = ctx->objectType->getMemberByName(ctx->methodName);
 
-            } else if (ctx->method == 0) {
+            } else if (ctx->method == nullptr) {
                // search for class variable with the same name
 
                if (g_currentDefinition && g_currentDefinition->definitionType() == Definition::TypeClass) {
@@ -15080,7 +15303,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                      QSharedPointer<ClassDef> cd = getResolvedClass(g_currentDefinition, g_sourceFileDef, *pObject);
 
                      if (cd && cd->isLinkable()) {
-                        if (ctx->objectType == 0) {
+                        if (ctx->objectType == nullptr) {
                            ctx->objectType = cd;
                         }
                         writeMultiLineCodeLink(*g_code, cd, *pObject);
@@ -15281,7 +15504,7 @@ static int yyread(char *buf, int max_size)
    return len;
 }
 
-/* review skipLanguageKeywords()  */
+  /* review skipLanguageKeywords()  */
 #define YY_NO_UNISTD_H 1
 
 #define INITIAL 0
@@ -15330,41 +15553,41 @@ static int yyread(char *buf, int max_size)
  */
 #include <unistd.h>
 #endif
-
+    
 #ifndef YY_EXTRA_TYPE
 #define YY_EXTRA_TYPE void *
 #endif
 
-static int yy_init_globals (void );
+static int yy_init_globals ( void );
 
 /* Accessor methods to globals.
    These are made visible to non-reentrant scanners for convenience. */
 
-int code_cstyle_YYlex_destroy (void );
+int yylex_destroy ( void );
 
-int code_cstyle_YYget_debug (void );
+int yyget_debug ( void );
 
-void code_cstyle_YYset_debug (int debug_flag  );
+void yyset_debug ( int debug_flag  );
 
-YY_EXTRA_TYPE code_cstyle_YYget_extra (void );
+YY_EXTRA_TYPE yyget_extra ( void );
 
-void code_cstyle_YYset_extra (YY_EXTRA_TYPE user_defined  );
+void yyset_extra ( YY_EXTRA_TYPE user_defined  );
 
-FILE *code_cstyle_YYget_in (void );
+FILE *yyget_in ( void );
 
-void code_cstyle_YYset_in  (FILE * in_str  );
+void yyset_in  ( FILE * _in_str  );
 
-FILE *code_cstyle_YYget_out (void );
+FILE *yyget_out ( void );
 
-void code_cstyle_YYset_out  (FILE * out_str  );
+void yyset_out  ( FILE * _out_str  );
 
-int code_cstyle_YYget_leng (void );
+			int yyget_leng ( void );
 
-char *code_cstyle_YYget_text (void );
+char *yyget_text ( void );
 
-int code_cstyle_YYget_lineno (void );
+int yyget_lineno ( void );
 
-void code_cstyle_YYset_lineno (int line_number  );
+void yyset_lineno ( int _line_number  );
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -15372,28 +15595,31 @@ void code_cstyle_YYset_lineno (int line_number  );
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int code_cstyle_YYwrap (void );
+extern "C" int yywrap ( void );
 #else
-extern int code_cstyle_YYwrap (void );
+extern int yywrap ( void );
 #endif
 #endif
 
-    static void yyunput (int c,char *buf_ptr  );
+#ifndef YY_NO_UNPUT
     
+    static void yyunput ( int c, char *buf_ptr  );
+    
+#endif
+
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char *,yyconst char *,int );
+static void yy_flex_strncpy ( char *, const char *, int );
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen (yyconst char * );
+static int yy_flex_strlen ( const char * );
 #endif
 
 #ifndef YY_NO_INPUT
-
 #ifdef __cplusplus
-static int yyinput (void );
+static int yyinput ( void );
 #else
-static int input (void );
+static int input ( void );
 #endif
 
 #endif
@@ -15413,7 +15639,7 @@ static int input (void );
 /* This used to be an fputs(), but since the string might contain NUL's,
  * we now use fwrite().
  */
-#define ECHO do { if (fwrite( code_cstyle_YYtext, code_cstyle_YYleng, 1, code_cstyle_YYout )) {} } while (0)
+#define ECHO do { if (fwrite( yytext, (size_t) yyleng, 1, yyout )) {} } while (0)
 #endif
 
 /* Gets input and stuffs it into "buf".  number of characters read, or YY_NULL,
@@ -15424,20 +15650,20 @@ static int input (void );
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
 		{ \
 		int c = '*'; \
-		size_t n; \
+		int n; \
 		for ( n = 0; n < max_size && \
-			     (c = getc( code_cstyle_YYin )) != EOF && c != '\n'; ++n ) \
+			     (c = getc( yyin )) != EOF && c != '\n'; ++n ) \
 			buf[n] = (char) c; \
 		if ( c == '\n' ) \
 			buf[n++] = (char) c; \
-		if ( c == EOF && ferror( code_cstyle_YYin ) ) \
+		if ( c == EOF && ferror( yyin ) ) \
 			YY_FATAL_ERROR( "input in flex scanner failed" ); \
 		result = n; \
 		} \
 	else \
 		{ \
 		errno=0; \
-		while ( (result = fread(buf, 1, max_size, code_cstyle_YYin))==0 && ferror(code_cstyle_YYin)) \
+		while ( (result = (int) fread(buf, 1, (yy_size_t) max_size, yyin)) == 0 && ferror(yyin)) \
 			{ \
 			if( errno != EINTR) \
 				{ \
@@ -15445,7 +15671,7 @@ static int input (void );
 				break; \
 				} \
 			errno=0; \
-			clearerr(code_cstyle_YYin); \
+			clearerr(yyin); \
 			} \
 		}\
 \
@@ -15478,12 +15704,12 @@ static int input (void );
 #ifndef YY_DECL
 #define YY_DECL_IS_OURS 1
 
-extern int code_cstyle_YYlex (void);
+extern int yylex (void);
 
-#define YY_DECL int code_cstyle_YYlex (void)
+#define YY_DECL int yylex (void)
 #endif /* !YY_DECL */
 
-/* Code executed at the beginning of each rule, after code_cstyle_YYtext and code_cstyle_YYleng
+/* Code executed at the beginning of each rule, after yytext and yyleng
  * have been set up.
  */
 #ifndef YY_USER_ACTION
@@ -15492,13 +15718,13 @@ extern int code_cstyle_YYlex (void);
 
 /* Code executed at the end of each rule. */
 #ifndef YY_BREAK
-#define YY_BREAK break;
+#define YY_BREAK /*LINTED*/break;
 #endif
 
 #define YY_RULE_SETUP \
-	if ( code_cstyle_YYleng > 0 ) \
+	if ( yyleng > 0 ) \
 		YY_CURRENT_BUFFER_LVALUE->yy_at_bol = \
-				(code_cstyle_YYtext[code_cstyle_YYleng - 1] == '\n'); \
+				(yytext[yyleng - 1] == '\n'); \
 	YY_USER_ACTION
 
 /** The main scanner function which does all the work.
@@ -15519,33 +15745,35 @@ YY_DECL
 
         /* Create the reject buffer large enough to save one state per allowed character. */
         if ( ! (yy_state_buf) )
-            (yy_state_buf) = (yy_state_type *)code_cstyle_YYalloc(YY_STATE_BUF_SIZE  );
+            (yy_state_buf) = (yy_state_type *)yyalloc(YY_STATE_BUF_SIZE  );
             if ( ! (yy_state_buf) )
-                YY_FATAL_ERROR( "out of dynamic memory in code_cstyle_YYlex()" );
+                YY_FATAL_ERROR( "out of dynamic memory in yylex()" );
 
 		if ( ! (yy_start) )
 			(yy_start) = 1;	/* first start state */
 
-		if ( ! code_cstyle_YYin )
-			code_cstyle_YYin = stdin;
+		if ( ! yyin )
+			yyin = stdin;
 
-		if ( ! code_cstyle_YYout )
-			code_cstyle_YYout = stdout;
+		if ( ! yyout )
+			yyout = stdout;
 
 		if ( ! YY_CURRENT_BUFFER ) {
-			code_cstyle_YYensure_buffer_stack ();
+			yyensure_buffer_stack ();
 			YY_CURRENT_BUFFER_LVALUE =
-				code_cstyle_YY_create_buffer(code_cstyle_YYin,YY_BUF_SIZE );
+				yy_create_buffer( yyin, YY_BUF_SIZE );
 		}
 
-		code_cstyle_YY_load_buffer_state( );
+		yy_load_buffer_state(  );
 		}
 
-	while ( 1 )		/* loops until end-of-file is reached */
+	{
+
+	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
 		yy_cp = (yy_c_buf_p);
 
-		/* Support of code_cstyle_YYtext. */
+		/* Support of yytext. */
 		*yy_cp = (yy_hold_char);
 
 		/* yy_bp points to the position in yy_ch_buf of the start of
@@ -15562,14 +15790,14 @@ YY_DECL
 yy_match:
 		do
 			{
-			YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)];
+			YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)] ;
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
 				if ( yy_current_state >= 4103 )
-					yy_c = yy_meta[(unsigned int) yy_c];
+					yy_c = yy_meta[yy_c];
 				}
-			yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
+			yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 			*(yy_state_ptr)++ = yy_current_state;
 			++yy_cp;
 			}
@@ -15630,17 +15858,17 @@ YY_RULE_SETUP
 case 2:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       startFontClass("preprocessor");
       g_code->codify(text);
-      BEGIN( ReadInclude );
+      BEGIN(ReadInclude);
    }
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_insideObjC = true;
 
       startFontClass("keyword");
@@ -15648,14 +15876,14 @@ YY_RULE_SETUP
       endFontClass();
 
       if (! g_insideTemplate)  {
-         BEGIN( ClassName );
+         BEGIN(ClassName);
       }
    }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (g_insideTemplate) {
          REJECT;
@@ -15664,14 +15892,14 @@ YY_RULE_SETUP
       startFontClass("keyword");
       codifyLines(text);
       endFontClass();
-      BEGIN( ClassName );
+      BEGIN(ClassName);
    }
 	YY_BREAK
 case 5:
 /* rule 5 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (g_insideTemplate) {
          REJECT;
@@ -15685,14 +15913,14 @@ YY_RULE_SETUP
 case 6:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       startFontClass("keyword");
       codifyLines(text);
       endFontClass();
 
       if (! g_insideTemplate) {
-         BEGIN( ClassName );
+         BEGIN(ClassName);
       }
    }
 	YY_BREAK
@@ -15700,20 +15928,20 @@ case 7:
 /* rule 7 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       startFontClass("keyword");
       codifyLines(text);
       endFontClass();
 
-      BEGIN( PackageName );
+      BEGIN(PackageName);
    }
 	YY_BREAK
 case 8:
 /* rule 8 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       if (! g_insideObjC) {
          REJECT;
       }
@@ -15724,7 +15952,7 @@ YY_RULE_SETUP
 case 9:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (! g_insideObjC || g_insideBody) {
          g_code->codify(text);
@@ -15739,7 +15967,7 @@ YY_RULE_SETUP
 case 10:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       BEGIN(ObjCParams);
    }
@@ -15747,7 +15975,7 @@ YY_RULE_SETUP
 case 11:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       BEGIN(ObjCParamType);
    }
@@ -15755,7 +15983,7 @@ YY_RULE_SETUP
 case 12:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
 
       if (text[0] == '{') {
@@ -15786,14 +16014,14 @@ YY_RULE_SETUP
 case 13:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       startFontClass("keywordtype");
       g_code->codify(text);
       endFontClass();
@@ -15803,7 +16031,7 @@ YY_RULE_SETUP
 case 15:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       generateClassOrGlobalLink(*g_code, text);
       g_parmType = text;
    }
@@ -15811,7 +16039,7 @@ YY_RULE_SETUP
 case 16:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       BEGIN(ObjCParams);
    }
@@ -15819,7 +16047,7 @@ YY_RULE_SETUP
 case 17:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       g_code->codify(text);
       g_parmName = text;
@@ -15831,14 +16059,14 @@ YY_RULE_SETUP
 case 18:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       generateClassOrGlobalLink(*g_code, text);
    }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 	YY_BREAK
@@ -15846,14 +16074,14 @@ case 20:
 /* rule 20 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       codifyLines(text);
    }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       bool ambig;
       bool found = false;
@@ -15902,43 +16130,43 @@ YY_RULE_SETUP
       g_code->codify(t);
 
       endFontClass();
-      BEGIN( Body );
+      BEGIN(Body);
    }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       startFontClass("preprocessor");
       g_lastSkipCppContext = YY_START;
       g_code->codify(text);
 
-      BEGIN( SkipCPP ) ;
+      BEGIN(SkipCPP);
    }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       g_code->codify(text);
       g_lastStringContext = YY_START;
 
-      BEGIN( SkipString );
+      BEGIN(SkipString);
    }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 	YY_BREAK
@@ -15946,27 +16174,28 @@ case 26:
 /* rule 26 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       codifyLines(text);
    }
 	YY_BREAK
 case 27:
 /* rule 27 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up code_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_bp + 2);
 (yy_c_buf_p) = yy_cp = yy_bp + 2;
-YY_DO_BEFORE_ACTION; /* set up code_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       REJECT;     // reconsider
 
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_theVarContext.pushScope();
 
       DBG_CTX((stderr,"** scope stack push INNERBLOCK\n"));
@@ -15985,13 +16214,13 @@ YY_RULE_SETUP
 
       g_type.resize(0);
       g_name.resize(0);
-      BEGIN( Body );
+      BEGIN(Body);
    }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       g_theVarContext.popScope();
       g_type.clear();
@@ -16025,7 +16254,7 @@ YY_RULE_SETUP
 case 30:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (g_sourceFileDef) {
          QSharedPointer<FileDef> fd = g_sourceFileDef;
@@ -16066,7 +16295,7 @@ YY_RULE_SETUP
 case 31:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (g_insideCS) {
          g_code->codify(text);
@@ -16077,14 +16306,14 @@ YY_RULE_SETUP
          g_code->codify(text);
          g_searchingForBody = false;
 
-         BEGIN( Body );
+         BEGIN(Body);
       }
    }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       g_type = g_curClassName;
       g_name.resize(0);
@@ -16096,7 +16325,7 @@ YY_RULE_SETUP
 case 33:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       startFontClass("keyword");
       g_code->codify(text);
@@ -16107,7 +16336,7 @@ case 34:
 case 35:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (g_insideCS) {
          g_curClassName = substitute(text, ".", "::");
@@ -16122,28 +16351,28 @@ YY_RULE_SETUP
          g_code->codify(text);
          endFontClass();
 
-         BEGIN( AlignAs );
+         BEGIN(AlignAs);
 
       } else {
          generateClassOrGlobalLink(*g_code, text);
-         BEGIN( ClassVar );
+         BEGIN(ClassVar);
       }
    }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_bracketCount = 1;
       g_code->codify(text);
-      BEGIN( AlignAsEnd );
+      BEGIN(AlignAsEnd);
    }
 	YY_BREAK
 case 37:
 /* rule 37 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       ++g_yyLineNr;
       codifyLines(text);
    }
@@ -16151,14 +16380,14 @@ YY_RULE_SETUP
 case 38:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       ++g_bracketCount;
    }
@@ -16166,7 +16395,7 @@ YY_RULE_SETUP
 case 40:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
 
       --g_bracketCount;
@@ -16180,15 +16409,15 @@ case 41:
 /* rule 41 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
-      g_yyLineNr++;
+      QString text = QString::fromUtf8(yytext);
+      ++g_yyLineNr;
       codifyLines(text);
    }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 	YY_BREAK
@@ -16196,32 +16425,36 @@ case 43:
 YY_RULE_SETUP
 {
       // PHP namespace
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
+
       g_curClassName = substitute(text, "\\", "::");
       g_scopeStack.push(CLASSBLOCK);
       pushScope(g_curClassName);
       addType();
       generateClassOrGlobalLink(*g_code, text);
-      BEGIN( ClassVar );
+
+      BEGIN(ClassVar);
    }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
 {
       // Obj-C category
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
+
       g_curClassName = removeRedundantWhiteSpace(text);
       g_scopeStack.push(CLASSBLOCK);
       pushScope(g_curClassName);
       addType();
       generateClassOrGlobalLink(*g_code,  text);
-      BEGIN( ClassVar );
+
+      BEGIN(ClassVar);
    }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_curClassName = substitute(text, ".", "::");
       addType();
       codifyLines(text);
@@ -16230,14 +16463,14 @@ YY_RULE_SETUP
 case 46:
 YY_RULE_SETUP
 {
-      unput(*code_cstyle_YYtext);
-      BEGIN( Body );
+      unput(*yytext);
+      BEGIN(Body);
    }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       // for Java
       startFontClass("keyword");
@@ -16252,7 +16485,7 @@ case 48:
 /* rule 48 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       DBG_CTX((stderr, "***** C++/CLI modifier %s on g_curClassName=%s\n", csPrintable(text),
                   csPrintable(g_curClassName)));
@@ -16267,7 +16500,7 @@ YY_RULE_SETUP
 case 49:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_type = g_curClassName;
       g_name = text;
 
@@ -16281,7 +16514,7 @@ YY_RULE_SETUP
 case 50:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       codifyLines(text);
       g_curClassBases.clear();
       BEGIN(Bases);
@@ -16292,7 +16525,7 @@ case 52:
 case 53:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       g_theVarContext.pushScope();
 
@@ -16323,7 +16556,7 @@ YY_RULE_SETUP
          pushScope(g_curClassName);
          DBG_CTX((stderr, "***** g_curClassName=%s\n", csPrintable(g_curClassName)));
 
-         if (getResolvedClass(g_currentDefinition, g_sourceFileDef, g_curClassName) == 0) {
+         if (getResolvedClass(g_currentDefinition, g_sourceFileDef, g_curClassName) == nullptr) {
 
             DBG_CTX((stderr, "Adding new class %s\n", csPrintable(g_curClassName)));
 
@@ -16363,7 +16596,7 @@ YY_RULE_SETUP
 case 54:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       startFontClass("keyword");
       g_code->codify(text);
@@ -16373,7 +16606,7 @@ YY_RULE_SETUP
 case 55:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       DBG_CTX((stderr, "%s:addBase(%s)\n", csPrintable(g_curClassName), csPrintable(text) ));
 
@@ -16384,7 +16617,7 @@ YY_RULE_SETUP
 case 56:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
 
       if (! g_insideObjC) {
@@ -16399,7 +16632,7 @@ YY_RULE_SETUP
 case 57:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       g_insideProtocolList = false;
    }
@@ -16407,7 +16640,7 @@ YY_RULE_SETUP
 case 58:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       ++g_sharpCount;
    }
@@ -16415,7 +16648,7 @@ YY_RULE_SETUP
 case 59:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
 
       if (--g_sharpCount <= 0) {
@@ -16426,7 +16659,7 @@ YY_RULE_SETUP
 case 60:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       g_lastStringContext = YY_START;
 
@@ -16436,7 +16669,7 @@ YY_RULE_SETUP
 case 61:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       g_lastStringContext = YY_START;
 
@@ -16446,7 +16679,7 @@ YY_RULE_SETUP
 case 62:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       g_sharpCount = 1;
       BEGIN (SkipSharp);
@@ -16455,7 +16688,7 @@ YY_RULE_SETUP
 case 63:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       ++g_sharpCount;
    }
@@ -16463,7 +16696,7 @@ YY_RULE_SETUP
 case 64:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
 
       if (--g_sharpCount <= 0) {
@@ -16474,18 +16707,19 @@ YY_RULE_SETUP
 case 65:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 	YY_BREAK
 case 66:
 /* rule 66 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up code_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up code_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       addType();
       generateFunctionLink(*g_code, text);
@@ -16493,17 +16727,18 @@ YY_RULE_SETUP
       g_args.resize(0);
       g_name += text;
 
-      BEGIN( FuncCall );
+      BEGIN(FuncCall);
    }
 	YY_BREAK
 case 67:
 /* rule 67 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up code_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up code_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       addType();
       generateFunctionLink(*g_code, text);
@@ -16516,12 +16751,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 68:
 /* rule 68 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up code_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up code_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       addType();
       generateFunctionLink(*g_code, text);
@@ -16533,12 +16769,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 69:
 /* rule 69 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up code_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up code_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       startFontClass("keyword");
       codifyLines(text);
@@ -16552,7 +16789,7 @@ case 70:
 /* rule 70 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       startFontClass("keyword");
       codifyLines(text);
@@ -16565,7 +16802,7 @@ case 71:
 /* rule 71 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       startFontClass("keyword");
       codifyLines(text);
@@ -16578,7 +16815,7 @@ case 72:
 /* rule 72 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       startFontClass("keyword");
       codifyLines(text);
@@ -16590,14 +16827,14 @@ YY_RULE_SETUP
 case 73:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       generateClassOrGlobalLink(*g_code, text);
    }
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       codifyLines(text);
       BEGIN(Body);
@@ -16606,7 +16843,7 @@ YY_RULE_SETUP
 case 75:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       addUsingDirective(substitute(text, ".", "::"));
       generateClassOrGlobalLink(*g_code, text);
@@ -16621,7 +16858,7 @@ case 76:
 /* rule 76 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       codifyLines(text);
       BEGIN(Body);
    }
@@ -16629,7 +16866,7 @@ YY_RULE_SETUP
 case 77:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       codifyLines(text);
       BEGIN(Body);
    }
@@ -16637,19 +16874,20 @@ YY_RULE_SETUP
 case 78:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);                      // "this->" for C++ "this." for C#
       s_prefix_this = true;
    }
 	YY_BREAK
 case 79:
 /* rule 79 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up code_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up code_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (g_insideJava && (text == "internal")) {
          // special case
@@ -16674,7 +16912,7 @@ YY_RULE_SETUP
 case 80:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (skipLanguageKeywords(text)) {
          REJECT;
@@ -16689,7 +16927,7 @@ case 81:
 /* rule 81 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (skipLanguageKeywords(text)) {
          REJECT;
@@ -16705,12 +16943,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 82:
 /* rule 82 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up code_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_bp + 2);
 (yy_c_buf_p) = yy_cp = yy_bp + 2;
-YY_DO_BEFORE_ACTION; /* set up code_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
+
       if (! g_inForEachExpression) {
          REJECT;
       }
@@ -16731,7 +16971,8 @@ case 83:
 /* rule 83 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
+
       startFontClass("keywordflow");
       codifyLines(text);
       endFontClass();
@@ -16746,7 +16987,7 @@ case 84:
 /* rule 84 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       startFontClass("keywordflow");
       codifyLines(text);
@@ -16766,12 +17007,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 85:
 /* rule 85 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up code_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up code_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       startFontClass("keywordflow");
       codifyLines(text);
       endFontClass();
@@ -16783,12 +17025,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 86:
 /* rule 86 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up code_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up code_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       startFontClass("keywordflow");
       codifyLines(text);
@@ -16802,7 +17045,8 @@ YY_RULE_SETUP
 case 87:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
+
       startFontClass("keywordflow");
       codifyLines(text);
       endFontClass();
@@ -16811,7 +17055,7 @@ YY_RULE_SETUP
 case 88:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       startFontClass("keywordflow");
       codifyLines(text);
@@ -16822,9 +17066,11 @@ case 89:
 YY_RULE_SETUP
 {
       // end of cast?
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
+
       g_code->codify(text);
       popCallContext();
+
       --g_bracketCount;
       g_parmType = g_name;
 
@@ -16834,14 +17080,14 @@ YY_RULE_SETUP
 case 90:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 	YY_BREAK
 case 91:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       g_name.resize(0);
       g_type.resize(0);
@@ -16849,6 +17095,7 @@ YY_RULE_SETUP
       if (text[0] == ')') {
          popCallContext();
          --g_bracketCount;
+
          BEGIN(FuncCall);
       }
    }
@@ -16856,21 +17103,21 @@ YY_RULE_SETUP
 case 92:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       startFontClass("keywordtype");
       g_code->codify(text);
       endFontClass();
       addType();
-      g_name += code_cstyle_YYtext;
+      g_name += yytext;
    }
 	YY_BREAK
 case 93:
-*yy_cp = (yy_hold_char); /* undo effects of setting up code_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
 (yy_c_buf_p) = yy_cp = yy_bp + 7;
-YY_DO_BEFORE_ACTION; /* set up code_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       startFontClass("keyword");
       g_code->codify(text);
@@ -16881,13 +17128,13 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 case 94:
-*yy_cp = (yy_hold_char); /* undo effects of setting up code_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
 (yy_c_buf_p) = yy_cp = yy_bp + 8;
-YY_DO_BEFORE_ACTION; /* set up code_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // template<...>
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       startFontClass("keyword");
       g_code->codify(text);
@@ -16900,7 +17147,7 @@ YY_RULE_SETUP
 case 95:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       startFontClass("keyword");
       codifyLines(text);
@@ -16910,7 +17157,7 @@ YY_RULE_SETUP
 case 96:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       g_sharpCount++;
    }
@@ -16918,7 +17165,7 @@ YY_RULE_SETUP
 case 97:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       g_sharpCount--;
 
@@ -16930,24 +17177,25 @@ YY_RULE_SETUP
 case 98:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
+
       startFontClass("keyword");
       codifyLines(text);
       endFontClass();
-      BEGIN( g_lastTemplCastContext );
+      BEGIN(g_lastTemplCastContext);
    }
 	YY_BREAK
 case 99:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       generateClassOrGlobalLink(*g_code, text);
    }
 	YY_BREAK
 case 100:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       startFontClass("keyword");
       codifyLines(text);
       endFontClass();
@@ -16956,7 +17204,7 @@ YY_RULE_SETUP
 case 101:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       codifyLines(text);
    }
 	YY_BREAK
@@ -16964,7 +17212,7 @@ case 102:
 YY_RULE_SETUP
 {
       // static_cast<T>(
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       startFontClass("keyword");
       codifyLines(text);
@@ -16979,7 +17227,7 @@ case 103:
 YY_RULE_SETUP
 {
       // PHP member variable
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addType();
       generatePHPVariableLink(*g_code, text);
       g_name += text.mid(7);
@@ -16990,7 +17238,7 @@ case 104:
 YY_RULE_SETUP
 {
       // A<T> *pt;
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (isCastKeyword(text) && YY_START == Body) {
          REJECT;
@@ -17006,7 +17254,7 @@ case 105:
 YY_RULE_SETUP
 {
       // "int var;" or "var, var2" or "debug(f) macro" , or int var : 5;
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (text.startsWith("typedef")) {
          REJECT;
@@ -17022,7 +17270,7 @@ case 106:
 YY_RULE_SETUP
 {
       // p->func()
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (text.startsWith("typedef")) {
          REJECT;
@@ -17030,7 +17278,7 @@ YY_RULE_SETUP
 
       addType();
       generateClassOrGlobalLink(*g_code, text);
-      g_name += code_cstyle_YYtext;
+      g_name += yytext;
    }
 	YY_BREAK
 case 107:
@@ -17038,7 +17286,7 @@ case 107:
 YY_RULE_SETUP
 {
       // (*p)->func() but not "if (p) ..."
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
 
       int s = 0;
@@ -17067,7 +17315,7 @@ YY_RULE_SETUP
 {
       // a() or c::a() or t<A,B>::a() or A\B\foo()
 
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       if (isCastKeyword(text)) {
          REJECT;
       }
@@ -17078,14 +17326,14 @@ YY_RULE_SETUP
       g_bracketCount = 0;
       g_args.resize(0);
       g_name += text;
-      BEGIN( FuncCall );
+      BEGIN(FuncCall);
    }
 	YY_BREAK
 case 110:
 /* rule 110 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       int i = text.indexOf('R');
       g_code->codify(text.left(i + 1));
@@ -17097,42 +17345,42 @@ YY_RULE_SETUP
       g_delimiter = text.mid(i + 2);
       g_delimiter = g_delimiter.left(g_delimiter.length() - 1);
 
-      BEGIN( RawString );
+      BEGIN(RawString);
    }
 	YY_BREAK
 case 111:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       startFontClass("stringliteral");
       g_code->codify(text);
       g_lastStringContext   = YY_START;
       g_inForEachExpression = false;
-      BEGIN( SkipString );
+      BEGIN(SkipString);
    }
 	YY_BREAK
 case 112:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       startFontClass("stringliteral");
       g_code->codify(text);
       g_lastStringContext   = YY_START;
       g_inForEachExpression = false;
-      BEGIN( SkipStringS );
+      BEGIN(SkipStringS);
    }
 	YY_BREAK
 case 113:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 	YY_BREAK
 case 114:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 	YY_BREAK
@@ -17140,7 +17388,7 @@ case 115:
 YY_RULE_SETUP
 {
       // */ (editor syntax fix)
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 	YY_BREAK
@@ -17148,27 +17396,27 @@ case 116:
 YY_RULE_SETUP
 {
       // */ (editor syntax fix)
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       g_code->codify(text);
       endFontClass();
-      BEGIN( g_lastStringContext );
+      BEGIN(g_lastStringContext);
    }
 	YY_BREAK
 case 117:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       g_code->codify(text);
       endFontClass();
-      BEGIN( g_lastStringContext );
+      BEGIN(g_lastStringContext);
    }
 	YY_BREAK
 case 118:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 	YY_BREAK
@@ -17176,29 +17424,28 @@ case 119:
 /* rule 119 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
 
       QString delimiter = text.mid(1);
       delimiter = delimiter.left(delimiter.length() - 1);
 
-      if (delimiter == g_delimiter)
-      {
-         BEGIN( g_lastStringContext );
+      if (delimiter == g_delimiter) {
+         BEGIN(g_lastStringContext);
       }
    }
 	YY_BREAK
 case 120:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 	YY_BREAK
 case 121:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 	YY_BREAK
@@ -17206,14 +17453,14 @@ case 122:
 /* rule 122 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       codifyLines(text);
    }
 	YY_BREAK
 case 123:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 	YY_BREAK
@@ -17221,7 +17468,7 @@ case 124:
 YY_RULE_SETUP
 {
       // escaped quote
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 	YY_BREAK
@@ -17229,16 +17476,17 @@ case 125:
 YY_RULE_SETUP
 {
       // end of string
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
+
       g_code->codify(text);
       endFontClass();
-      BEGIN( g_lastVerbStringContext );
+      BEGIN(g_lastVerbStringContext);
    }
 	YY_BREAK
 case 126:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 	YY_BREAK
@@ -17246,14 +17494,14 @@ case 127:
 /* rule 127 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       codifyLines(text);
    }
 	YY_BREAK
 case 128:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       g_name.resize(0);
       g_type.resize(0);
@@ -17262,7 +17510,7 @@ YY_RULE_SETUP
 case 129:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (g_insideTemplate) {
          g_sharpCount++;
@@ -17273,7 +17521,7 @@ YY_RULE_SETUP
 case 130:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (g_insideTemplate) {
          if (--g_sharpCount <= 0) {
@@ -17286,7 +17534,7 @@ YY_RULE_SETUP
 case 131:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       startFontClass("charliteral");
       g_code->codify(text);
       endFontClass();
@@ -17295,7 +17543,7 @@ YY_RULE_SETUP
 case 132:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (text[0] == '-') {
          // -> could be overloaded
@@ -17304,14 +17552,14 @@ YY_RULE_SETUP
 
       g_code->codify(text);
       g_memCallContext = YY_START;
-      BEGIN( MemberCall );
+      BEGIN(MemberCall);
    }
 	YY_BREAK
 case 133:
 /* rule 133 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (getScopeCallContext()) {
             if (! generateClassMemberLink(*g_code, getScopeCallContext(), text)) {
@@ -17341,7 +17589,7 @@ case 134:
 /* rule 134 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (getScopeCallContext()) {
          DBG_CTX((stderr, "g_theCallContext.getClass()=%p\n", getScopeCallContext()));
@@ -17367,7 +17615,7 @@ YY_RULE_SETUP
 case 135:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (g_insideObjC && text[0] == '[')  {
          // printf("Found start of ObjC call\n");
@@ -17382,7 +17630,7 @@ YY_RULE_SETUP
          g_currentCtxId    = 0;
          g_currentNameId   = 0;
          g_currentObjId    = 0;
-         g_ObjC_currentCtx = 0;
+         g_ObjC_currentCtx = nullptr;
          g_braceCount      = 0;
 
          unput('[');
@@ -17414,9 +17662,9 @@ YY_RULE_SETUP
 	YY_BREAK
 /*
 <ObjCMemberCall>{ID}          {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
-      if (qstrcmp(code_cstyle_YYtext,"self") == 0 || qstrcmp(code_cstyle_YYtext,"super") == 0) {
+      if (qstrcmp(yytext,"self") == 0 || qstrcmp(yytext,"super") == 0) {
          // TODO: get proper base class for "super"
          g_theCallContext.setClass(getClass(g_curClassName));
          startFontClass("keyword");
@@ -17432,13 +17680,13 @@ YY_RULE_SETUP
    }
 
 <ObjCMemberCall>"["        {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       pushCallContext();
    }
 
 <ObjCMemberCall2>{ID}":"?     {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       g_name += text;
       if (g_theCallContext.getClass()) {
@@ -17459,7 +17707,7 @@ YY_RULE_SETUP
    }
 
 <ObjCMemberCall2,ObjCMemberCall3>"]"   {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       popCallContext();
       g_code->codify(text);
       BEGIN(Body);
@@ -17469,7 +17717,7 @@ YY_RULE_SETUP
 case 136:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       saveObjCContext();
       g_ObjC_currentCtx->format += text[0];
 
@@ -17479,7 +17727,7 @@ YY_RULE_SETUP
 case 137:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_ObjC_currentCtx->format += text[0];
       restoreObjCContext();
       BEGIN(ObjCMName);
@@ -17494,7 +17742,7 @@ YY_RULE_SETUP
 case 138:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_ObjC_currentCtx->format += escapeComment(text);
    }
 	YY_BREAK
@@ -17502,7 +17750,7 @@ case 139:
 YY_RULE_SETUP
 {
       // */ (editor syntax fix)
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_lastObjCCallContext = YY_START;
       g_ObjC_currentCtx->comment = text;
       BEGIN(ObjCCallComment);
@@ -17511,7 +17759,7 @@ YY_RULE_SETUP
 case 140:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_ObjC_currentCtx->comment += text;
       g_ObjC_currentCtx->format  += escapeComment(g_ObjC_currentCtx->comment);
       BEGIN(g_lastObjCCallContext);
@@ -17520,7 +17768,7 @@ YY_RULE_SETUP
 case 141:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_ObjC_currentCtx->comment += text;
    }
 	YY_BREAK
@@ -17528,7 +17776,7 @@ case 142:
 YY_RULE_SETUP
 {
       // */ (editor syntax fix)
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_ObjC_currentCtx->comment += text;
    }
 	YY_BREAK
@@ -17536,21 +17784,21 @@ case 143:
 /* rule 143 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_ObjC_currentCtx->comment += text[0];
    }
 	YY_BREAK
 case 144:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_ObjC_currentCtx->comment += text[0];
    }
 	YY_BREAK
 case 145:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_ObjC_currentCtx->format += escapeObject(text);
 
       if (g_braceCount == 0) {
@@ -17563,7 +17811,7 @@ case 146:
 /* rule 146 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (g_braceCount == 0 && g_ObjC_currentCtx->methodName.isEmpty()) {
          g_ObjC_currentCtx->methodName = text;
@@ -17578,7 +17826,7 @@ case 147:
 /* rule 147 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (g_braceCount == 0) {
          g_ObjC_currentCtx->methodName += text;
@@ -17591,21 +17839,21 @@ YY_RULE_SETUP
 case 148:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_ObjC_currentCtx->format += text;
    }
 	YY_BREAK
 case 149:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_ObjC_currentCtx->format += text;
    }
 	YY_BREAK
 case 150:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_ObjC_currentCtx->format += text;
       BEGIN(g_lastStringContext);
    }
@@ -17613,14 +17861,14 @@ YY_RULE_SETUP
 case 151:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_ObjC_currentCtx->format += text;
    }
 	YY_BREAK
 case 152:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_ObjC_currentCtx->format += text;
       g_lastStringContext        = YY_START;
       BEGIN(ObjCSkipStr);
@@ -17635,7 +17883,7 @@ YY_RULE_SETUP
 case 154:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_ObjC_currentCtx->format += text[0];
       g_braceCount++;
    }
@@ -17643,33 +17891,33 @@ YY_RULE_SETUP
 case 155:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_ObjC_currentCtx->format += text[0];
       g_braceCount--;
    }
 	YY_BREAK
 case 156:
-*yy_cp = (yy_hold_char); /* undo effects of setting up code_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
-YY_DO_BEFORE_ACTION; /* set up code_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // needed to prevent matching the global rule (for C#)
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_ObjC_currentCtx->format += text;
    }
 	YY_BREAK
 case 157:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_ObjC_currentCtx->format += escapeWord(text);
    }
 	YY_BREAK
 case 158:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_ObjC_currentCtx->format += text[0];
    }
 	YY_BREAK
@@ -17677,14 +17925,14 @@ case 159:
 /* rule 159 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_ObjC_currentCtx->format += text[0];
    }
 	YY_BREAK
 case 160:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       popCallContext();
       g_code->codify(text);
@@ -17698,28 +17946,30 @@ YY_RULE_SETUP
 case 161:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 	YY_BREAK
 case 162:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 	YY_BREAK
 case 163:
 /* rule 163 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up code_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up code_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (skipLanguageKeywords(text)) {
-         REJECT;      }
+         REJECT;
+      }
 
       startFontClass("keyword");
       g_code->codify(text);
@@ -17728,12 +17978,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 164:
 /* rule 164 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up code_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up code_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addParmType();
       g_parmName = text;
 
@@ -17744,12 +17995,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 165:
 /* rule 165 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up code_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up code_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addParmType();
       g_parmName = text;
       startFontClass("keywordflow");
@@ -17759,12 +18011,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 166:
 /* rule 166 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up code_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up code_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       addParmType();
       g_parmName = text;
@@ -17776,7 +18029,7 @@ YY_RULE_SETUP
 case 167:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (isCastKeyword(text)) {
          REJECT;
@@ -17791,16 +18044,16 @@ case 168:
 YY_RULE_SETUP
 {
       // probably a cast, not a function call
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       g_inForEachExpression = false;
-      BEGIN( Body );
+      BEGIN(Body);
    }
 	YY_BREAK
 case 169:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       g_theVarContext.addVariable(g_parmType, g_parmName);
       g_parmType.resize(0);
@@ -17810,12 +18063,13 @@ YY_RULE_SETUP
 case 170:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (g_bracketCount > 0) {
          g_code->codify(text);
          g_skipInlineInitContext = YY_START;
          g_curlyCount = 0;
+
          BEGIN(InlineInit);
 
       } else {
@@ -17826,7 +18080,7 @@ YY_RULE_SETUP
 case 171:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_curlyCount++;
       g_code->codify(text);
    }
@@ -17834,7 +18088,7 @@ YY_RULE_SETUP
 case 172:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
 
       if (--g_curlyCount <= 0) {
@@ -17846,25 +18100,28 @@ case 173:
 /* rule 173 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       codifyLines(text);
    }
 	YY_BREAK
 case 174:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 	YY_BREAK
 case 175:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
+
       g_parmType.resize(0);
       g_parmName.resize(0);
       g_code->codify(text);
-      g_bracketCount++;
+
+      ++g_bracketCount;
+
       pushCallContext();
 
       if (YY_START == FuncCall && ! g_insideBody) {
@@ -17876,7 +18133,7 @@ case 176:
 YY_RULE_SETUP
 {
       // operator
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if ((text != "*") && (text != "&") && (text != "^") && (text != "%")) {
          // typically a pointer or reference
@@ -17892,10 +18149,10 @@ YY_RULE_SETUP
 case 177:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (text[0] == ')') {
-         // no a pointer cast
+         // not a pointer cast
 
          if (g_parmType.isEmpty()) {
             g_parmType = g_parmName;
@@ -17919,10 +18176,18 @@ YY_RULE_SETUP
       --g_bracketCount;
 
       if (g_bracketCount <= 0)  {
-         if (g_name.isEmpty()) {
-            BEGIN( Body );
+         bool isCsMacro = false;
+
+         if (g_name.contains("CS_SIGNAL_") || g_name.contains("CS_SLOT_") ||
+               g_name.contains("CS_PROPERTY_") || g_name.contains("CS_INVOKABLE_")) {
+            isCsMacro = true;
+         }
+
+         if (g_name.isEmpty() || isCsMacro) {
+            BEGIN(Body);
+
          } else {
-            BEGIN( CallEnd );
+            BEGIN(CallEnd);
          }
       }
    }
@@ -17931,7 +18196,7 @@ case 178:
 /* rule 178 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       codifyLines(text);
    }
 	YY_BREAK
@@ -17941,7 +18206,7 @@ YY_RULE_SETUP
 case 179:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       codifyLines(text);
       g_bracketCount = 0;
@@ -17967,11 +18232,11 @@ YY_RULE_SETUP
 
          g_name.resize(0);
          g_type.resize(0);
-         BEGIN( Body );
+         BEGIN(Body);
 
       } else {
          g_bracketCount = 0;
-         BEGIN( SkipInits );
+         BEGIN(SkipInits);
       }
    }
 	YY_BREAK
@@ -17979,7 +18244,8 @@ case 180:
 /* rule 180 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
+
       startFontClass("keyword");
       codifyLines(text);
       endFontClass();
@@ -17989,7 +18255,7 @@ case 181:
 /* rule 181 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (g_insideBody) {
          g_theVarContext.pushScope();
@@ -18054,14 +18320,14 @@ YY_RULE_SETUP
 
       g_type.resize(0);
       g_name.resize(0);
-      BEGIN( Body );
+      BEGIN(Body);
    }
 	YY_BREAK
 case 182:
 YY_RULE_SETUP
 {
       // function-try-block
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       startFontClass("keyword");
       g_code->codify(text);
@@ -18072,7 +18338,7 @@ YY_RULE_SETUP
 case 183:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       startFontClass("keyword");
       g_code->codify(text);
@@ -18082,7 +18348,7 @@ YY_RULE_SETUP
 case 184:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (g_insideBody || ! g_parmType.isEmpty())  {
          REJECT;
@@ -18090,7 +18356,7 @@ YY_RULE_SETUP
 
       // could be K&R style definition
       addParmType();
-      g_parmName = code_cstyle_YYtext;
+      g_parmName = yytext;
       generateClassOrGlobalLink(*g_code, text, ! g_insideBody);
       BEGIN(OldStyleArgs);
    }
@@ -18098,7 +18364,7 @@ YY_RULE_SETUP
 case 185:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       addParmType();
       g_parmName = text;
       generateClassOrGlobalLink(*g_code, text, ! g_insideBody);
@@ -18107,7 +18373,7 @@ YY_RULE_SETUP
 case 186:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       g_theVarContext.addVariable(g_parmType, g_parmName);
 
@@ -18120,17 +18386,17 @@ YY_RULE_SETUP
 case 187:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       startFontClass("preprocessor");
       g_lastSkipCppContext = Body;
       g_code->codify(text);
-      BEGIN( SkipCPP );
+      BEGIN(SkipCPP);
    }
 	YY_BREAK
 case 188:
 YY_RULE_SETUP
 {
-      unput(*code_cstyle_YYtext);
+      unput(*yytext);
 
       if (! g_insideBody) {
          g_theVarContext.popScope();
@@ -18140,23 +18406,23 @@ YY_RULE_SETUP
       g_args.resize(0);
       g_parmType.resize(0);
       g_parmName.resize(0);
-      BEGIN( Body );
+      BEGIN(Body);
    }
 	YY_BREAK
 case 189:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       g_type.resize(0);
       g_name.resize(0);
-      BEGIN( Body );
+      BEGIN(Body);
    }
 	YY_BREAK
 case 190:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
 
       if (g_searchingForBody) {
@@ -18180,13 +18446,13 @@ YY_RULE_SETUP
 
       g_type.resize(0);
       g_name.resize(0);
-      BEGIN( Body );
+      BEGIN(Body);
    }
 	YY_BREAK
 case 191:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       int bracketPos = text.indexOf('{');
       int spacePos   = text.indexOf(' ');
@@ -18199,33 +18465,33 @@ YY_RULE_SETUP
 case 192:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       generateClassOrGlobalLink(*g_code, text);
    }
 	YY_BREAK
 case 193:
-*yy_cp = (yy_hold_char); /* undo effects of setting up code_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up code_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       generateFunctionLink(*g_code, text);
    }
 	YY_BREAK
 case 194:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_name = text;
       generateClassOrGlobalLink(*g_code, text);
-      BEGIN( MemberCall2 );
+      BEGIN(MemberCall2);
    }
 	YY_BREAK
 case 195:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
 
       int s = 0;
@@ -18241,14 +18507,14 @@ YY_RULE_SETUP
       }
 
       g_name = text.mid(s, e - s + 1);
-      BEGIN( MemberCall2 );
+      BEGIN(MemberCall2);
    }
 	YY_BREAK
 case 196:
 /* rule 196 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (! g_args.isEmpty())  {
          generateMemberLink(*g_code,g_args, text);
@@ -18257,7 +18523,7 @@ YY_RULE_SETUP
       }
 
       g_args.resize(0);
-      BEGIN( FuncCall );
+      BEGIN(FuncCall);
    }
 	YY_BREAK
 case 197:
@@ -18266,62 +18532,63 @@ YY_RULE_SETUP
 {
       // g_code->codify(text);
 
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_name = text;
       generateClassOrGlobalLink(*g_code, text);
-      BEGIN( MemberCall2 );
+      BEGIN(MemberCall2);
    }
 	YY_BREAK
 case 198:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
-      if (code_cstyle_YYtext[0]=='-') {
+      if (yytext[0]=='-') {
          // -> could be overloaded
          updateCallContextForSmartPointer();
       }
 
       g_code->codify(text);
       g_memCallContext = YY_START;
-      BEGIN( MemberCall );
+      BEGIN(MemberCall);
    }
 	YY_BREAK
 case 199:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       endFontClass();
-      BEGIN( g_lastCContext ) ;
+      BEGIN(g_lastCContext);
    }
 	YY_BREAK
 case 200:
 YY_RULE_SETUP
 {
       // */ (editor syntax fix)
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 	YY_BREAK
 case 201:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 	YY_BREAK
 case 202:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       endFontClass();
 
       if (g_lastCContext == SkipCPP) {
          startFontClass("preprocessor");
       }
-      BEGIN( g_lastCContext );
+
+      BEGIN(g_lastCContext);
    }
 	YY_BREAK
 case 203:
@@ -18329,14 +18596,14 @@ case 203:
 YY_RULE_SETUP
 {
       // line continuation
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       codifyLines(text);
    }
 	YY_BREAK
 case 204:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 	YY_BREAK
@@ -18350,25 +18617,26 @@ YY_RULE_SETUP
 {
       unput('\n');
       endFontClass();
-      BEGIN( g_lastCContext );
+      BEGIN(g_lastCContext);
    }
 	YY_BREAK
 case 207:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 	YY_BREAK
 case 208:
 /* rule 208 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up code_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up code_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // */ (editor syntax fix)
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_yyLineNr += text.count('\n');
    }
 	YY_BREAK
@@ -18376,16 +18644,16 @@ case 209:
 /* rule 209 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_yyLineNr += text.count('\n');
 
       if (g_lastSpecialCContext == SkipCxxComment) {
          // force end of C++ comment here
          nextCodeLine();
          endFontClass();
-         BEGIN( g_lastCContext );
-      } else {
+         BEGIN(g_lastCContext);
 
+      } else {
          if (text.endsWith('\n'))  {
             --g_yyLineNr;
             unput('\n');
@@ -18431,7 +18699,7 @@ YY_RULE_SETUP
 case 215:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       g_code->codify(text);
       g_type.resize(0);
@@ -18444,7 +18712,7 @@ case 216:
 YY_RULE_SETUP
 {
       // remove special one-line comment
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (YY_START == SkipCPP) {
          REJECT;
@@ -18462,21 +18730,22 @@ YY_RULE_SETUP
 
       if (YY_START == SkipCxxComment) {
          endFontClass();
-         BEGIN( g_lastCContext );
+         BEGIN(g_lastCContext);
       }
    }
 	YY_BREAK
 case 217:
 /* rule 217 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up code_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_bp + 1);
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
-YY_DO_BEFORE_ACTION; /* set up code_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       endFontClass();
       unput('\n');
 
-      BEGIN( g_lastSkipCppContext );
+      BEGIN(g_lastSkipCppContext);
    }
 	YY_BREAK
 case 218:
@@ -18484,7 +18753,7 @@ case 218:
 YY_RULE_SETUP
 {
       // remove one-line group marker
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (s_stripCodeComments) {
          g_yyLineNr += 2;
@@ -18498,7 +18767,7 @@ YY_RULE_SETUP
 
       if (YY_START == SkipCxxComment) {
          endFontClass();
-         BEGIN( g_lastCContext );
+         BEGIN(g_lastCContext);
       }
    }
 	YY_BREAK
@@ -18508,7 +18777,7 @@ YY_RULE_SETUP
 {
       // */ (editor syntax fix)
       // remove one-line group marker
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (s_stripCodeComments) {
          if (YY_START != RemoveSpecialCComment) {
@@ -18535,7 +18804,7 @@ case 220:
 YY_RULE_SETUP
 {
       // remove one-line group marker
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (s_stripCodeComments) {
          ++g_yyLineNr;
@@ -18553,7 +18822,7 @@ YY_RULE_SETUP
 {
       // */ (editor syntax fix)
       // remove multi-line group marker
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (s_stripCodeComments) {
 
@@ -18579,7 +18848,7 @@ case 222:
 YY_RULE_SETUP
 {
       // remove special one-line comment
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (! s_stripCodeComments) {
          startFontClass("comment");
@@ -18592,7 +18861,7 @@ case 223:
 YY_RULE_SETUP
 {
       // strip special one-line comment
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (YY_START == SkipComment || YY_START == SkipString) {
          REJECT;
@@ -18609,7 +18878,7 @@ case 224:
 YY_RULE_SETUP
 {
       // special pattern /*[tag:filename]*/ to force linking to a tag file
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       g_forceTagReference = text;
 
@@ -18621,13 +18890,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 225:
 /* rule 225 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up code_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up code_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // */ (editor syntax fix)
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (s_stripCodeComments) {
 
@@ -18652,14 +18922,15 @@ YY_RULE_SETUP
 	YY_BREAK
 case 226:
 /* rule 226 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up code_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up code_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
 
       // special C "banner" comment block at a new line
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (s_stripCodeComments) {
          if (YY_START != RemoveSpecialCComment) {
@@ -18683,15 +18954,16 @@ YY_RULE_SETUP
 	YY_BREAK
 case 227:
 /* rule 227 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up code_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
-YY_DO_BEFORE_ACTION; /* set up code_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // */ (editor syntax fix)
       // special C comment block at a new line
 
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (s_stripCodeComments) {
          if (YY_START != RemoveSpecialCComment) {
@@ -18715,15 +18987,16 @@ YY_RULE_SETUP
 	YY_BREAK
 case 228:
 /* rule 228 can match eol */
-*yy_cp = (yy_hold_char); /* undo effects of setting up code_cstyle_YYtext */
+*yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
+YY_LINENO_REWIND_TO(yy_bp + 3);
 (yy_c_buf_p) = yy_cp = yy_bp + 3;
-YY_DO_BEFORE_ACTION; /* set up code_cstyle_YYtext again */
+YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 {
       // */ (editor syntax fix)
       // special C comment block half way a line
 
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (YY_START == SkipString) {
          REJECT;
@@ -18752,7 +19025,7 @@ YY_RULE_SETUP
 case 229:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       if (YY_START == SkipString) {
          REJECT;
@@ -18768,14 +19041,14 @@ YY_RULE_SETUP
 case 230:
 YY_RULE_SETUP
 {
-      g_code->codify(QString::fromUtf8(code_cstyle_YYtext));
+      g_code->codify(QString::fromUtf8(yytext));
    }
 	YY_BREAK
 case 231:
 YY_RULE_SETUP
 {
       // */ (editor syntax fix)
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       startFontClass("comment");
       g_code->codify(text);
@@ -18783,36 +19056,41 @@ YY_RULE_SETUP
       // check is to prevent getting stuck in skipping C++ comments
 
       if (YY_START != SkipComment && YY_START != SkipCxxComment) {
-         g_lastCContext = YY_START ;
+         g_lastCContext = YY_START;
       }
-      BEGIN( SkipComment );
+
+      BEGIN(SkipComment);
    }
 	YY_BREAK
 case 232:
 YY_RULE_SETUP
 {
       // C# verbatim string
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
+
       startFontClass("stringliteral");
       g_code->codify(text);
       g_lastVerbStringContext = YY_START;
+
       BEGIN(SkipVerbString);
    }
 	YY_BREAK
 case 233:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
+
       startFontClass("comment");
       g_code->codify(text);
       g_lastCContext = YY_START;
-      BEGIN( SkipCxxComment );
+
+      BEGIN(SkipCxxComment);
    }
 	YY_BREAK
 case 234:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       pushCallContext();
    }
@@ -18820,7 +19098,7 @@ YY_RULE_SETUP
 case 235:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       popCallContext();
    }
@@ -18829,7 +19107,7 @@ case 236:
 /* rule 236 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_yyColNr++;
       codifyLines(text);
    }
@@ -18838,7 +19116,7 @@ case 237:
 YY_RULE_SETUP
 {
       // utf-8 code point
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       g_yyColNr += text.size();
       g_code->codify(text);
    }
@@ -18846,7 +19124,7 @@ YY_RULE_SETUP
 case 238:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
       ++g_yyColNr;
       g_code->codify(text);
    }
@@ -18854,7 +19132,7 @@ YY_RULE_SETUP
 /*
 <*>([ \t\n]*"\n"){2,}         {
       // combine multiple blank lines
-      QString text = QString::fromUtf8(code_cstyle_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       QString sepLine = text;
       g_code->codify("\n\n");
@@ -18921,15 +19199,15 @@ ECHO;
 			{
 			/* We're scanning a new file or input source.  It's
 			 * possible that this happened because the user
-			 * just pointed code_cstyle_YYin at a new source and called
-			 * code_cstyle_YYlex().  If so, then we have to assure
+			 * just pointed yyin at a new source and called
+			 * yylex().  If so, then we have to assure
 			 * consistency between YY_CURRENT_BUFFER and our
 			 * globals.  Here is the right place to do so, because
 			 * this is the first action (other than possibly a
 			 * back-up) that will match for the new input source.
 			 */
 			(yy_n_chars) = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
-			YY_CURRENT_BUFFER_LVALUE->yy_input_file = code_cstyle_YYin;
+			YY_CURRENT_BUFFER_LVALUE->yy_input_file = yyin;
 			YY_CURRENT_BUFFER_LVALUE->yy_buffer_status = YY_BUFFER_NORMAL;
 			}
 
@@ -18982,11 +19260,11 @@ ECHO;
 				{
 				(yy_did_buffer_switch_on_eof) = 0;
 
-				if ( code_cstyle_YYwrap( ) )
+				if ( yywrap(  ) )
 					{
 					/* Note: because we've taken care in
 					 * yy_get_next_buffer() to have set up
-					 * code_cstyle_YYtext, we can now set up
+					 * yytext, we can now set up
 					 * yy_c_buf_p so that if some total
 					 * hoser (like flex itself) wants to
 					 * call the scanner after we return the
@@ -19035,7 +19313,8 @@ ECHO;
 			"fatal flex scanner internal error--no action found" );
 	} /* end of action switch */
 		} /* end of scanning one token */
-} /* end of code_cstyle_YYlex */
+	} /* end of user's declarations */
+} /* end of yylex */
 
 /* yy_get_next_buffer - try to read in a new buffer
  *
@@ -19077,7 +19356,7 @@ static int yy_get_next_buffer (void)
 	/* Try to read more data. */
 
 	/* First move last chars to start of buffer. */
-	number_to_move = (int) ((yy_c_buf_p) - (yytext_ptr)) - 1;
+	number_to_move = (int) ((yy_c_buf_p) - (yytext_ptr) - 1);
 
 	for ( i = 0; i < number_to_move; ++i )
 		*(dest++) = *(source++);
@@ -19106,7 +19385,7 @@ static int yy_get_next_buffer (void)
 
 		/* Read in more data. */
 		YY_INPUT( (&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
-			(yy_n_chars), (size_t) num_to_read );
+			(yy_n_chars), num_to_read );
 
 		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
 		}
@@ -19116,7 +19395,7 @@ static int yy_get_next_buffer (void)
 		if ( number_to_move == YY_MORE_ADJ )
 			{
 			ret_val = EOB_ACT_END_OF_FILE;
-			code_cstyle_YYrestart(code_cstyle_YYin  );
+			yyrestart( yyin  );
 			}
 
 		else
@@ -19130,12 +19409,15 @@ static int yy_get_next_buffer (void)
 	else
 		ret_val = EOB_ACT_CONTINUE_SCAN;
 
-	if ((yy_size_t) ((yy_n_chars) + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
+	if (((yy_n_chars) + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
 		/* Extend the array by 50%, plus the number we really need. */
-		yy_size_t new_size = (yy_n_chars) + number_to_move + ((yy_n_chars) >> 1);
-		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) code_cstyle_YYrealloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size  );
+		int new_size = (yy_n_chars) + number_to_move + ((yy_n_chars) >> 1);
+		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) yyrealloc(
+			(void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf, (yy_size_t) new_size  );
 		if ( ! YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
 			YY_FATAL_ERROR( "out of dynamic memory in yy_get_next_buffer()" );
+		/* "- 2" to take care of EOB's */
+		YY_CURRENT_BUFFER_LVALUE->yy_buf_size = (int) (new_size - 2);
 	}
 
 	(yy_n_chars) += number_to_move;
@@ -19167,9 +19449,9 @@ static int yy_get_next_buffer (void)
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
 			if ( yy_current_state >= 4103 )
-				yy_c = yy_meta[(unsigned int) yy_c];
+				yy_c = yy_meta[yy_c];
 			}
-		yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
+		yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 		*(yy_state_ptr)++ = yy_current_state;
 		}
 
@@ -19190,15 +19472,17 @@ static int yy_get_next_buffer (void)
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
 		if ( yy_current_state >= 4103 )
-			yy_c = yy_meta[(unsigned int) yy_c];
+			yy_c = yy_meta[yy_c];
 		}
-	yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
+	yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 	yy_is_jam = (yy_current_state == 4102);
 	if ( ! yy_is_jam )
 		*(yy_state_ptr)++ = yy_current_state;
 
-	return yy_is_jam ? 0 : yy_current_state;
+		return yy_is_jam ? 0 : yy_current_state;
 }
+
+#ifndef YY_NO_UNPUT
 
     static void yyunput (int c, char * yy_bp )
 {
@@ -19206,7 +19490,7 @@ static int yy_get_next_buffer (void)
     
     yy_cp = (yy_c_buf_p);
 
-	/* undo effects of setting up code_cstyle_YYtext */
+	/* undo effects of setting up yytext */
 	*yy_cp = (yy_hold_char);
 
 	if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
@@ -19224,7 +19508,7 @@ static int yy_get_next_buffer (void)
 		yy_cp += (int) (dest - source);
 		yy_bp += (int) (dest - source);
 		YY_CURRENT_BUFFER_LVALUE->yy_n_chars =
-			(yy_n_chars) = YY_CURRENT_BUFFER_LVALUE->yy_buf_size;
+			(yy_n_chars) = (int) YY_CURRENT_BUFFER_LVALUE->yy_buf_size;
 
 		if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
 			YY_FATAL_ERROR( "flex scanner push-back overflow" );
@@ -19236,6 +19520,8 @@ static int yy_get_next_buffer (void)
 	(yy_hold_char) = *yy_cp;
 	(yy_c_buf_p) = yy_cp;
 }
+
+#endif
 
 #ifndef YY_NO_INPUT
 #ifdef __cplusplus
@@ -19261,7 +19547,7 @@ static int yy_get_next_buffer (void)
 
 		else
 			{ /* need more input */
-			int offset = (yy_c_buf_p) - (yytext_ptr);
+			int offset = (int) ((yy_c_buf_p) - (yytext_ptr));
 			++(yy_c_buf_p);
 
 			switch ( yy_get_next_buffer(  ) )
@@ -19278,14 +19564,14 @@ static int yy_get_next_buffer (void)
 					 */
 
 					/* Reset buffer status. */
-					code_cstyle_YYrestart(code_cstyle_YYin );
+					yyrestart( yyin );
 
 					/*FALLTHROUGH*/
 
 				case EOB_ACT_END_OF_FILE:
 					{
-					if ( code_cstyle_YYwrap( ) )
-						return EOF;
+					if ( yywrap(  ) )
+						return 0;
 
 					if ( ! (yy_did_buffer_switch_on_eof) )
 						YY_NEW_FILE;
@@ -19304,7 +19590,7 @@ static int yy_get_next_buffer (void)
 		}
 
 	c = *(unsigned char *) (yy_c_buf_p);	/* cast for 8-bit char's */
-	*(yy_c_buf_p) = '\0';	/* preserve code_cstyle_YYtext */
+	*(yy_c_buf_p) = '\0';	/* preserve yytext */
 	(yy_hold_char) = *++(yy_c_buf_p);
 
 	YY_CURRENT_BUFFER_LVALUE->yy_at_bol = (c == '\n');
@@ -19318,32 +19604,32 @@ static int yy_get_next_buffer (void)
  * 
  * @note This function does not reset the start condition to @c INITIAL .
  */
-    void code_cstyle_YYrestart  (FILE * input_file )
+    void yyrestart  (FILE * input_file )
 {
     
 	if ( ! YY_CURRENT_BUFFER ){
-        code_cstyle_YYensure_buffer_stack ();
+        yyensure_buffer_stack ();
 		YY_CURRENT_BUFFER_LVALUE =
-            code_cstyle_YY_create_buffer(code_cstyle_YYin,YY_BUF_SIZE );
+            yy_create_buffer( yyin, YY_BUF_SIZE );
 	}
 
-	code_cstyle_YY_init_buffer(YY_CURRENT_BUFFER,input_file );
-	code_cstyle_YY_load_buffer_state( );
+	yy_init_buffer( YY_CURRENT_BUFFER, input_file );
+	yy_load_buffer_state(  );
 }
 
 /** Switch to a different input buffer.
  * @param new_buffer The new input buffer.
  * 
  */
-    void code_cstyle_YY_switch_to_buffer  (YY_BUFFER_STATE  new_buffer )
+    void yy_switch_to_buffer  (YY_BUFFER_STATE  new_buffer )
 {
     
 	/* TODO. We should be able to replace this entire function body
 	 * with
-	 *		code_cstyle_YYpop_buffer_state();
-	 *		code_cstyle_YYpush_buffer_state(new_buffer);
+	 *		yypop_buffer_state();
+	 *		yypush_buffer_state(new_buffer);
      */
-	code_cstyle_YYensure_buffer_stack ();
+	yyensure_buffer_stack ();
 	if ( YY_CURRENT_BUFFER == new_buffer )
 		return;
 
@@ -19356,21 +19642,21 @@ static int yy_get_next_buffer (void)
 		}
 
 	YY_CURRENT_BUFFER_LVALUE = new_buffer;
-	code_cstyle_YY_load_buffer_state( );
+	yy_load_buffer_state(  );
 
 	/* We don't actually know whether we did this switch during
-	 * EOF (code_cstyle_YYwrap()) processing, but the only time this flag
-	 * is looked at is after code_cstyle_YYwrap() is called, so it's safe
+	 * EOF (yywrap()) processing, but the only time this flag
+	 * is looked at is after yywrap() is called, so it's safe
 	 * to go ahead and always set it.
 	 */
 	(yy_did_buffer_switch_on_eof) = 1;
 }
 
-static void code_cstyle_YY_load_buffer_state  (void)
+static void yy_load_buffer_state  (void)
 {
     	(yy_n_chars) = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
 	(yytext_ptr) = (yy_c_buf_p) = YY_CURRENT_BUFFER_LVALUE->yy_buf_pos;
-	code_cstyle_YYin = YY_CURRENT_BUFFER_LVALUE->yy_input_file;
+	yyin = YY_CURRENT_BUFFER_LVALUE->yy_input_file;
 	(yy_hold_char) = *(yy_c_buf_p);
 }
 
@@ -19380,35 +19666,35 @@ static void code_cstyle_YY_load_buffer_state  (void)
  * 
  * @return the allocated buffer state.
  */
-    YY_BUFFER_STATE code_cstyle_YY_create_buffer  (FILE * file, int  size )
+    YY_BUFFER_STATE yy_create_buffer  (FILE * file, int  size )
 {
 	YY_BUFFER_STATE b;
     
-	b = (YY_BUFFER_STATE) code_cstyle_YYalloc(sizeof( struct yy_buffer_state )  );
+	b = (YY_BUFFER_STATE) yyalloc( sizeof( struct yy_buffer_state )  );
 	if ( ! b )
-		YY_FATAL_ERROR( "out of dynamic memory in code_cstyle_YY_create_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
 
 	b->yy_buf_size = size;
 
 	/* yy_ch_buf has to be 2 characters longer than the size given because
 	 * we need to put in 2 end-of-buffer characters.
 	 */
-	b->yy_ch_buf = (char *) code_cstyle_YYalloc(b->yy_buf_size + 2  );
+	b->yy_ch_buf = (char *) yyalloc( (yy_size_t) (b->yy_buf_size + 2)  );
 	if ( ! b->yy_ch_buf )
-		YY_FATAL_ERROR( "out of dynamic memory in code_cstyle_YY_create_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
 
 	b->yy_is_our_buffer = 1;
 
-	code_cstyle_YY_init_buffer(b,file );
+	yy_init_buffer( b, file );
 
 	return b;
 }
 
 /** Destroy the buffer.
- * @param b a buffer created with code_cstyle_YY_create_buffer()
+ * @param b a buffer created with yy_create_buffer()
  * 
  */
-    void code_cstyle_YY_delete_buffer (YY_BUFFER_STATE  b )
+    void yy_delete_buffer (YY_BUFFER_STATE  b )
 {
     
 	if ( ! b )
@@ -19418,27 +19704,27 @@ static void code_cstyle_YY_load_buffer_state  (void)
 		YY_CURRENT_BUFFER_LVALUE = (YY_BUFFER_STATE) 0;
 
 	if ( b->yy_is_our_buffer )
-		code_cstyle_YYfree((void *) b->yy_ch_buf  );
+		yyfree( (void *) b->yy_ch_buf  );
 
-	code_cstyle_YYfree((void *) b  );
+	yyfree( (void *) b  );
 }
 
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
- * such as during a code_cstyle_YYrestart() or at EOF.
+ * such as during a yyrestart() or at EOF.
  */
-    static void code_cstyle_YY_init_buffer  (YY_BUFFER_STATE  b, FILE * file )
+    static void yy_init_buffer  (YY_BUFFER_STATE  b, FILE * file )
 
 {
 	int oerrno = errno;
     
-	code_cstyle_YY_flush_buffer(b );
+	yy_flush_buffer( b );
 
 	b->yy_input_file = file;
 	b->yy_fill_buffer = 1;
 
-    /* If b is the current buffer, then code_cstyle_YY_init_buffer was _probably_
-     * called from code_cstyle_YYrestart() or through yy_get_next_buffer.
+    /* If b is the current buffer, then yy_init_buffer was _probably_
+     * called from yyrestart() or through yy_get_next_buffer.
      * In that case, we don't want to reset the lineno or column.
      */
     if (b != YY_CURRENT_BUFFER){
@@ -19455,7 +19741,7 @@ static void code_cstyle_YY_load_buffer_state  (void)
  * @param b the buffer state to be flushed, usually @c YY_CURRENT_BUFFER.
  * 
  */
-    void code_cstyle_YY_flush_buffer (YY_BUFFER_STATE  b )
+    void yy_flush_buffer (YY_BUFFER_STATE  b )
 {
     	if ( ! b )
 		return;
@@ -19475,7 +19761,7 @@ static void code_cstyle_YY_load_buffer_state  (void)
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
 	if ( b == YY_CURRENT_BUFFER )
-		code_cstyle_YY_load_buffer_state( );
+		yy_load_buffer_state(  );
 }
 
 /** Pushes the new state onto the stack. The new state becomes
@@ -19484,14 +19770,14 @@ static void code_cstyle_YY_load_buffer_state  (void)
  *  @param new_buffer The new state.
  *  
  */
-void code_cstyle_YYpush_buffer_state (YY_BUFFER_STATE new_buffer )
+void yypush_buffer_state (YY_BUFFER_STATE new_buffer )
 {
-    	if (new_buffer == NULL)
+    	if (new_buffer == nullptr)
 		return;
 
-	code_cstyle_YYensure_buffer_stack();
+	yyensure_buffer_stack();
 
-	/* This block is copied from code_cstyle_YY_switch_to_buffer. */
+	/* This block is copied from yy_switch_to_buffer. */
 	if ( YY_CURRENT_BUFFER )
 		{
 		/* Flush out information for old buffer. */
@@ -19505,8 +19791,8 @@ void code_cstyle_YYpush_buffer_state (YY_BUFFER_STATE new_buffer )
 		(yy_buffer_stack_top)++;
 	YY_CURRENT_BUFFER_LVALUE = new_buffer;
 
-	/* copied from code_cstyle_YY_switch_to_buffer. */
-	code_cstyle_YY_load_buffer_state( );
+	/* copied from yy_switch_to_buffer. */
+	yy_load_buffer_state(  );
 	(yy_did_buffer_switch_on_eof) = 1;
 }
 
@@ -19514,18 +19800,18 @@ void code_cstyle_YYpush_buffer_state (YY_BUFFER_STATE new_buffer )
  *  The next element becomes the new top.
  *  
  */
-void code_cstyle_YYpop_buffer_state (void)
+void yypop_buffer_state (void)
 {
     	if (!YY_CURRENT_BUFFER)
 		return;
 
-	code_cstyle_YY_delete_buffer(YY_CURRENT_BUFFER );
-	YY_CURRENT_BUFFER_LVALUE = NULL;
+	yy_delete_buffer(YY_CURRENT_BUFFER );
+	YY_CURRENT_BUFFER_LVALUE = nullptr;
 	if ((yy_buffer_stack_top) > 0)
 		--(yy_buffer_stack_top);
 
 	if (YY_CURRENT_BUFFER) {
-		code_cstyle_YY_load_buffer_state( );
+		yy_load_buffer_state(  );
 		(yy_did_buffer_switch_on_eof) = 1;
 	}
 }
@@ -19533,9 +19819,9 @@ void code_cstyle_YYpop_buffer_state (void)
 /* Allocates the stack if it does not exist.
  *  Guarantees space for at least one push.
  */
-static void code_cstyle_YYensure_buffer_stack (void)
+static void yyensure_buffer_stack (void)
 {
-	int num_to_alloc;
+	yy_size_t num_to_alloc;
     
 	if (!(yy_buffer_stack)) {
 
@@ -19543,15 +19829,15 @@ static void code_cstyle_YYensure_buffer_stack (void)
 		 * scanner will even need a stack. We use 2 instead of 1 to avoid an
 		 * immediate realloc on the next call.
          */
-		num_to_alloc = 1;
-		(yy_buffer_stack) = (struct yy_buffer_state**)code_cstyle_YYalloc
+      num_to_alloc = 1; /* After all that talk, this was set to 1 anyways... */
+		(yy_buffer_stack) = (struct yy_buffer_state**)yyalloc
 								(num_to_alloc * sizeof(struct yy_buffer_state*)
 								);
 		if ( ! (yy_buffer_stack) )
-			YY_FATAL_ERROR( "out of dynamic memory in code_cstyle_YYensure_buffer_stack()" );
-								  
+			YY_FATAL_ERROR( "out of dynamic memory in yyensure_buffer_stack()" );
+
 		memset((yy_buffer_stack), 0, num_to_alloc * sizeof(struct yy_buffer_state*));
-				
+
 		(yy_buffer_stack_max) = num_to_alloc;
 		(yy_buffer_stack_top) = 0;
 		return;
@@ -19560,15 +19846,15 @@ static void code_cstyle_YYensure_buffer_stack (void)
 	if ((yy_buffer_stack_top) >= ((yy_buffer_stack_max)) - 1){
 
 		/* Increase the buffer to prepare for a possible push. */
-		int grow_size = 8 /* arbitrary grow size */;
+		yy_size_t grow_size = 8 /* arbitrary grow size */;
 
 		num_to_alloc = (yy_buffer_stack_max) + grow_size;
-		(yy_buffer_stack) = (struct yy_buffer_state**)code_cstyle_YYrealloc
+		(yy_buffer_stack) = (struct yy_buffer_state**)yyrealloc
 								((yy_buffer_stack),
 								num_to_alloc * sizeof(struct yy_buffer_state*)
 								);
 		if ( ! (yy_buffer_stack) )
-			YY_FATAL_ERROR( "out of dynamic memory in code_cstyle_YYensure_buffer_stack()" );
+			YY_FATAL_ERROR( "out of dynamic memory in yyensure_buffer_stack()" );
 
 		/* zero only the new slots.*/
 		memset((yy_buffer_stack) + (yy_buffer_stack_max), 0, grow_size * sizeof(struct yy_buffer_state*));
@@ -19580,9 +19866,9 @@ static void code_cstyle_YYensure_buffer_stack (void)
  * @param base the character buffer
  * @param size the size in bytes of the character buffer
  * 
- * @return the newly allocated buffer state object. 
+ * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE code_cstyle_YY_scan_buffer  (char * base, yy_size_t  size )
+YY_BUFFER_STATE yy_scan_buffer  (char * base, yy_size_t  size )
 {
 	YY_BUFFER_STATE b;
     
@@ -19590,49 +19876,49 @@ YY_BUFFER_STATE code_cstyle_YY_scan_buffer  (char * base, yy_size_t  size )
 	     base[size-2] != YY_END_OF_BUFFER_CHAR ||
 	     base[size-1] != YY_END_OF_BUFFER_CHAR )
 		/* They forgot to leave room for the EOB's. */
-		return 0;
+		return nullptr;
 
-	b = (YY_BUFFER_STATE) code_cstyle_YYalloc(sizeof( struct yy_buffer_state )  );
+	b = (YY_BUFFER_STATE) yyalloc( sizeof( struct yy_buffer_state )  );
 	if ( ! b )
-		YY_FATAL_ERROR( "out of dynamic memory in code_cstyle_YY_scan_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_scan_buffer()" );
 
-	b->yy_buf_size = size - 2;	/* "- 2" to take care of EOB's */
+	b->yy_buf_size = (int) (size - 2);	/* "- 2" to take care of EOB's */
 	b->yy_buf_pos = b->yy_ch_buf = base;
 	b->yy_is_our_buffer = 0;
-	b->yy_input_file = 0;
+	b->yy_input_file = nullptr;
 	b->yy_n_chars = b->yy_buf_size;
 	b->yy_is_interactive = 0;
 	b->yy_at_bol = 1;
 	b->yy_fill_buffer = 0;
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
-	code_cstyle_YY_switch_to_buffer(b  );
+	yy_switch_to_buffer( b  );
 
 	return b;
 }
 
-/** Setup the input buffer state to scan a string. The next call to code_cstyle_YYlex() will
+/** Setup the input buffer state to scan a string. The next call to yylex() will
  * scan from a @e copy of @a str.
  * @param yystr a NUL-terminated string to scan
  * 
  * @return the newly allocated buffer state object.
  * @note If you want to scan bytes that may contain NUL values, then use
- *       code_cstyle_YY_scan_bytes() instead.
+ *       yy_scan_bytes() instead.
  */
-YY_BUFFER_STATE code_cstyle_YY_scan_string (yyconst char * yystr )
+YY_BUFFER_STATE yy_scan_string (const char * yystr )
 {
     
-	return code_cstyle_YY_scan_bytes(yystr,strlen(yystr) );
+	return yy_scan_bytes( yystr, (int) strlen(yystr) );
 }
 
-/** Setup the input buffer state to scan the given bytes. The next call to code_cstyle_YYlex() will
+/** Setup the input buffer state to scan the given bytes. The next call to yylex() will
  * scan from a @e copy of @a bytes.
  * @param yybytes the byte buffer to scan
  * @param _yybytes_len the number of bytes in the buffer pointed to by @a bytes.
  * 
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE code_cstyle_YY_scan_bytes  (yyconst char * yybytes, int  _yybytes_len )
+YY_BUFFER_STATE yy_scan_bytes  (const char * yybytes, int  _yybytes_len )
 {
 	YY_BUFFER_STATE b;
 	char *buf;
@@ -19640,19 +19926,19 @@ YY_BUFFER_STATE code_cstyle_YY_scan_bytes  (yyconst char * yybytes, int  _yybyte
 	int i;
     
 	/* Get memory for full buffer, including space for trailing EOB's. */
-	n = _yybytes_len + 2;
-	buf = (char *) code_cstyle_YYalloc(n  );
+	n = (yy_size_t) (_yybytes_len + 2);
+	buf = (char *) yyalloc( n  );
 	if ( ! buf )
-		YY_FATAL_ERROR( "out of dynamic memory in code_cstyle_YY_scan_bytes()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_scan_bytes()" );
 
 	for ( i = 0; i < _yybytes_len; ++i )
 		buf[i] = yybytes[i];
 
 	buf[_yybytes_len] = buf[_yybytes_len+1] = YY_END_OF_BUFFER_CHAR;
 
-	b = code_cstyle_YY_scan_buffer(buf,n );
+	b = yy_scan_buffer( buf, n );
 	if ( ! b )
-		YY_FATAL_ERROR( "bad buffer in code_cstyle_YY_scan_bytes()" );
+		YY_FATAL_ERROR( "bad buffer in yy_scan_bytes()" );
 
 	/* It's okay to grow etc. this buffer, and we should throw it
 	 * away when we're done.
@@ -19666,9 +19952,9 @@ YY_BUFFER_STATE code_cstyle_YY_scan_bytes  (yyconst char * yybytes, int  _yybyte
 #define YY_EXIT_FAILURE 2
 #endif
 
-static void yy_fatal_error (yyconst char* msg )
+static void yynoreturn yy_fatal_error (const char* msg )
 {
-    	(void) fprintf( stderr, "%s\n", msg );
+			fprintf( stderr, "%s\n", msg );
 	exit( YY_EXIT_FAILURE );
 }
 
@@ -19678,14 +19964,14 @@ static void yy_fatal_error (yyconst char* msg )
 #define yyless(n) \
 	do \
 		{ \
-		/* Undo effects of setting up code_cstyle_YYtext. */ \
+		/* Undo effects of setting up yytext. */ \
         int yyless_macro_arg = (n); \
         YY_LESS_LINENO(yyless_macro_arg);\
-		code_cstyle_YYtext[code_cstyle_YYleng] = (yy_hold_char); \
-		(yy_c_buf_p) = code_cstyle_YYtext + yyless_macro_arg; \
+		yytext[yyleng] = (yy_hold_char); \
+		(yy_c_buf_p) = yytext + yyless_macro_arg; \
 		(yy_hold_char) = *(yy_c_buf_p); \
 		*(yy_c_buf_p) = '\0'; \
-		code_cstyle_YYleng = yyless_macro_arg; \
+		yyleng = yyless_macro_arg; \
 		} \
 	while ( 0 )
 
@@ -19694,91 +19980,91 @@ static void yy_fatal_error (yyconst char* msg )
 /** Get the current line number.
  * 
  */
-int code_cstyle_YYget_lineno  (void)
+int yyget_lineno  (void)
 {
-        
-    return code_cstyle_YYlineno;
+    
+    return yylineno;
 }
 
 /** Get the input stream.
  * 
  */
-FILE *code_cstyle_YYget_in  (void)
+FILE *yyget_in  (void)
 {
-        return code_cstyle_YYin;
+        return yyin;
 }
 
 /** Get the output stream.
  * 
  */
-FILE *code_cstyle_YYget_out  (void)
+FILE *yyget_out  (void)
 {
-        return code_cstyle_YYout;
+        return yyout;
 }
 
 /** Get the length of the current token.
  * 
  */
-int code_cstyle_YYget_leng  (void)
+int yyget_leng  (void)
 {
-        return code_cstyle_YYleng;
+        return yyleng;
 }
 
 /** Get the current token.
  * 
  */
 
-char *code_cstyle_YYget_text  (void)
+char *yyget_text  (void)
 {
-        return code_cstyle_YYtext;
+        return yytext;
 }
 
 /** Set the current line number.
- * @param line_number
+ * @param _line_number line number
  * 
  */
-void code_cstyle_YYset_lineno (int  line_number )
+void yyset_lineno (int  _line_number )
 {
     
-    code_cstyle_YYlineno = line_number;
+    yylineno = _line_number;
 }
 
 /** Set the input stream. This does not discard the current
  * input buffer.
- * @param in_str A readable stream.
+ * @param _in_str A readable stream.
  * 
- * @see code_cstyle_YY_switch_to_buffer
+ * @see yy_switch_to_buffer
  */
-void code_cstyle_YYset_in (FILE *  in_str )
+void yyset_in (FILE *  _in_str )
 {
-        code_cstyle_YYin = in_str ;
+        yyin = _in_str ;
 }
 
-void code_cstyle_YYset_out (FILE *  out_str )
+void yyset_out (FILE *  _out_str )
 {
-        code_cstyle_YYout = out_str ;
+        yyout = _out_str ;
 }
 
-int code_cstyle_YYget_debug  (void)
+int yyget_debug  (void)
 {
-        return code_cstyle_YY_flex_debug;
+        return yy_flex_debug;
 }
 
-void code_cstyle_YYset_debug (int  bdebug )
+void yyset_debug (int  _bdebug )
 {
-        code_cstyle_YY_flex_debug = bdebug ;
+        yy_flex_debug = _bdebug ;
 }
 
 static int yy_init_globals (void)
 {
         /* Initialization is the same as for the non-reentrant scanner.
-     * This function is called from code_cstyle_YYlex_destroy(), so don't allocate here.
+     * This function is called from yylex_destroy(), so don't allocate here.
      */
 
-    (yy_buffer_stack) = 0;
+    (yy_buffer_stack) = nullptr;
     (yy_buffer_stack_top) = 0;
     (yy_buffer_stack_max) = 0;
-    (yy_c_buf_p) = (char *) 0;
+    (yy_c_buf_p) = nullptr;
     (yy_init) = 0;
     (yy_start) = 0;
 
@@ -19789,39 +20075,39 @@ static int yy_init_globals (void)
 
 /* Defined in main.c */
 #ifdef YY_STDINIT
-    code_cstyle_YYin = stdin;
-    code_cstyle_YYout = stdout;
+    yyin = stdin;
+    yyout = stdout;
 #else
-    code_cstyle_YYin = (FILE *) 0;
-    code_cstyle_YYout = (FILE *) 0;
+    yyin = nullptr;
+    yyout = nullptr;
 #endif
 
     /* For future reference: Set errno on error, since we are called by
-     * code_cstyle_YYlex_init()
+     * yylex_init()
      */
     return 0;
 }
 
-/* code_cstyle_YYlex_destroy is for both reentrant and non-reentrant scanners. */
-int code_cstyle_YYlex_destroy  (void)
+/* yylex_destroy is for both reentrant and non-reentrant scanners. */
+int yylex_destroy  (void)
 {
     
     /* Pop the buffer stack, destroying each element. */
 	while(YY_CURRENT_BUFFER){
-		code_cstyle_YY_delete_buffer(YY_CURRENT_BUFFER  );
-		YY_CURRENT_BUFFER_LVALUE = NULL;
-		code_cstyle_YYpop_buffer_state();
+		yy_delete_buffer( YY_CURRENT_BUFFER  );
+		YY_CURRENT_BUFFER_LVALUE = nullptr;
+		yypop_buffer_state();
 	}
 
 	/* Destroy the stack itself. */
-	code_cstyle_YYfree((yy_buffer_stack) );
-	(yy_buffer_stack) = NULL;
+	yyfree((yy_buffer_stack) );
+	(yy_buffer_stack) = nullptr;
 
-    code_cstyle_YYfree ( (yy_state_buf) );
-    (yy_state_buf)  = NULL;
+    yyfree ( (yy_state_buf) );
+    (yy_state_buf)  = nullptr;
 
     /* Reset the globals. This is important in a non-reentrant scanner so the next time
-     * code_cstyle_YYlex() is called, initialization will occur. */
+     * yylex() is called, initialization will occur. */
     yy_init_globals( );
 
     return 0;
@@ -19832,8 +20118,9 @@ int code_cstyle_YYlex_destroy  (void)
  */
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char* s1, yyconst char * s2, int n )
+static void yy_flex_strncpy (char* s1, const char * s2, int n )
 {
+		
 	int i;
 	for ( i = 0; i < n; ++i )
 		s1[i] = s2[i];
@@ -19841,7 +20128,7 @@ static void yy_flex_strncpy (char* s1, yyconst char * s2, int n )
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen (yyconst char * s )
+static int yy_flex_strlen (const char * s )
 {
 	int n;
 	for ( n = 0; s[n]; ++n )
@@ -19851,13 +20138,14 @@ static int yy_flex_strlen (yyconst char * s )
 }
 #endif
 
-void *code_cstyle_YYalloc (yy_size_t  size )
+void *yyalloc (yy_size_t  size )
 {
-	return (void *) malloc( size );
+			return malloc(size);
 }
 
-void *code_cstyle_YYrealloc  (void * ptr, yy_size_t  size )
+void *yyrealloc  (void * ptr, yy_size_t  size )
 {
+		
 	/* The cast to (char *) in the following accommodates both
 	 * implementations that use char* generic pointers, and those
 	 * that use void* generic pointers.  It works with the latter
@@ -19865,19 +20153,19 @@ void *code_cstyle_YYrealloc  (void * ptr, yy_size_t  size )
 	 * any pointer type to void*, and deal with argument conversions
 	 * as though doing an assignment.
 	 */
-	return (void *) realloc( (char *) ptr, size );
+	return realloc(ptr, size);
 }
 
-void code_cstyle_YYfree (void * ptr )
+void yyfree (void * ptr )
 {
-	free( (char *) ptr );	/* see code_cstyle_YYrealloc() for (char *) cast */
+			free( (char *) ptr );	/* see yyrealloc() for (char *) cast */
 }
 
 #define YYTABLES_NAME "yytables"
 
 static void saveObjCContext()
 {
-   if (g_ObjC_currentCtx) {
+   if (g_ObjC_currentCtx != nullptr) {
       g_ObjC_currentCtx->format += QString("$c%1").formatArg(g_currentCtxId);
 
       if (g_braceCount == 0 && YY_START == ObjCCall) {
@@ -19900,7 +20188,7 @@ static void saveObjCContext()
    g_ObjC_currentCtx = temp;
 
    g_braceCount = 0;
-   g_currentCtxId++;
+   ++g_currentCtxId;
 }
 
 static void restoreObjCContext()
@@ -19979,7 +20267,7 @@ void parseCCode(CodeGenerator &outputX, const QString &className, const QString 
    g_exampleBlock  = exBlock;
    g_exampleName   = exName;
    g_sourceFileDef = fd;
-   g_lineNumbers   = (fd != 0 && showLineNumbers);
+   g_lineNumbers   = (fd != nullptr && showLineNumbers);
 
    bool cleanupSourceDef = false;
 
@@ -20028,9 +20316,9 @@ void parseCCode(CodeGenerator &outputX, const QString &className, const QString 
       setParameterList(memberDef);
    }
 
-   code_cstyle_YYrestart(code_cstyle_YYin );
-   BEGIN( Body );
-   code_cstyle_YYlex();
+   yyrestart( yyin );
+   BEGIN(Body);
+   yylex();
 
    g_lexInit = true;
 
@@ -20055,7 +20343,7 @@ void parseCCode(CodeGenerator &outputX, const QString &className, const QString 
 void codeFreeScanner()
 {
    if (g_lexInit) {
-      code_cstyle_YYlex_destroy();
+      yylex_destroy();
    }
 }
 

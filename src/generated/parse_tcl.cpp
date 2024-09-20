@@ -22,11 +22,17 @@
 
 #define yy_create_buffer parse_tcl_YY_create_buffer
 #define yy_delete_buffer parse_tcl_YY_delete_buffer
-#define yy_flex_debug parse_tcl_YY_flex_debug
+#define yy_scan_buffer parse_tcl_YY_scan_buffer
+#define yy_scan_string parse_tcl_YY_scan_string
+#define yy_scan_bytes parse_tcl_YY_scan_bytes
 #define yy_init_buffer parse_tcl_YY_init_buffer
 #define yy_flush_buffer parse_tcl_YY_flush_buffer
 #define yy_load_buffer_state parse_tcl_YY_load_buffer_state
 #define yy_switch_to_buffer parse_tcl_YY_switch_to_buffer
+#define yypush_buffer_state parse_tcl_YYpush_buffer_state
+#define yypop_buffer_state parse_tcl_YYpop_buffer_state
+#define yyensure_buffer_stack parse_tcl_YYensure_buffer_stack
+#define yy_flex_debug parse_tcl_YY_flex_debug
 #define yyin parse_tcl_YYin
 #define yyleng parse_tcl_YYleng
 #define yylex parse_tcl_YYlex
@@ -41,10 +47,244 @@
 
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
-#define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 35
+#define YY_FLEX_MINOR_VERSION 6
+#define YY_FLEX_SUBMINOR_VERSION 4
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
+#endif
+
+#ifdef yy_create_buffer
+#define parse_tcl_YY_create_buffer_ALREADY_DEFINED
+#else
+#define yy_create_buffer parse_tcl_YY_create_buffer
+#endif
+
+#ifdef yy_delete_buffer
+#define parse_tcl_YY_delete_buffer_ALREADY_DEFINED
+#else
+#define yy_delete_buffer parse_tcl_YY_delete_buffer
+#endif
+
+#ifdef yy_scan_buffer
+#define parse_tcl_YY_scan_buffer_ALREADY_DEFINED
+#else
+#define yy_scan_buffer parse_tcl_YY_scan_buffer
+#endif
+
+#ifdef yy_scan_string
+#define parse_tcl_YY_scan_string_ALREADY_DEFINED
+#else
+#define yy_scan_string parse_tcl_YY_scan_string
+#endif
+
+#ifdef yy_scan_bytes
+#define parse_tcl_YY_scan_bytes_ALREADY_DEFINED
+#else
+#define yy_scan_bytes parse_tcl_YY_scan_bytes
+#endif
+
+#ifdef yy_init_buffer
+#define parse_tcl_YY_init_buffer_ALREADY_DEFINED
+#else
+#define yy_init_buffer parse_tcl_YY_init_buffer
+#endif
+
+#ifdef yy_flush_buffer
+#define parse_tcl_YY_flush_buffer_ALREADY_DEFINED
+#else
+#define yy_flush_buffer parse_tcl_YY_flush_buffer
+#endif
+
+#ifdef yy_load_buffer_state
+#define parse_tcl_YY_load_buffer_state_ALREADY_DEFINED
+#else
+#define yy_load_buffer_state parse_tcl_YY_load_buffer_state
+#endif
+
+#ifdef yy_switch_to_buffer
+#define parse_tcl_YY_switch_to_buffer_ALREADY_DEFINED
+#else
+#define yy_switch_to_buffer parse_tcl_YY_switch_to_buffer
+#endif
+
+#ifdef yypush_buffer_state
+#define parse_tcl_YYpush_buffer_state_ALREADY_DEFINED
+#else
+#define yypush_buffer_state parse_tcl_YYpush_buffer_state
+#endif
+
+#ifdef yypop_buffer_state
+#define parse_tcl_YYpop_buffer_state_ALREADY_DEFINED
+#else
+#define yypop_buffer_state parse_tcl_YYpop_buffer_state
+#endif
+
+#ifdef yyensure_buffer_stack
+#define parse_tcl_YYensure_buffer_stack_ALREADY_DEFINED
+#else
+#define yyensure_buffer_stack parse_tcl_YYensure_buffer_stack
+#endif
+
+#ifdef yylex
+#define parse_tcl_YYlex_ALREADY_DEFINED
+#else
+#define yylex parse_tcl_YYlex
+#endif
+
+#ifdef yyrestart
+#define parse_tcl_YYrestart_ALREADY_DEFINED
+#else
+#define yyrestart parse_tcl_YYrestart
+#endif
+
+#ifdef yylex_init
+#define parse_tcl_YYlex_init_ALREADY_DEFINED
+#else
+#define yylex_init parse_tcl_YYlex_init
+#endif
+
+#ifdef yylex_init_extra
+#define parse_tcl_YYlex_init_extra_ALREADY_DEFINED
+#else
+#define yylex_init_extra parse_tcl_YYlex_init_extra
+#endif
+
+#ifdef yylex_destroy
+#define parse_tcl_YYlex_destroy_ALREADY_DEFINED
+#else
+#define yylex_destroy parse_tcl_YYlex_destroy
+#endif
+
+#ifdef yyget_debug
+#define parse_tcl_YYget_debug_ALREADY_DEFINED
+#else
+#define yyget_debug parse_tcl_YYget_debug
+#endif
+
+#ifdef yyset_debug
+#define parse_tcl_YYset_debug_ALREADY_DEFINED
+#else
+#define yyset_debug parse_tcl_YYset_debug
+#endif
+
+#ifdef yyget_extra
+#define parse_tcl_YYget_extra_ALREADY_DEFINED
+#else
+#define yyget_extra parse_tcl_YYget_extra
+#endif
+
+#ifdef yyset_extra
+#define parse_tcl_YYset_extra_ALREADY_DEFINED
+#else
+#define yyset_extra parse_tcl_YYset_extra
+#endif
+
+#ifdef yyget_in
+#define parse_tcl_YYget_in_ALREADY_DEFINED
+#else
+#define yyget_in parse_tcl_YYget_in
+#endif
+
+#ifdef yyset_in
+#define parse_tcl_YYset_in_ALREADY_DEFINED
+#else
+#define yyset_in parse_tcl_YYset_in
+#endif
+
+#ifdef yyget_out
+#define parse_tcl_YYget_out_ALREADY_DEFINED
+#else
+#define yyget_out parse_tcl_YYget_out
+#endif
+
+#ifdef yyset_out
+#define parse_tcl_YYset_out_ALREADY_DEFINED
+#else
+#define yyset_out parse_tcl_YYset_out
+#endif
+
+#ifdef yyget_leng
+#define parse_tcl_YYget_leng_ALREADY_DEFINED
+#else
+#define yyget_leng parse_tcl_YYget_leng
+#endif
+
+#ifdef yyget_text
+#define parse_tcl_YYget_text_ALREADY_DEFINED
+#else
+#define yyget_text parse_tcl_YYget_text
+#endif
+
+#ifdef yyget_lineno
+#define parse_tcl_YYget_lineno_ALREADY_DEFINED
+#else
+#define yyget_lineno parse_tcl_YYget_lineno
+#endif
+
+#ifdef yyset_lineno
+#define parse_tcl_YYset_lineno_ALREADY_DEFINED
+#else
+#define yyset_lineno parse_tcl_YYset_lineno
+#endif
+
+#ifdef yywrap
+#define parse_tcl_YYwrap_ALREADY_DEFINED
+#else
+#define yywrap parse_tcl_YYwrap
+#endif
+
+#ifdef yyalloc
+#define parse_tcl_YYalloc_ALREADY_DEFINED
+#else
+#define yyalloc parse_tcl_YYalloc
+#endif
+
+#ifdef yyrealloc
+#define parse_tcl_YYrealloc_ALREADY_DEFINED
+#else
+#define yyrealloc parse_tcl_YYrealloc
+#endif
+
+#ifdef yyfree
+#define parse_tcl_YYfree_ALREADY_DEFINED
+#else
+#define yyfree parse_tcl_YYfree
+#endif
+
+#ifdef yytext
+#define parse_tcl_YYtext_ALREADY_DEFINED
+#else
+#define yytext parse_tcl_YYtext
+#endif
+
+#ifdef yyleng
+#define parse_tcl_YYleng_ALREADY_DEFINED
+#else
+#define yyleng parse_tcl_YYleng
+#endif
+
+#ifdef yyin
+#define parse_tcl_YYin_ALREADY_DEFINED
+#else
+#define yyin parse_tcl_YYin
+#endif
+
+#ifdef yyout
+#define parse_tcl_YYout_ALREADY_DEFINED
+#else
+#define yyout parse_tcl_YYout
+#endif
+
+#ifdef yy_flex_debug
+#define parse_tcl_YY_flex_debug_ALREADY_DEFINED
+#else
+#define yy_flex_debug parse_tcl_YY_flex_debug
+#endif
+
+#ifdef yylineno
+#define parse_tcl_YYlineno_ALREADY_DEFINED
+#else
+#define yylineno parse_tcl_YYlineno
 #endif
 
 /* First, we deal with  platform-specific or compiler-specific issues. */
@@ -117,60 +357,48 @@ typedef unsigned int flex_uint32_t;
 #define UINT32_MAX             (4294967295U)
 #endif
 
+#ifndef SIZE_MAX
+#define SIZE_MAX               (~(size_t)0)
+#endif
+
 #endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
-#ifdef __cplusplus
+/* begin standard C++ headers. */
 
-/* The "const" storage-class-modifier is valid. */
-#define YY_USE_CONST
-
-#else	/* ! __cplusplus */
-
-/* C99 requires __STDC__ to be defined as 1. */
-#if defined (__STDC__)
-
-#define YY_USE_CONST
-
-#endif	/* defined (__STDC__) */
-#endif	/* ! __cplusplus */
-
-#ifdef YY_USE_CONST
+/* TODO: this is always defined, so inline it */
 #define yyconst const
+
+#if defined(__GNUC__) && __GNUC__ >= 3
+#define yynoreturn __attribute__((__noreturn__))
 #else
-#define yyconst
+#define yynoreturn
 #endif
 
 /* Returned upon end-of-file. */
 #define YY_NULL 0
 
-/* Promotes a possibly negative, possibly signed char to an unsigned
- * integer for use as an array index.  If the signed char is negative,
- * we want to instead treat it as an 8-bit unsigned char, hence the
- * double cast.
+/* Promotes a possibly negative, possibly signed char to an
+ *   integer in range [0..255] for use as an array index.
  */
-#define YY_SC_TO_UI(c) ((unsigned int) (unsigned char) c)
+#define YY_SC_TO_UI(c) ((YY_CHAR) (c))
 
 /* Enter a start condition.  This macro really ought to take a parameter,
  * but we do it the disgusting crufty way forced on us by the ()-less
  * definition of BEGIN.
  */
 #define BEGIN (yy_start) = 1 + 2 *
-
 /* Translate the current start state into a value that can be later handed
  * to BEGIN to return to the state.  The YYSTATE alias is for lex
  * compatibility.
  */
 #define YY_START (((yy_start) - 1) / 2)
 #define YYSTATE YY_START
-
 /* Action number for EOF rule of a given start state. */
 #define YY_STATE_EOF(state) (YY_END_OF_BUFFER + state + 1)
-
 /* Special action meaning "start processing a new file". */
-#define YY_NEW_FILE parse_tcl_YYrestart(parse_tcl_YYin  )
-
+#define YY_NEW_FILE yyrestart( yyin  )
 #define YY_END_OF_BUFFER_CHAR 0
 
 /* Size of default input buffer. */
@@ -195,49 +423,55 @@ typedef unsigned int flex_uint32_t;
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
-extern int parse_tcl_YYleng;
+#ifndef YY_TYPEDEF_YY_SIZE_T
+#define YY_TYPEDEF_YY_SIZE_T
+typedef size_t yy_size_t;
+#endif
 
-extern FILE *parse_tcl_YYin, *parse_tcl_YYout;
+extern int yyleng;
+
+extern FILE *yyin, *yyout;
 
 #define EOB_ACT_CONTINUE_SCAN 0
 #define EOB_ACT_END_OF_FILE 1
 #define EOB_ACT_LAST_MATCH 2
-
+    
     /* Note: We specifically omit the test for yy_rule_can_match_eol because it requires
      *       access to the local variable yy_act. Since yyless() is a macro, it would break
-     *       existing scanners that call yyless() from OUTSIDE parse_tcl_YYlex. 
+     *       existing scanners that call yyless() from OUTSIDE yylex.
      *       One obvious solution it to make yy_act a global. I tried that, and saw
-     *       a 5% performance hit in a non-parse_tcl_YYlineno scanner, because yy_act is
-     *       normally declared as a variable-- so it is not worth it.
+     *       a 5% performance hit in a non-yylineno scanner, because yy_act is
+     *       normally declared as a register variable-- so it is not worth it.
      */
     #define  YY_LESS_LINENO(n) \
             do { \
                 int yyl;\
-                for ( yyl = n; yyl < parse_tcl_YYleng; ++yyl )\
-                    if ( parse_tcl_YYtext[yyl] == '\n' )\
-                        --parse_tcl_YYlineno;\
+                for ( yyl = n; yyl < yyleng; ++yyl )\
+                    if ( yytext[yyl] == '\n' )\
+                        --yylineno;\
+            }while(0)
+    #define YY_LINENO_REWIND_TO(dst) \
+            do {\
+                const char *p;\
+                for ( p = yy_cp-1; p >= (dst); --p)\
+                    if ( *p == '\n' )\
+                        --yylineno;\
             }while(0)
     
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
 	do \
 		{ \
-		/* Undo effects of setting up parse_tcl_YYtext. */ \
+		/* Undo effects of setting up yytext. */ \
         int yyless_macro_arg = (n); \
         YY_LESS_LINENO(yyless_macro_arg);\
 		*yy_cp = (yy_hold_char); \
 		YY_RESTORE_YY_MORE_OFFSET \
 		(yy_c_buf_p) = yy_cp = yy_bp + yyless_macro_arg - YY_MORE_ADJ; \
-		YY_DO_BEFORE_ACTION; /* set up parse_tcl_YYtext again */ \
+		YY_DO_BEFORE_ACTION; /* set up yytext again */ \
 		} \
 	while ( 0 )
-
 #define unput(c) yyunput( c, (yytext_ptr)  )
-
-#ifndef YY_TYPEDEF_YY_SIZE_T
-#define YY_TYPEDEF_YY_SIZE_T
-typedef size_t yy_size_t;
-#endif
 
 #ifndef YY_STRUCT_YY_BUFFER_STATE
 #define YY_STRUCT_YY_BUFFER_STATE
@@ -251,7 +485,7 @@ struct yy_buffer_state
 	/* Size of input buffer in bytes, not including room for EOB
 	 * characters.
 	 */
-	yy_size_t yy_buf_size;
+	int yy_buf_size;
 
 	/* Number of characters read into yy_ch_buf, not including EOB
 	 * characters.
@@ -279,7 +513,7 @@ struct yy_buffer_state
 
     int yy_bs_lineno; /**< The line count. */
     int yy_bs_column; /**< The column count. */
-    
+
 	/* Whether to try to fill the input buffer when we reach the
 	 * end of it.
 	 */
@@ -296,8 +530,8 @@ struct yy_buffer_state
 	 * possible backing-up.
 	 *
 	 * When we actually see the EOF, we change the status to "new"
-	 * (via parse_tcl_YYrestart()), so that the user can continue scanning by
-	 * just pointing parse_tcl_YYin at a new input file.
+	 * (via yyrestart()), so that the user can continue scanning by
+	 * just pointing yyin at a new input file.
 	 */
 #define YY_BUFFER_EOF_PENDING 2
 
@@ -307,118 +541,113 @@ struct yy_buffer_state
 /* Stack of input buffers. */
 static size_t yy_buffer_stack_top = 0; /**< index of top of stack. */
 static size_t yy_buffer_stack_max = 0; /**< capacity of stack. */
-static YY_BUFFER_STATE * yy_buffer_stack = 0; /**< Stack as an array. */
+static YY_BUFFER_STATE * yy_buffer_stack = nullptr; /**< Stack as an array. */
 
 /* We provide macros for accessing buffer states in case in the
  * future we want to put the buffer states in a more general
  * "scanner state".
  *
- * Returns the top of the stack, or NULL.
+ * Returns the top of the stack, or nullptr.
  */
 #define YY_CURRENT_BUFFER ( (yy_buffer_stack) \
                           ? (yy_buffer_stack)[(yy_buffer_stack_top)] \
-                          : NULL)
-
+                          : nullptr)
 /* Same as previous macro, but useful when we know that the buffer stack is not
- * NULL or when we need an lvalue. For internal use only.
+ * nullptr or when we need an lvalue. For internal use only.
  */
 #define YY_CURRENT_BUFFER_LVALUE (yy_buffer_stack)[(yy_buffer_stack_top)]
 
-/* yy_hold_char holds the character lost when parse_tcl_YYtext is formed. */
+/* yy_hold_char holds the character lost when yytext is formed. */
 static char yy_hold_char;
 static int yy_n_chars;		/* number of characters read into yy_ch_buf */
-int parse_tcl_YYleng;
+int yyleng;
 
 /* Points to current character in buffer. */
-static char *yy_c_buf_p = (char *) 0;
+static char *yy_c_buf_p = nullptr;
 static int yy_init = 0;		/* whether we need to initialize */
 static int yy_start = 0;	/* start state number */
 
-/* Flag which is used to allow parse_tcl_YYwrap()'s to do buffer switches
- * instead of setting up a fresh parse_tcl_YYin.  A bit of a hack ...
+/* Flag which is used to allow yywrap()'s to do buffer switches
+ * instead of setting up a fresh yyin.  A bit of a hack ...
  */
 static int yy_did_buffer_switch_on_eof;
 
-void parse_tcl_YYrestart (FILE *input_file  );
-void parse_tcl_YY_switch_to_buffer (YY_BUFFER_STATE new_buffer  );
-YY_BUFFER_STATE parse_tcl_YY_create_buffer (FILE *file,int size  );
-void parse_tcl_YY_delete_buffer (YY_BUFFER_STATE b  );
-void parse_tcl_YY_flush_buffer (YY_BUFFER_STATE b  );
-void parse_tcl_YYpush_buffer_state (YY_BUFFER_STATE new_buffer  );
-void parse_tcl_YYpop_buffer_state (void );
+void yyrestart ( FILE *input_file  );
+void yy_switch_to_buffer ( YY_BUFFER_STATE new_buffer  );
+YY_BUFFER_STATE yy_create_buffer ( FILE *file, int size  );
+void yy_delete_buffer ( YY_BUFFER_STATE b  );
+void yy_flush_buffer ( YY_BUFFER_STATE b  );
+void yypush_buffer_state ( YY_BUFFER_STATE new_buffer  );
+void yypop_buffer_state ( void );
 
-static void parse_tcl_YYensure_buffer_stack (void );
-static void parse_tcl_YY_load_buffer_state (void );
-static void parse_tcl_YY_init_buffer (YY_BUFFER_STATE b,FILE *file  );
+static void yyensure_buffer_stack ( void );
+static void yy_load_buffer_state ( void );
+static void yy_init_buffer ( YY_BUFFER_STATE b, FILE *file  );
+#define YY_FLUSH_BUFFER yy_flush_buffer( YY_CURRENT_BUFFER )
 
-#define YY_FLUSH_BUFFER parse_tcl_YY_flush_buffer(YY_CURRENT_BUFFER )
+YY_BUFFER_STATE yy_scan_buffer ( char *base, yy_size_t size  );
+YY_BUFFER_STATE yy_scan_string ( const char *yy_str  );
+YY_BUFFER_STATE yy_scan_bytes ( const char *bytes, int len  );
 
-YY_BUFFER_STATE parse_tcl_YY_scan_buffer (char *base,yy_size_t size  );
-YY_BUFFER_STATE parse_tcl_YY_scan_string (yyconst char *yy_str  );
-YY_BUFFER_STATE parse_tcl_YY_scan_bytes (yyconst char *bytes,int len  );
+void *yyalloc ( yy_size_t  );
+void *yyrealloc ( void *, yy_size_t  );
+void yyfree ( void *  );
 
-void *parse_tcl_YYalloc (yy_size_t  );
-void *parse_tcl_YYrealloc (void *,yy_size_t  );
-void parse_tcl_YYfree (void *  );
-
-#define yy_new_buffer parse_tcl_YY_create_buffer
-
+#define yy_new_buffer yy_create_buffer
 #define yy_set_interactive(is_interactive) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){ \
-        parse_tcl_YYensure_buffer_stack (); \
+        yyensure_buffer_stack (); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-            parse_tcl_YY_create_buffer(parse_tcl_YYin,YY_BUF_SIZE ); \
+            yy_create_buffer( yyin, YY_BUF_SIZE ); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_is_interactive = is_interactive; \
 	}
-
 #define yy_set_bol(at_bol) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){\
-        parse_tcl_YYensure_buffer_stack (); \
+        yyensure_buffer_stack (); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-            parse_tcl_YY_create_buffer(parse_tcl_YYin,YY_BUF_SIZE ); \
+            yy_create_buffer( yyin, YY_BUF_SIZE ); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_at_bol = at_bol; \
 	}
-
 #define YY_AT_BOL() (YY_CURRENT_BUFFER_LVALUE->yy_at_bol)
 
 /* Begin user sect3 */
 
-#define parse_tcl_YYwrap(n) 1
+#define parse_tcl_YYwrap() (/*CONSTCOND*/1)
 #define YY_SKIP_YYWRAP
+typedef flex_uint8_t YY_CHAR;
 
-typedef unsigned char YY_CHAR;
-
-FILE *parse_tcl_YYin = (FILE *) 0, *parse_tcl_YYout = (FILE *) 0;
+FILE *yyin = nullptr, *yyout = nullptr;
 
 typedef int yy_state_type;
 
-extern int parse_tcl_YYlineno;
+extern int yylineno;
+int yylineno = 1;
 
-int parse_tcl_YYlineno = 1;
+extern char *yytext;
+#ifdef yytext_ptr
+#undef yytext_ptr
+#endif
+#define yytext_ptr yytext
 
-extern char *parse_tcl_YYtext;
-#define yytext_ptr parse_tcl_YYtext
-
-static yy_state_type yy_get_previous_state (void );
-static yy_state_type yy_try_NUL_trans (yy_state_type current_state  );
-static int yy_get_next_buffer (void );
-static void yy_fatal_error (yyconst char msg[]  );
+static yy_state_type yy_get_previous_state ( void );
+static yy_state_type yy_try_NUL_trans ( yy_state_type current_state  );
+static int yy_get_next_buffer ( void );
+static void yynoreturn yy_fatal_error ( const char* msg  );
 
 /* Done after the current pattern has been matched and before the
- * corresponding action - sets up parse_tcl_YYtext.
+ * corresponding action - sets up yytext.
  */
 #define YY_DO_BEFORE_ACTION \
 	(yytext_ptr) = yy_bp; \
 	(yytext_ptr) -= (yy_more_len); \
-	parse_tcl_YYleng = (size_t) (yy_cp - (yytext_ptr)); \
+	yyleng = (int) (yy_cp - (yytext_ptr)); \
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
-
 #define YY_NUM_RULES 55
 #define YY_END_OF_BUFFER 56
 /* This struct is not used in this scanner,
@@ -428,7 +657,7 @@ struct yy_trans_info
 	flex_int32_t yy_verify;
 	flex_int32_t yy_nxt;
 	};
-static yyconst flex_int16_t yy_accept[179] =
+static const flex_int16_t yy_accept[179] =
     {   0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
         5,    5,    0,    0,    0,    0,    0,    0,   26,   26,
@@ -451,7 +680,7 @@ static yyconst flex_int16_t yy_accept[179] =
        12,    0,   10,   10,    0,    0,   19,    0
     } ;
 
-static yyconst flex_int32_t yy_ec[256] =
+static const YY_CHAR yy_ec[256] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    2,    3,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -483,14 +712,14 @@ static yyconst flex_int32_t yy_ec[256] =
         1,    1,    1,    1,    1
     } ;
 
-static yyconst flex_int32_t yy_meta[29] =
+static const YY_CHAR yy_meta[29] =
     {   0,
         1,    2,    3,    1,    2,    4,    5,    1,    2,    1,
         1,    4,    6,    4,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    4,    4
     } ;
 
-static yyconst flex_int16_t yy_base[205] =
+static const flex_int16_t yy_base[205] =
     {   0,
         0,    0,  178,  162,    0,   12,   24,   50,   76,  103,
        34,   38,    7,   19,   27,   43,   53,   58,  130,  136,
@@ -517,7 +746,7 @@ static yyconst flex_int16_t yy_base[205] =
       545,  551,  557,  563
     } ;
 
-static yyconst flex_int16_t yy_def[205] =
+static const flex_int16_t yy_def[205] =
     {   0,
       179,  179,  180,  180,  181,  181,  182,  182,  183,  183,
       184,  184,  185,  185,  186,  186,  187,  187,  188,  188,
@@ -544,7 +773,7 @@ static yyconst flex_int16_t yy_def[205] =
       178,  178,  178,  178
     } ;
 
-static yyconst flex_int16_t yy_nxt[599] =
+static const flex_int16_t yy_nxt[599] =
     {   0,
       178,   27,   28,  111,   27,   88,   29,  111,   27,   55,
        56,  111,   30,   27,   28,   89,   27,  113,   29,   57,
@@ -614,7 +843,7 @@ static yyconst flex_int16_t yy_nxt[599] =
 
     } ;
 
-static yyconst flex_int16_t yy_chk[599] =
+static const flex_int16_t yy_chk[599] =
     {   0,
         0,    5,    5,  111,    5,   46,    5,  110,    5,   13,
        13,   70,    5,    6,    6,   46,    6,   70,    6,   13,
@@ -685,7 +914,7 @@ static yyconst flex_int16_t yy_chk[599] =
     } ;
 
 /* Table of booleans, true if rule could match eol. */
-static yyconst flex_int32_t yy_rule_can_match_eol[56] =
+static const flex_int32_t yy_rule_can_match_eol[56] =
     {   0,
 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 
     1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 
@@ -694,8 +923,8 @@ static yyconst flex_int32_t yy_rule_can_match_eol[56] =
 static yy_state_type yy_last_accepting_state;
 static char *yy_last_accepting_cpos;
 
-extern int parse_tcl_YY_flex_debug;
-int parse_tcl_YY_flex_debug = 0;
+extern int yy_flex_debug;
+int yy_flex_debug = 0;
 
 /* The intent behind this definition is that it'll catch
  * any uses of REJECT which flex missed.
@@ -706,7 +935,7 @@ static int yy_more_len = 0;
 #define yymore() ((yy_more_flag) = 1)
 #define YY_MORE_ADJ (yy_more_len)
 #define YY_RESTORE_YY_MORE_OFFSET
-char *parse_tcl_YYtext;
+char *yytext;
 /*************************************************************************
  *
  * Copyright (c) 2014-2024 Barbara Geller & Ansel Sermersheim
@@ -715,6 +944,21 @@ char *parse_tcl_YYtext;
 
 *************************************************************************/
 
+#include <parse_tcl.h>
+
+#include <arguments.h>
+#include <commentcnv.h>
+#include <commentscan.h>
+#include <config.h>
+#include <default_args.h>
+#include <doxy_globals.h>
+#include <entry.h>
+#include <language.h>
+#include <message.h>
+#include <outputlist.h>
+#include <pre.h>
+#include <util.h>
+
 #include <QFile>
 #include <QHash>
 #include <QRegularExpression>
@@ -722,24 +966,10 @@ char *parse_tcl_YYtext;
 #include <QStringList>
 #include <QVector>
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>
-
-#include <arguments.h>
-#include <config.h>
-#include <commentcnv.h>
-#include <commentscan.h>
-#include <default_args.h>
-#include <doxy_globals.h>
-#include <entry.h>
-#include <language.h>
-#include <message.h>
-#include <outputlist.h>
-#include <parse_tcl.h>
-#include <pre.h>
-#include <util.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define YY_NO_INPUT 1
 
@@ -747,14 +977,14 @@ char *parse_tcl_YYtext;
 
 // application error
 #define tcl_err \
-  printf("Error TCL file: %s, line %d ", csPrintable(tcl.file_name), parse_tcl_YYlineno); \
+  printf("Error TCL file: %s, line %d ", csPrintable(tcl.file_name), yylineno); \
   yy_push_state(ERROR); \
   yyless(0); \
   printf
 
 // Application warning
 #define tcl_warn \
-  printf("Warning TCL file: %s, line %d: ", csPrintable(tcl.file_name), parse_tcl_YYlineno); \
+  printf("Warning TCL file: %s, line %d: ", csPrintable(tcl.file_name), yylineno); \
   printf
 
 #define TCL_ERROR       1
@@ -801,7 +1031,7 @@ int TclFindElement(const QString &list, int listLength, int &elementIndex, int &
 
    elemStart = iter;
 
-   if (bracePtr != 0) {
+   if (bracePtr != nullptr) {
       *bracePtr = openBraces;
    }
 
@@ -913,7 +1143,7 @@ done:
    elementIndex = elemStart - list.constBegin();
    nextIndex    = iter - list.constBegin();
 
-   if (sizePtr != 0) {
+   if (sizePtr != nullptr) {
       *sizePtr = size;
    }
 
@@ -991,7 +1221,7 @@ typedef struct {
    QSharedPointer<Entry> entry_scan;       // current scan entry
 
    Protection protection;                  // current protections state
-   QStringList after;                      // option/value list (options: NULL comment keyword script)
+   QStringList after;                      // option/value list (options: nullptr comment keyword script)
 } tcl_scan;
 
 // Structure containing all internal global variables
@@ -1295,7 +1525,7 @@ static void tcl_codify(const QString &s, const QString &str)
       return;
    }
 
-   if (! s.isEmpty() && s != "NULL") {
+   if (! s.isEmpty() && s != "nullptr") {
       tcl_font_end();
       tcl.code->startFontClass(s);
       tcl.code_font = s;
@@ -1351,7 +1581,7 @@ static void tcl_codify_cmd(const QString &s, int i)
 
 // codify a string token , codifies string according to type.
 // Starts a new scan context if needed (*myScan==0 and type == "script").
-// returns NULL or the created scan context.
+// returns nullptr or the created scan context.
 
 static tcl_scan *tcl_codify_token(tcl_scan *myScan, const QString type, const QString &string)
 {
@@ -1360,7 +1590,7 @@ static tcl_scan *tcl_codify_token(tcl_scan *myScan, const QString type, const QS
       if (! type.isEmpty()) {
          myScan->after << type << string;
       } else {
-         myScan->after << "NULL" << string;
+         myScan->after << "nullptr" << string;
       }
 
    } else {
@@ -1403,41 +1633,41 @@ static tcl_scan *tcl_codify_token(tcl_scan *myScan, const QString type, const QS
  */
 #include <unistd.h>
 #endif
-
+    
 #ifndef YY_EXTRA_TYPE
 #define YY_EXTRA_TYPE void *
 #endif
 
-static int yy_init_globals (void );
+static int yy_init_globals ( void );
 
 /* Accessor methods to globals.
    These are made visible to non-reentrant scanners for convenience. */
 
-int parse_tcl_YYlex_destroy (void );
+int yylex_destroy ( void );
 
-int parse_tcl_YYget_debug (void );
+int yyget_debug ( void );
 
-void parse_tcl_YYset_debug (int debug_flag  );
+void yyset_debug ( int debug_flag  );
 
-YY_EXTRA_TYPE parse_tcl_YYget_extra (void );
+YY_EXTRA_TYPE yyget_extra ( void );
 
-void parse_tcl_YYset_extra (YY_EXTRA_TYPE user_defined  );
+void yyset_extra ( YY_EXTRA_TYPE user_defined  );
 
-FILE *parse_tcl_YYget_in (void );
+FILE *yyget_in ( void );
 
-void parse_tcl_YYset_in  (FILE * in_str  );
+void yyset_in  ( FILE * _in_str  );
 
-FILE *parse_tcl_YYget_out (void );
+FILE *yyget_out ( void );
 
-void parse_tcl_YYset_out  (FILE * out_str  );
+void yyset_out  ( FILE * _out_str  );
 
-int parse_tcl_YYget_leng (void );
+			int yyget_leng ( void );
 
-char *parse_tcl_YYget_text (void );
+char *yyget_text ( void );
 
-int parse_tcl_YYget_lineno (void );
+int yyget_lineno ( void );
 
-void parse_tcl_YYset_lineno (int line_number  );
+void yyset_lineno ( int _line_number  );
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -1445,39 +1675,42 @@ void parse_tcl_YYset_lineno (int line_number  );
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int parse_tcl_YYwrap (void );
+extern "C" int yywrap ( void );
 #else
-extern int parse_tcl_YYwrap (void );
+extern int yywrap ( void );
 #endif
 #endif
 
-    static void yyunput (int c,char *buf_ptr  );
+#ifndef YY_NO_UNPUT
     
+    static void yyunput ( int c, char *buf_ptr  );
+    
+#endif
+
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char *,yyconst char *,int );
+static void yy_flex_strncpy ( char *, const char *, int );
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen (yyconst char * );
+static int yy_flex_strlen ( const char * );
 #endif
 
 #ifndef YY_NO_INPUT
-
 #ifdef __cplusplus
-static int yyinput (void );
+static int yyinput ( void );
 #else
-static int input (void );
+static int input ( void );
 #endif
 
 #endif
 
         static int yy_start_stack_ptr = 0;
         static int yy_start_stack_depth = 0;
-        static int *yy_start_stack = NULL;
+        static int *yy_start_stack = nullptr;
     
-    static void yy_push_state (int new_state );
+    static void yy_push_state ( int _new_state );
     
-    static void yy_pop_state (void );
+    static void yy_pop_state ( void );
     
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
@@ -1494,7 +1727,7 @@ static int input (void );
 /* This used to be an fputs(), but since the string might contain NUL's,
  * we now use fwrite().
  */
-#define ECHO do { if (fwrite( parse_tcl_YYtext, parse_tcl_YYleng, 1, parse_tcl_YYout )) {} } while (0)
+#define ECHO do { if (fwrite( yytext, (size_t) yyleng, 1, yyout )) {} } while (0)
 #endif
 
 /* Gets input and stuffs it into "buf".  number of characters read, or YY_NULL,
@@ -1505,20 +1738,20 @@ static int input (void );
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
 		{ \
 		int c = '*'; \
-		size_t n; \
+		int n; \
 		for ( n = 0; n < max_size && \
-			     (c = getc( parse_tcl_YYin )) != EOF && c != '\n'; ++n ) \
+			     (c = getc( yyin )) != EOF && c != '\n'; ++n ) \
 			buf[n] = (char) c; \
 		if ( c == '\n' ) \
 			buf[n++] = (char) c; \
-		if ( c == EOF && ferror( parse_tcl_YYin ) ) \
+		if ( c == EOF && ferror( yyin ) ) \
 			YY_FATAL_ERROR( "input in flex scanner failed" ); \
 		result = n; \
 		} \
 	else \
 		{ \
 		errno=0; \
-		while ( (result = fread(buf, 1, max_size, parse_tcl_YYin))==0 && ferror(parse_tcl_YYin)) \
+		while ( (result = (int) fread(buf, 1, (yy_size_t) max_size, yyin)) == 0 && ferror(yyin)) \
 			{ \
 			if( errno != EINTR) \
 				{ \
@@ -1526,7 +1759,7 @@ static int input (void );
 				break; \
 				} \
 			errno=0; \
-			clearerr(parse_tcl_YYin); \
+			clearerr(yyin); \
 			} \
 		}\
 \
@@ -1559,12 +1792,12 @@ static int input (void );
 #ifndef YY_DECL
 #define YY_DECL_IS_OURS 1
 
-extern int parse_tcl_YYlex (void);
+extern int yylex (void);
 
-#define YY_DECL int parse_tcl_YYlex (void)
+#define YY_DECL int yylex (void)
 #endif /* !YY_DECL */
 
-/* Code executed at the beginning of each rule, after parse_tcl_YYtext and parse_tcl_YYleng
+/* Code executed at the beginning of each rule, after yytext and yyleng
  * have been set up.
  */
 #ifndef YY_USER_ACTION
@@ -1573,7 +1806,7 @@ extern int parse_tcl_YYlex (void);
 
 /* Code executed at the end of each rule. */
 #ifndef YY_BREAK
-#define YY_BREAK break;
+#define YY_BREAK /*LINTED*/break;
 #endif
 
 #define YY_RULE_SETUP \
@@ -1598,32 +1831,34 @@ YY_DECL
 		if ( ! (yy_start) )
 			(yy_start) = 1;	/* first start state */
 
-		if ( ! parse_tcl_YYin )
-			parse_tcl_YYin = stdin;
+		if ( ! yyin )
+			yyin = stdin;
 
-		if ( ! parse_tcl_YYout )
-			parse_tcl_YYout = stdout;
+		if ( ! yyout )
+			yyout = stdout;
 
 		if ( ! YY_CURRENT_BUFFER ) {
-			parse_tcl_YYensure_buffer_stack ();
+			yyensure_buffer_stack ();
 			YY_CURRENT_BUFFER_LVALUE =
-				parse_tcl_YY_create_buffer(parse_tcl_YYin,YY_BUF_SIZE );
+				yy_create_buffer( yyin, YY_BUF_SIZE );
 		}
 
-		parse_tcl_YY_load_buffer_state( );
+		yy_load_buffer_state(  );
 		}
 
-	while ( 1 )		/* loops until end-of-file is reached */
+	{
+
+	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
 		(yy_more_len) = 0;
 		if ( (yy_more_flag) )
 			{
-			(yy_more_len) = (yy_c_buf_p) - (yytext_ptr);
+			(yy_more_len) = (int) ((yy_c_buf_p) - (yytext_ptr));
 			(yy_more_flag) = 0;
 			}
 		yy_cp = (yy_c_buf_p);
 
-		/* Support of parse_tcl_YYtext. */
+		/* Support of yytext. */
 		*yy_cp = (yy_hold_char);
 
 		/* yy_bp points to the position in yy_ch_buf of the start of
@@ -1635,7 +1870,7 @@ YY_DECL
 yy_match:
 		do
 			{
-			YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)];
+			YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)] ;
 			if ( yy_accept[yy_current_state] )
 				{
 				(yy_last_accepting_state) = yy_current_state;
@@ -1645,9 +1880,9 @@ yy_match:
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
 				if ( yy_current_state >= 179 )
-					yy_c = yy_meta[(unsigned int) yy_c];
+					yy_c = yy_meta[yy_c];
 				}
-			yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
+			yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 			++yy_cp;
 			}
 		while ( yy_current_state != 178 );
@@ -1662,10 +1897,10 @@ yy_find_action:
 		if ( yy_act != YY_END_OF_BUFFER && yy_rule_can_match_eol[yy_act] )
 			{
 			int yyl;
-			for ( yyl = (yy_more_len); yyl < parse_tcl_YYleng; ++yyl )
-				if ( parse_tcl_YYtext[yyl] == '\n' )
-					   
-    parse_tcl_YYlineno++;
+			for ( yyl = (yy_more_len); yyl < yyleng; ++yyl )
+				if ( yytext[yyl] == '\n' )
+					
+    yylineno++;
 ;
 			}
 
@@ -1718,7 +1953,7 @@ case 2:
 YY_RULE_SETUP
 {
       yyless(0);
-      tcl.line_comment = parse_tcl_YYlineno;
+      tcl.line_comment = yylineno;
       tcl_comment(0, "");
    }
 	YY_BREAK
@@ -1726,7 +1961,7 @@ case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
       tcl_codify("", text);
    }
 	YY_BREAK
@@ -1734,14 +1969,14 @@ case 4:
 YY_RULE_SETUP
 {
       yyless(0);
-      tcl.line_command = parse_tcl_YYlineno;
+      tcl.line_command = yylineno;
       tcl_command(0, "");
    }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
       tcl_codify("comment", text);
    }
 	YY_BREAK
@@ -1749,7 +1984,7 @@ case 6:
 /* rule 6 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
       tcl_codify("comment", text);
       tcl_comment(2, text.mid(1));
    }
@@ -1758,7 +1993,7 @@ case 7:
 /* rule 7 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
       tcl_codify("comment", text);
 
       text = text.mid(2, text.length() - 3);
@@ -1772,7 +2007,7 @@ case 8:
 /* rule 8 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
       tcl_codify("comment", text);
       tcl_comment(1, text.mid(2));
    }
@@ -1781,7 +2016,7 @@ case 9:
 /* rule 9 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       tcl_codify("comment", text.left(7));
       tcl_comment(2, "\n@code\n");
@@ -1793,7 +2028,7 @@ case 10:
 /* rule 10 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       tcl_codify("comment", text.left(11));
       tcl_comment(2, "\n@verbatim\n");
@@ -1805,7 +2040,7 @@ case 11:
 /* rule 11 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       tcl_codify("comment", text);
       text = text.mid(1, text.length() - 3);
@@ -1818,7 +2053,7 @@ case 12:
 /* rule 12 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       tcl_codify("comment", text);
       tcl_comment(2, text.mid(1));
@@ -1827,7 +2062,7 @@ YY_RULE_SETUP
 case 13:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       text = text.mid(0, text.length() - 1);
       tcl_codify("comment", text);
@@ -1848,7 +2083,7 @@ case 15:
 /* rule 15 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
       tcl_comment(-2,  text);
       yyless(0);
    }
@@ -1857,7 +2092,7 @@ case 16:
 /* rule 16 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       text = text.left(text.length() - 10);
       tcl_comment(2, text);
@@ -1884,7 +2119,7 @@ case 19:
 /* rule 19 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       text = text.left(text.length() - 14);
       tcl_comment(2, text);
@@ -1911,7 +2146,7 @@ case 22:
 /* rule 22 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       tcl_codify("comment", text);
       tcl_comment(2, text);
@@ -1921,7 +2156,7 @@ case 23:
 /* rule 23 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       tcl_codify("comment", text);
       tcl_comment(2, text);
@@ -1945,7 +2180,7 @@ YY_RULE_SETUP
 case 26:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
       tcl.string_commentcodify += text;
    }
 	YY_BREAK
@@ -1953,7 +2188,7 @@ case 27:
 /* rule 27 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
       tcl.string_commentcodify += text;
 
       text = text.mid(2, text.length() - 4);
@@ -1967,7 +2202,7 @@ case 28:
 /* rule 28 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       tcl.string_commentcodify += text;
       tcl.string_commentline   += text.mid(2);
@@ -1977,7 +2212,7 @@ case 29:
 /* rule 29 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       yy_pop_state();
 
@@ -1997,7 +2232,7 @@ case 30:
 /* rule 30 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
       tcl.string_commentcodify += text;
 
       text = text.left(text.length() - 3);
@@ -2009,7 +2244,7 @@ case 31:
 /* rule 31 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       tcl.string_commentcodify += text;
       tcl.string_commentline += text;
@@ -2019,7 +2254,7 @@ YY_RULE_SETUP
 case 32:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       text = text.left(text.length() - 1);
       tcl.string_commentcodify += text;
@@ -2033,13 +2268,13 @@ case 33:
 /* rule 33 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       tcl.string_commentcodify = text;
       tcl.string_commentcodify = tcl.string_commentcodify.left(tcl.string_commentcodify.length()-2);
       tcl.string_commentline   = "";
-      tcl.line_commentline     = parse_tcl_YYlineno;
-      tcl.line_body1           = parse_tcl_YYlineno;
+      tcl.line_commentline     = yylineno;
+      tcl.line_body1           = yylineno;
 
       unput('<');
       unput('#');
@@ -2050,11 +2285,11 @@ case 34:
 /* rule 34 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       tcl.string_commentcodify = "";
       tcl.string_commentline   = "";
-      tcl.line_body1           = parse_tcl_YYlineno;
+      tcl.line_body1           = yylineno;
 
       tcl_command(-1, text);
    }
@@ -2063,11 +2298,11 @@ case 35:
 /* rule 35 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       tcl.string_commentcodify = "";
       tcl.string_commentline   = "";
-      tcl.line_body1           = parse_tcl_YYlineno;
+      tcl.line_body1           = yylineno;
 
       tcl_command(-1, text);
    }
@@ -2076,11 +2311,11 @@ case 36:
 /* rule 36 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       tcl.string_commentcodify = "";
       tcl.string_commentline   = "";
-      tcl.line_body1           = parse_tcl_YYlineno - 1;
+      tcl.line_body1           = yylineno - 1;
 
       tcl_command(-1, text);
    }
@@ -2089,14 +2324,14 @@ case 37:
 /* rule 37 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
       tcl_command(1, text);
    }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       tcl.word_is     = ' ';
       tcl.string_last = "{*}";
@@ -2106,7 +2341,7 @@ YY_RULE_SETUP
 case 39:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       tcl.word_is     = ' ';
       tcl.string_last = "";
@@ -2116,7 +2351,7 @@ YY_RULE_SETUP
 case 40:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
 
       tcl.word_is = ' ';
       if (text[0] == '{' || text[0] == '[' || text[0] == '"') {
@@ -2131,7 +2366,7 @@ case 41:
 case 42:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
       tcl_word(1, text);
    }
 	YY_BREAK
@@ -2139,63 +2374,63 @@ case 43:
 /* rule 43 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
       tcl_word(2, text);
    }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
       tcl_word(3, text);
    }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
       tcl_word(4, text);
    }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
       tcl_word(5, text);
    }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
       tcl_word(6, text);
    }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
       tcl_word(7, text);
    }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
       tcl_word(8, text);
    }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
       tcl_word(9, text);
    }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
       tcl_word(10, text);
    }
 	YY_BREAK
@@ -2203,21 +2438,21 @@ case 52:
 /* rule 52 can match eol */
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
       tcl_word(11, text);
    }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
       tcl_word(12, text);
    }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
 {
-      QString text = QString::fromUtf8(parse_tcl_YYtext);
+      QString text = QString::fromUtf8(yytext);
       tcl_word(1, text);
    }
 	YY_BREAK
@@ -2239,15 +2474,15 @@ ECHO;
 			{
 			/* We're scanning a new file or input source.  It's
 			 * possible that this happened because the user
-			 * just pointed parse_tcl_YYin at a new source and called
-			 * parse_tcl_YYlex().  If so, then we have to assure
+			 * just pointed yyin at a new source and called
+			 * yylex().  If so, then we have to assure
 			 * consistency between YY_CURRENT_BUFFER and our
 			 * globals.  Here is the right place to do so, because
 			 * this is the first action (other than possibly a
 			 * back-up) that will match for the new input source.
 			 */
 			(yy_n_chars) = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
-			YY_CURRENT_BUFFER_LVALUE->yy_input_file = parse_tcl_YYin;
+			YY_CURRENT_BUFFER_LVALUE->yy_input_file = yyin;
 			YY_CURRENT_BUFFER_LVALUE->yy_buffer_status = YY_BUFFER_NORMAL;
 			}
 
@@ -2301,11 +2536,11 @@ ECHO;
 				{
 				(yy_did_buffer_switch_on_eof) = 0;
 
-				if ( parse_tcl_YYwrap( ) )
+				if ( yywrap(  ) )
 					{
 					/* Note: because we've taken care in
 					 * yy_get_next_buffer() to have set up
-					 * parse_tcl_YYtext, we can now set up
+					 * yytext, we can now set up
 					 * yy_c_buf_p so that if some total
 					 * hoser (like flex itself) wants to
 					 * call the scanner after we return the
@@ -2354,7 +2589,8 @@ ECHO;
 			"fatal flex scanner internal error--no action found" );
 	} /* end of action switch */
 		} /* end of scanning one token */
-} /* end of parse_tcl_YYlex */
+	} /* end of user's declarations */
+} /* end of yylex */
 
 /* yy_get_next_buffer - try to read in a new buffer
  *
@@ -2396,7 +2632,7 @@ static int yy_get_next_buffer (void)
 	/* Try to read more data. */
 
 	/* First move last chars to start of buffer. */
-	number_to_move = (int) ((yy_c_buf_p) - (yytext_ptr)) - 1;
+	number_to_move = (int) ((yy_c_buf_p) - (yytext_ptr) - 1);
 
 	for ( i = 0; i < number_to_move; ++i )
 		*(dest++) = *(source++);
@@ -2416,7 +2652,7 @@ static int yy_get_next_buffer (void)
 			{ /* Not enough room in the buffer - grow it. */
 
 			/* just a shorter name for the current buffer */
-			YY_BUFFER_STATE b = YY_CURRENT_BUFFER;
+			YY_BUFFER_STATE b = YY_CURRENT_BUFFER_LVALUE;
 
 			int yy_c_buf_p_offset =
 				(int) ((yy_c_buf_p) - b->yy_ch_buf);
@@ -2432,11 +2668,12 @@ static int yy_get_next_buffer (void)
 
 				b->yy_ch_buf = (char *)
 					/* Include room in for 2 EOB chars. */
-					parse_tcl_YYrealloc((void *) b->yy_ch_buf,b->yy_buf_size + 2  );
+					yyrealloc( (void *) b->yy_ch_buf,
+							 (yy_size_t) (b->yy_buf_size + 2)  );
 				}
 			else
 				/* Can't grow it, we don't own it. */
-				b->yy_ch_buf = 0;
+				b->yy_ch_buf = nullptr;
 
 			if ( ! b->yy_ch_buf )
 				YY_FATAL_ERROR(
@@ -2454,7 +2691,7 @@ static int yy_get_next_buffer (void)
 
 		/* Read in more data. */
 		YY_INPUT( (&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
-			(yy_n_chars), (size_t) num_to_read );
+			(yy_n_chars), num_to_read );
 
 		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
 		}
@@ -2464,7 +2701,7 @@ static int yy_get_next_buffer (void)
 		if ( number_to_move == YY_MORE_ADJ )
 			{
 			ret_val = EOB_ACT_END_OF_FILE;
-			parse_tcl_YYrestart(parse_tcl_YYin  );
+			yyrestart( yyin  );
 			}
 
 		else
@@ -2478,12 +2715,15 @@ static int yy_get_next_buffer (void)
 	else
 		ret_val = EOB_ACT_CONTINUE_SCAN;
 
-	if ((yy_size_t) ((yy_n_chars) + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
+	if (((yy_n_chars) + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
 		/* Extend the array by 50%, plus the number we really need. */
-		yy_size_t new_size = (yy_n_chars) + number_to_move + ((yy_n_chars) >> 1);
-		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) parse_tcl_YYrealloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size  );
+		int new_size = (yy_n_chars) + number_to_move + ((yy_n_chars) >> 1);
+		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) yyrealloc(
+			(void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf, (yy_size_t) new_size  );
 		if ( ! YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
 			YY_FATAL_ERROR( "out of dynamic memory in yy_get_next_buffer()" );
+		/* "- 2" to take care of EOB's */
+		YY_CURRENT_BUFFER_LVALUE->yy_buf_size = (int) (new_size - 2);
 	}
 
 	(yy_n_chars) += number_to_move;
@@ -2516,9 +2756,9 @@ static int yy_get_next_buffer (void)
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
 			if ( yy_current_state >= 179 )
-				yy_c = yy_meta[(unsigned int) yy_c];
+				yy_c = yy_meta[yy_c];
 			}
-		yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
+		yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 		}
 
 	return yy_current_state;
@@ -2544,13 +2784,15 @@ static int yy_get_next_buffer (void)
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
 		if ( yy_current_state >= 179 )
-			yy_c = yy_meta[(unsigned int) yy_c];
+			yy_c = yy_meta[yy_c];
 		}
-	yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
+	yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 	yy_is_jam = (yy_current_state == 178);
 
-	return yy_is_jam ? 0 : yy_current_state;
+		return yy_is_jam ? 0 : yy_current_state;
 }
+
+#ifndef YY_NO_UNPUT
 
     static void yyunput (int c, char * yy_bp )
 {
@@ -2558,7 +2800,7 @@ static int yy_get_next_buffer (void)
     
     yy_cp = (yy_c_buf_p);
 
-	/* undo effects of setting up parse_tcl_YYtext */
+	/* undo effects of setting up yytext */
 	*yy_cp = (yy_hold_char);
 
 	if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
@@ -2576,7 +2818,7 @@ static int yy_get_next_buffer (void)
 		yy_cp += (int) (dest - source);
 		yy_bp += (int) (dest - source);
 		YY_CURRENT_BUFFER_LVALUE->yy_n_chars =
-			(yy_n_chars) = YY_CURRENT_BUFFER_LVALUE->yy_buf_size;
+			(yy_n_chars) = (int) YY_CURRENT_BUFFER_LVALUE->yy_buf_size;
 
 		if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
 			YY_FATAL_ERROR( "flex scanner push-back overflow" );
@@ -2585,13 +2827,15 @@ static int yy_get_next_buffer (void)
 	*--yy_cp = (char) c;
 
     if ( c == '\n' ){
-        --parse_tcl_YYlineno;
+        --yylineno;
     }
 
 	(yytext_ptr) = yy_bp;
 	(yy_hold_char) = *yy_cp;
 	(yy_c_buf_p) = yy_cp;
 }
+
+#endif
 
 #ifndef YY_NO_INPUT
 #ifdef __cplusplus
@@ -2617,7 +2861,7 @@ static int yy_get_next_buffer (void)
 
 		else
 			{ /* need more input */
-			int offset = (yy_c_buf_p) - (yytext_ptr);
+			int offset = (int) ((yy_c_buf_p) - (yytext_ptr));
 			++(yy_c_buf_p);
 
 			switch ( yy_get_next_buffer(  ) )
@@ -2634,14 +2878,14 @@ static int yy_get_next_buffer (void)
 					 */
 
 					/* Reset buffer status. */
-					parse_tcl_YYrestart(parse_tcl_YYin );
+					yyrestart( yyin );
 
 					/*FALLTHROUGH*/
 
 				case EOB_ACT_END_OF_FILE:
 					{
-					if ( parse_tcl_YYwrap( ) )
-						return EOF;
+					if ( yywrap(  ) )
+						return 0;
 
 					if ( ! (yy_did_buffer_switch_on_eof) )
 						YY_NEW_FILE;
@@ -2660,12 +2904,12 @@ static int yy_get_next_buffer (void)
 		}
 
 	c = *(unsigned char *) (yy_c_buf_p);	/* cast for 8-bit char's */
-	*(yy_c_buf_p) = '\0';	/* preserve parse_tcl_YYtext */
+	*(yy_c_buf_p) = '\0';	/* preserve yytext */
 	(yy_hold_char) = *++(yy_c_buf_p);
 
 	if ( c == '\n' )
-		   
-    parse_tcl_YYlineno++;
+		
+    yylineno++;
 ;
 
 	return c;
@@ -2677,32 +2921,32 @@ static int yy_get_next_buffer (void)
  * 
  * @note This function does not reset the start condition to @c INITIAL .
  */
-    void parse_tcl_YYrestart  (FILE * input_file )
+    void yyrestart  (FILE * input_file )
 {
     
 	if ( ! YY_CURRENT_BUFFER ){
-        parse_tcl_YYensure_buffer_stack ();
+        yyensure_buffer_stack ();
 		YY_CURRENT_BUFFER_LVALUE =
-            parse_tcl_YY_create_buffer(parse_tcl_YYin,YY_BUF_SIZE );
+            yy_create_buffer( yyin, YY_BUF_SIZE );
 	}
 
-	parse_tcl_YY_init_buffer(YY_CURRENT_BUFFER,input_file );
-	parse_tcl_YY_load_buffer_state( );
+	yy_init_buffer( YY_CURRENT_BUFFER, input_file );
+	yy_load_buffer_state(  );
 }
 
 /** Switch to a different input buffer.
  * @param new_buffer The new input buffer.
  * 
  */
-    void parse_tcl_YY_switch_to_buffer  (YY_BUFFER_STATE  new_buffer )
+    void yy_switch_to_buffer  (YY_BUFFER_STATE  new_buffer )
 {
     
 	/* TODO. We should be able to replace this entire function body
 	 * with
-	 *		parse_tcl_YYpop_buffer_state();
-	 *		parse_tcl_YYpush_buffer_state(new_buffer);
+	 *		yypop_buffer_state();
+	 *		yypush_buffer_state(new_buffer);
      */
-	parse_tcl_YYensure_buffer_stack ();
+	yyensure_buffer_stack ();
 	if ( YY_CURRENT_BUFFER == new_buffer )
 		return;
 
@@ -2715,21 +2959,21 @@ static int yy_get_next_buffer (void)
 		}
 
 	YY_CURRENT_BUFFER_LVALUE = new_buffer;
-	parse_tcl_YY_load_buffer_state( );
+	yy_load_buffer_state(  );
 
 	/* We don't actually know whether we did this switch during
-	 * EOF (parse_tcl_YYwrap()) processing, but the only time this flag
-	 * is looked at is after parse_tcl_YYwrap() is called, so it's safe
+	 * EOF (yywrap()) processing, but the only time this flag
+	 * is looked at is after yywrap() is called, so it's safe
 	 * to go ahead and always set it.
 	 */
 	(yy_did_buffer_switch_on_eof) = 1;
 }
 
-static void parse_tcl_YY_load_buffer_state  (void)
+static void yy_load_buffer_state  (void)
 {
     	(yy_n_chars) = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
 	(yytext_ptr) = (yy_c_buf_p) = YY_CURRENT_BUFFER_LVALUE->yy_buf_pos;
-	parse_tcl_YYin = YY_CURRENT_BUFFER_LVALUE->yy_input_file;
+	yyin = YY_CURRENT_BUFFER_LVALUE->yy_input_file;
 	(yy_hold_char) = *(yy_c_buf_p);
 }
 
@@ -2739,35 +2983,35 @@ static void parse_tcl_YY_load_buffer_state  (void)
  * 
  * @return the allocated buffer state.
  */
-    YY_BUFFER_STATE parse_tcl_YY_create_buffer  (FILE * file, int  size )
+    YY_BUFFER_STATE yy_create_buffer  (FILE * file, int  size )
 {
 	YY_BUFFER_STATE b;
     
-	b = (YY_BUFFER_STATE) parse_tcl_YYalloc(sizeof( struct yy_buffer_state )  );
+	b = (YY_BUFFER_STATE) yyalloc( sizeof( struct yy_buffer_state )  );
 	if ( ! b )
-		YY_FATAL_ERROR( "out of dynamic memory in parse_tcl_YY_create_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
 
 	b->yy_buf_size = size;
 
 	/* yy_ch_buf has to be 2 characters longer than the size given because
 	 * we need to put in 2 end-of-buffer characters.
 	 */
-	b->yy_ch_buf = (char *) parse_tcl_YYalloc(b->yy_buf_size + 2  );
+	b->yy_ch_buf = (char *) yyalloc( (yy_size_t) (b->yy_buf_size + 2)  );
 	if ( ! b->yy_ch_buf )
-		YY_FATAL_ERROR( "out of dynamic memory in parse_tcl_YY_create_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
 
 	b->yy_is_our_buffer = 1;
 
-	parse_tcl_YY_init_buffer(b,file );
+	yy_init_buffer( b, file );
 
 	return b;
 }
 
 /** Destroy the buffer.
- * @param b a buffer created with parse_tcl_YY_create_buffer()
+ * @param b a buffer created with yy_create_buffer()
  * 
  */
-    void parse_tcl_YY_delete_buffer (YY_BUFFER_STATE  b )
+    void yy_delete_buffer (YY_BUFFER_STATE  b )
 {
     
 	if ( ! b )
@@ -2777,27 +3021,27 @@ static void parse_tcl_YY_load_buffer_state  (void)
 		YY_CURRENT_BUFFER_LVALUE = (YY_BUFFER_STATE) 0;
 
 	if ( b->yy_is_our_buffer )
-		parse_tcl_YYfree((void *) b->yy_ch_buf  );
+		yyfree( (void *) b->yy_ch_buf  );
 
-	parse_tcl_YYfree((void *) b  );
+	yyfree( (void *) b  );
 }
 
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
- * such as during a parse_tcl_YYrestart() or at EOF.
+ * such as during a yyrestart() or at EOF.
  */
-    static void parse_tcl_YY_init_buffer  (YY_BUFFER_STATE  b, FILE * file )
+    static void yy_init_buffer  (YY_BUFFER_STATE  b, FILE * file )
 
 {
 	int oerrno = errno;
     
-	parse_tcl_YY_flush_buffer(b );
+	yy_flush_buffer( b );
 
 	b->yy_input_file = file;
 	b->yy_fill_buffer = 1;
 
-    /* If b is the current buffer, then parse_tcl_YY_init_buffer was _probably_
-     * called from parse_tcl_YYrestart() or through yy_get_next_buffer.
+    /* If b is the current buffer, then yy_init_buffer was _probably_
+     * called from yyrestart() or through yy_get_next_buffer.
      * In that case, we don't want to reset the lineno or column.
      */
     if (b != YY_CURRENT_BUFFER){
@@ -2814,7 +3058,7 @@ static void parse_tcl_YY_load_buffer_state  (void)
  * @param b the buffer state to be flushed, usually @c YY_CURRENT_BUFFER.
  * 
  */
-    void parse_tcl_YY_flush_buffer (YY_BUFFER_STATE  b )
+    void yy_flush_buffer (YY_BUFFER_STATE  b )
 {
     	if ( ! b )
 		return;
@@ -2834,7 +3078,7 @@ static void parse_tcl_YY_load_buffer_state  (void)
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
 	if ( b == YY_CURRENT_BUFFER )
-		parse_tcl_YY_load_buffer_state( );
+		yy_load_buffer_state(  );
 }
 
 /** Pushes the new state onto the stack. The new state becomes
@@ -2843,14 +3087,14 @@ static void parse_tcl_YY_load_buffer_state  (void)
  *  @param new_buffer The new state.
  *  
  */
-void parse_tcl_YYpush_buffer_state (YY_BUFFER_STATE new_buffer )
+void yypush_buffer_state (YY_BUFFER_STATE new_buffer )
 {
-    	if (new_buffer == NULL)
+    	if (new_buffer == nullptr)
 		return;
 
-	parse_tcl_YYensure_buffer_stack();
+	yyensure_buffer_stack();
 
-	/* This block is copied from parse_tcl_YY_switch_to_buffer. */
+	/* This block is copied from yy_switch_to_buffer. */
 	if ( YY_CURRENT_BUFFER )
 		{
 		/* Flush out information for old buffer. */
@@ -2864,8 +3108,8 @@ void parse_tcl_YYpush_buffer_state (YY_BUFFER_STATE new_buffer )
 		(yy_buffer_stack_top)++;
 	YY_CURRENT_BUFFER_LVALUE = new_buffer;
 
-	/* copied from parse_tcl_YY_switch_to_buffer. */
-	parse_tcl_YY_load_buffer_state( );
+	/* copied from yy_switch_to_buffer. */
+	yy_load_buffer_state(  );
 	(yy_did_buffer_switch_on_eof) = 1;
 }
 
@@ -2873,18 +3117,18 @@ void parse_tcl_YYpush_buffer_state (YY_BUFFER_STATE new_buffer )
  *  The next element becomes the new top.
  *  
  */
-void parse_tcl_YYpop_buffer_state (void)
+void yypop_buffer_state (void)
 {
     	if (!YY_CURRENT_BUFFER)
 		return;
 
-	parse_tcl_YY_delete_buffer(YY_CURRENT_BUFFER );
-	YY_CURRENT_BUFFER_LVALUE = NULL;
+	yy_delete_buffer(YY_CURRENT_BUFFER );
+	YY_CURRENT_BUFFER_LVALUE = nullptr;
 	if ((yy_buffer_stack_top) > 0)
 		--(yy_buffer_stack_top);
 
 	if (YY_CURRENT_BUFFER) {
-		parse_tcl_YY_load_buffer_state( );
+		yy_load_buffer_state(  );
 		(yy_did_buffer_switch_on_eof) = 1;
 	}
 }
@@ -2892,9 +3136,9 @@ void parse_tcl_YYpop_buffer_state (void)
 /* Allocates the stack if it does not exist.
  *  Guarantees space for at least one push.
  */
-static void parse_tcl_YYensure_buffer_stack (void)
+static void yyensure_buffer_stack (void)
 {
-	int num_to_alloc;
+	yy_size_t num_to_alloc;
     
 	if (!(yy_buffer_stack)) {
 
@@ -2902,15 +3146,15 @@ static void parse_tcl_YYensure_buffer_stack (void)
 		 * scanner will even need a stack. We use 2 instead of 1 to avoid an
 		 * immediate realloc on the next call.
          */
-		num_to_alloc = 1;
-		(yy_buffer_stack) = (struct yy_buffer_state**)parse_tcl_YYalloc
+      num_to_alloc = 1; /* After all that talk, this was set to 1 anyways... */
+		(yy_buffer_stack) = (struct yy_buffer_state**)yyalloc
 								(num_to_alloc * sizeof(struct yy_buffer_state*)
 								);
 		if ( ! (yy_buffer_stack) )
-			YY_FATAL_ERROR( "out of dynamic memory in parse_tcl_YYensure_buffer_stack()" );
-								  
+			YY_FATAL_ERROR( "out of dynamic memory in yyensure_buffer_stack()" );
+
 		memset((yy_buffer_stack), 0, num_to_alloc * sizeof(struct yy_buffer_state*));
-				
+
 		(yy_buffer_stack_max) = num_to_alloc;
 		(yy_buffer_stack_top) = 0;
 		return;
@@ -2919,15 +3163,15 @@ static void parse_tcl_YYensure_buffer_stack (void)
 	if ((yy_buffer_stack_top) >= ((yy_buffer_stack_max)) - 1){
 
 		/* Increase the buffer to prepare for a possible push. */
-		int grow_size = 8 /* arbitrary grow size */;
+		yy_size_t grow_size = 8 /* arbitrary grow size */;
 
 		num_to_alloc = (yy_buffer_stack_max) + grow_size;
-		(yy_buffer_stack) = (struct yy_buffer_state**)parse_tcl_YYrealloc
+		(yy_buffer_stack) = (struct yy_buffer_state**)yyrealloc
 								((yy_buffer_stack),
 								num_to_alloc * sizeof(struct yy_buffer_state*)
 								);
 		if ( ! (yy_buffer_stack) )
-			YY_FATAL_ERROR( "out of dynamic memory in parse_tcl_YYensure_buffer_stack()" );
+			YY_FATAL_ERROR( "out of dynamic memory in yyensure_buffer_stack()" );
 
 		/* zero only the new slots.*/
 		memset((yy_buffer_stack) + (yy_buffer_stack_max), 0, grow_size * sizeof(struct yy_buffer_state*));
@@ -2939,9 +3183,9 @@ static void parse_tcl_YYensure_buffer_stack (void)
  * @param base the character buffer
  * @param size the size in bytes of the character buffer
  * 
- * @return the newly allocated buffer state object. 
+ * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE parse_tcl_YY_scan_buffer  (char * base, yy_size_t  size )
+YY_BUFFER_STATE yy_scan_buffer  (char * base, yy_size_t  size )
 {
 	YY_BUFFER_STATE b;
     
@@ -2949,49 +3193,49 @@ YY_BUFFER_STATE parse_tcl_YY_scan_buffer  (char * base, yy_size_t  size )
 	     base[size-2] != YY_END_OF_BUFFER_CHAR ||
 	     base[size-1] != YY_END_OF_BUFFER_CHAR )
 		/* They forgot to leave room for the EOB's. */
-		return 0;
+		return nullptr;
 
-	b = (YY_BUFFER_STATE) parse_tcl_YYalloc(sizeof( struct yy_buffer_state )  );
+	b = (YY_BUFFER_STATE) yyalloc( sizeof( struct yy_buffer_state )  );
 	if ( ! b )
-		YY_FATAL_ERROR( "out of dynamic memory in parse_tcl_YY_scan_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_scan_buffer()" );
 
-	b->yy_buf_size = size - 2;	/* "- 2" to take care of EOB's */
+	b->yy_buf_size = (int) (size - 2);	/* "- 2" to take care of EOB's */
 	b->yy_buf_pos = b->yy_ch_buf = base;
 	b->yy_is_our_buffer = 0;
-	b->yy_input_file = 0;
+	b->yy_input_file = nullptr;
 	b->yy_n_chars = b->yy_buf_size;
 	b->yy_is_interactive = 0;
 	b->yy_at_bol = 1;
 	b->yy_fill_buffer = 0;
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
-	parse_tcl_YY_switch_to_buffer(b  );
+	yy_switch_to_buffer( b  );
 
 	return b;
 }
 
-/** Setup the input buffer state to scan a string. The next call to parse_tcl_YYlex() will
+/** Setup the input buffer state to scan a string. The next call to yylex() will
  * scan from a @e copy of @a str.
  * @param yystr a NUL-terminated string to scan
  * 
  * @return the newly allocated buffer state object.
  * @note If you want to scan bytes that may contain NUL values, then use
- *       parse_tcl_YY_scan_bytes() instead.
+ *       yy_scan_bytes() instead.
  */
-YY_BUFFER_STATE parse_tcl_YY_scan_string (yyconst char * yystr )
+YY_BUFFER_STATE yy_scan_string (const char * yystr )
 {
     
-	return parse_tcl_YY_scan_bytes(yystr,strlen(yystr) );
+	return yy_scan_bytes( yystr, (int) strlen(yystr) );
 }
 
-/** Setup the input buffer state to scan the given bytes. The next call to parse_tcl_YYlex() will
+/** Setup the input buffer state to scan the given bytes. The next call to yylex() will
  * scan from a @e copy of @a bytes.
  * @param yybytes the byte buffer to scan
  * @param _yybytes_len the number of bytes in the buffer pointed to by @a bytes.
  * 
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE parse_tcl_YY_scan_bytes  (yyconst char * yybytes, int  _yybytes_len )
+YY_BUFFER_STATE yy_scan_bytes  (const char * yybytes, int  _yybytes_len )
 {
 	YY_BUFFER_STATE b;
 	char *buf;
@@ -2999,19 +3243,19 @@ YY_BUFFER_STATE parse_tcl_YY_scan_bytes  (yyconst char * yybytes, int  _yybytes_
 	int i;
     
 	/* Get memory for full buffer, including space for trailing EOB's. */
-	n = _yybytes_len + 2;
-	buf = (char *) parse_tcl_YYalloc(n  );
+	n = (yy_size_t) (_yybytes_len + 2);
+	buf = (char *) yyalloc( n  );
 	if ( ! buf )
-		YY_FATAL_ERROR( "out of dynamic memory in parse_tcl_YY_scan_bytes()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_scan_bytes()" );
 
 	for ( i = 0; i < _yybytes_len; ++i )
 		buf[i] = yybytes[i];
 
 	buf[_yybytes_len] = buf[_yybytes_len+1] = YY_END_OF_BUFFER_CHAR;
 
-	b = parse_tcl_YY_scan_buffer(buf,n );
+	b = yy_scan_buffer( buf, n );
 	if ( ! b )
-		YY_FATAL_ERROR( "bad buffer in parse_tcl_YY_scan_bytes()" );
+		YY_FATAL_ERROR( "bad buffer in yy_scan_bytes()" );
 
 	/* It's okay to grow etc. this buffer, and we should throw it
 	 * away when we're done.
@@ -3021,20 +3265,21 @@ YY_BUFFER_STATE parse_tcl_YY_scan_bytes  (yyconst char * yybytes, int  _yybytes_
 	return b;
 }
 
-    static void yy_push_state (int  new_state )
+    static void yy_push_state (int  _new_state )
 {
     	if ( (yy_start_stack_ptr) >= (yy_start_stack_depth) )
 		{
 		yy_size_t new_size;
 
 		(yy_start_stack_depth) += YY_START_STACK_INCR;
-		new_size = (yy_start_stack_depth) * sizeof( int );
+		new_size = (yy_size_t) (yy_start_stack_depth) * sizeof( int );
 
 		if ( ! (yy_start_stack) )
-			(yy_start_stack) = (int *) parse_tcl_YYalloc(new_size  );
+			(yy_start_stack) = (int *) yyalloc( new_size  );
 
 		else
-			(yy_start_stack) = (int *) parse_tcl_YYrealloc((void *) (yy_start_stack),new_size  );
+			(yy_start_stack) = (int *) yyrealloc(
+					(void *) (yy_start_stack), new_size  );
 
 		if ( ! (yy_start_stack) )
 			YY_FATAL_ERROR( "out of memory expanding start-condition stack" );
@@ -3042,7 +3287,7 @@ YY_BUFFER_STATE parse_tcl_YY_scan_bytes  (yyconst char * yybytes, int  _yybytes_
 
 	(yy_start_stack)[(yy_start_stack_ptr)++] = YY_START;
 
-	BEGIN(new_state);
+	BEGIN(_new_state);
 }
 
     static void yy_pop_state  (void)
@@ -3057,9 +3302,9 @@ YY_BUFFER_STATE parse_tcl_YY_scan_bytes  (yyconst char * yybytes, int  _yybytes_
 #define YY_EXIT_FAILURE 2
 #endif
 
-static void yy_fatal_error (yyconst char* msg )
+static void yynoreturn yy_fatal_error (const char* msg )
 {
-    	(void) fprintf( stderr, "%s\n", msg );
+			fprintf( stderr, "%s\n", msg );
 	exit( YY_EXIT_FAILURE );
 }
 
@@ -3069,14 +3314,14 @@ static void yy_fatal_error (yyconst char* msg )
 #define yyless(n) \
 	do \
 		{ \
-		/* Undo effects of setting up parse_tcl_YYtext. */ \
+		/* Undo effects of setting up yytext. */ \
         int yyless_macro_arg = (n); \
         YY_LESS_LINENO(yyless_macro_arg);\
-		parse_tcl_YYtext[parse_tcl_YYleng] = (yy_hold_char); \
-		(yy_c_buf_p) = parse_tcl_YYtext + yyless_macro_arg; \
+		yytext[yyleng] = (yy_hold_char); \
+		(yy_c_buf_p) = yytext + yyless_macro_arg; \
 		(yy_hold_char) = *(yy_c_buf_p); \
 		*(yy_c_buf_p) = '\0'; \
-		parse_tcl_YYleng = yyless_macro_arg; \
+		yyleng = yyless_macro_arg; \
 		} \
 	while ( 0 )
 
@@ -3085,137 +3330,137 @@ static void yy_fatal_error (yyconst char* msg )
 /** Get the current line number.
  * 
  */
-int parse_tcl_YYget_lineno  (void)
+int yyget_lineno  (void)
 {
-        
-    return parse_tcl_YYlineno;
+    
+    return yylineno;
 }
 
 /** Get the input stream.
  * 
  */
-FILE *parse_tcl_YYget_in  (void)
+FILE *yyget_in  (void)
 {
-        return parse_tcl_YYin;
+        return yyin;
 }
 
 /** Get the output stream.
  * 
  */
-FILE *parse_tcl_YYget_out  (void)
+FILE *yyget_out  (void)
 {
-        return parse_tcl_YYout;
+        return yyout;
 }
 
 /** Get the length of the current token.
  * 
  */
-int parse_tcl_YYget_leng  (void)
+int yyget_leng  (void)
 {
-        return parse_tcl_YYleng;
+        return yyleng;
 }
 
 /** Get the current token.
  * 
  */
 
-char *parse_tcl_YYget_text  (void)
+char *yyget_text  (void)
 {
-        return parse_tcl_YYtext;
+        return yytext;
 }
 
 /** Set the current line number.
- * @param line_number
+ * @param _line_number line number
  * 
  */
-void parse_tcl_YYset_lineno (int  line_number )
+void yyset_lineno (int  _line_number )
 {
     
-    parse_tcl_YYlineno = line_number;
+    yylineno = _line_number;
 }
 
 /** Set the input stream. This does not discard the current
  * input buffer.
- * @param in_str A readable stream.
+ * @param _in_str A readable stream.
  * 
- * @see parse_tcl_YY_switch_to_buffer
+ * @see yy_switch_to_buffer
  */
-void parse_tcl_YYset_in (FILE *  in_str )
+void yyset_in (FILE *  _in_str )
 {
-        parse_tcl_YYin = in_str ;
+        yyin = _in_str ;
 }
 
-void parse_tcl_YYset_out (FILE *  out_str )
+void yyset_out (FILE *  _out_str )
 {
-        parse_tcl_YYout = out_str ;
+        yyout = _out_str ;
 }
 
-int parse_tcl_YYget_debug  (void)
+int yyget_debug  (void)
 {
-        return parse_tcl_YY_flex_debug;
+        return yy_flex_debug;
 }
 
-void parse_tcl_YYset_debug (int  bdebug )
+void yyset_debug (int  _bdebug )
 {
-        parse_tcl_YY_flex_debug = bdebug ;
+        yy_flex_debug = _bdebug ;
 }
 
 static int yy_init_globals (void)
 {
         /* Initialization is the same as for the non-reentrant scanner.
-     * This function is called from parse_tcl_YYlex_destroy(), so don't allocate here.
+     * This function is called from yylex_destroy(), so don't allocate here.
      */
 
-    /* We do not touch parse_tcl_YYlineno unless the option is enabled. */
-    parse_tcl_YYlineno =  1;
+    /* We do not touch yylineno unless the option is enabled. */
+    yylineno =  1;
     
-    (yy_buffer_stack) = 0;
+    (yy_buffer_stack) = nullptr;
     (yy_buffer_stack_top) = 0;
     (yy_buffer_stack_max) = 0;
-    (yy_c_buf_p) = (char *) 0;
+    (yy_c_buf_p) = nullptr;
     (yy_init) = 0;
     (yy_start) = 0;
 
     (yy_start_stack_ptr) = 0;
     (yy_start_stack_depth) = 0;
-    (yy_start_stack) =  NULL;
+    (yy_start_stack) =  nullptr;
 
 /* Defined in main.c */
 #ifdef YY_STDINIT
-    parse_tcl_YYin = stdin;
-    parse_tcl_YYout = stdout;
+    yyin = stdin;
+    yyout = stdout;
 #else
-    parse_tcl_YYin = (FILE *) 0;
-    parse_tcl_YYout = (FILE *) 0;
+    yyin = nullptr;
+    yyout = nullptr;
 #endif
 
     /* For future reference: Set errno on error, since we are called by
-     * parse_tcl_YYlex_init()
+     * yylex_init()
      */
     return 0;
 }
 
-/* parse_tcl_YYlex_destroy is for both reentrant and non-reentrant scanners. */
-int parse_tcl_YYlex_destroy  (void)
+/* yylex_destroy is for both reentrant and non-reentrant scanners. */
+int yylex_destroy  (void)
 {
     
     /* Pop the buffer stack, destroying each element. */
 	while(YY_CURRENT_BUFFER){
-		parse_tcl_YY_delete_buffer(YY_CURRENT_BUFFER  );
-		YY_CURRENT_BUFFER_LVALUE = NULL;
-		parse_tcl_YYpop_buffer_state();
+		yy_delete_buffer( YY_CURRENT_BUFFER  );
+		YY_CURRENT_BUFFER_LVALUE = nullptr;
+		yypop_buffer_state();
 	}
 
 	/* Destroy the stack itself. */
-	parse_tcl_YYfree((yy_buffer_stack) );
-	(yy_buffer_stack) = NULL;
+	yyfree((yy_buffer_stack) );
+	(yy_buffer_stack) = nullptr;
 
     /* Destroy the start condition stack. */
-        parse_tcl_YYfree((yy_start_stack)  );
-        (yy_start_stack) = NULL;
+        yyfree( (yy_start_stack)  );
+        (yy_start_stack) = nullptr;
 
     /* Reset the globals. This is important in a non-reentrant scanner so the next time
-     * parse_tcl_YYlex() is called, initialization will occur. */
+     * yylex() is called, initialization will occur. */
     yy_init_globals( );
 
     return 0;
@@ -3226,8 +3471,9 @@ int parse_tcl_YYlex_destroy  (void)
  */
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char* s1, yyconst char * s2, int n )
+static void yy_flex_strncpy (char* s1, const char * s2, int n )
 {
+		
 	int i;
 	for ( i = 0; i < n; ++i )
 		s1[i] = s2[i];
@@ -3235,7 +3481,7 @@ static void yy_flex_strncpy (char* s1, yyconst char * s2, int n )
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen (yyconst char * s )
+static int yy_flex_strlen (const char * s )
 {
 	int n;
 	for ( n = 0; s[n]; ++n )
@@ -3245,13 +3491,14 @@ static int yy_flex_strlen (yyconst char * s )
 }
 #endif
 
-void *parse_tcl_YYalloc (yy_size_t  size )
+void *yyalloc (yy_size_t  size )
 {
-	return (void *) malloc( size );
+			return malloc(size);
 }
 
-void *parse_tcl_YYrealloc  (void * ptr, yy_size_t  size )
+void *yyrealloc  (void * ptr, yy_size_t  size )
 {
+		
 	/* The cast to (char *) in the following accommodates both
 	 * implementations that use char* generic pointers, and those
 	 * that use void* generic pointers.  It works with the latter
@@ -3259,12 +3506,12 @@ void *parse_tcl_YYrealloc  (void * ptr, yy_size_t  size )
 	 * any pointer type to void*, and deal with argument conversions
 	 * as though doing an assignment.
 	 */
-	return (void *) realloc( (char *) ptr, size );
+	return realloc(ptr, size);
 }
 
-void parse_tcl_YYfree (void * ptr )
+void yyfree (void * ptr )
 {
-	free( (char *) ptr );	/* see parse_tcl_YYrealloc() for (char *) cast */
+			free( (char *) ptr );	/* see yyrealloc() for (char *) cast */
 }
 
 #define YYTABLES_NAME "yytables"
@@ -3274,7 +3521,7 @@ void parse_tcl_YYfree (void * ptr )
 YY_BUFFER_STATE tcl_scan_string (const QString &yystr)
 {
    QByteArray tmp = yystr.toUtf8();
-   return parse_tcl_YY_scan_bytes(tmp.constData(),tmp.length());
+   return yy_scan_bytes(tmp.constData(), tmp.length());
 }
 
 static tcl_scan *tcl_scan_start(QChar type, const QString &content_t, const QString &ns,
@@ -3288,7 +3535,7 @@ static tcl_scan *tcl_scan_start(QChar type, const QString &content_t, const QStr
       myScan = tcl.listScan.at(0);
    }
 
-   myScan->line1 = parse_tcl_YYlineno;
+   myScan->line1 = yylineno;
    yy_push_state(TOP);
 
    myScan = new tcl_scan;
@@ -3332,7 +3579,7 @@ static tcl_scan *tcl_scan_start(QChar type, const QString &content_t, const QStr
    myScan->line1 = tcl.line_body1;
 
    myScan->after.clear();
-   parse_tcl_YYlineno = myScan->line0;
+   yylineno = myScan->line0;
    myScan->protection = tcl.protection;
 
    tcl.entry_inside = myScan->entry_scan;
@@ -3340,7 +3587,7 @@ static tcl_scan *tcl_scan_start(QChar type, const QString &content_t, const QStr
 
    tcl.listScan.insert(0, myScan);
 
-   parse_tcl_YY_switch_to_buffer(myScan->buffer_state);
+   yy_switch_to_buffer(myScan->buffer_state);
 
    return (myScan);
 }
@@ -3382,12 +3629,12 @@ static void tcl_scan_end()
       tcl_codify(myScan->after[i], myScan->after[i + 1]);
    }
 
-   parse_tcl_YY_delete_buffer(myScan->buffer_state);
+   yy_delete_buffer(myScan->buffer_state);
    yy_pop_state();
    tcl.entry_inside = myScan1->entry_scan;
 
-   parse_tcl_YY_switch_to_buffer(myScan1->buffer_state);
-   parse_tcl_YYlineno       = myScan1->line1;
+   yy_switch_to_buffer(myScan1->buffer_state);
+   yylineno       = myScan1->line1;
    tcl.protection = myScan1->protection;
 
    if (myStart >= 0) {
@@ -3980,7 +4227,7 @@ static void tcl_codify_link(const QString &name)
 //
 // parses (*tcl.list_commandwords.at(i)).utf8() and checks for brackets.
 // Starts a new scan context if needed (*myScan==0 and brackets found).
-// Returns NULL or the created scan context.
+// Returns nullptr or the created scan context.
 
 static tcl_scan *tcl_command_ARG(tcl_scan *myScan, unsigned int i, bool ignoreOutermostBraces)
 {
@@ -3994,7 +4241,7 @@ static tcl_scan *tcl_command_ARG(tcl_scan *myScan, unsigned int i, bool ignoreOu
 
    if (i % 2 != 0) {
       // handle white space
-      myScan = tcl_codify_token(myScan, "NULL", myName);
+      myScan = tcl_codify_token(myScan, "nullptr", myName);
 
    } else {
       QString myStr = "";
@@ -4039,7 +4286,7 @@ static tcl_scan *tcl_command_ARG(tcl_scan *myScan, unsigned int i, bool ignoreOu
             // the first opening bracket, output what we have so far
             myStr  += c;
 
-            myScan = tcl_codify_token(myScan, "NULL", myStr);
+            myScan = tcl_codify_token(myScan, "nullptr", myStr);
             myStr  = "";
 
          } else if (c == ']' && ! backslashed && insideBrackets == 0 && insideBraces == 0) {
@@ -4058,7 +4305,7 @@ static tcl_scan *tcl_command_ARG(tcl_scan *myScan, unsigned int i, bool ignoreOu
          tcl_codify_link(myStr);
 
       } else {
-         myScan = tcl_codify_token(myScan, "NULL", myStr);
+         myScan = tcl_codify_token(myScan, "nullptr", myStr);
 
       }
    }
@@ -4143,7 +4390,7 @@ static void tcl_command_SWITCH()
       if (token[0] == '{') {
          inBraces = true;
          token    = token.mid(1, token.length() - 2);
-         myScan   = tcl_codify_token(myScan, "NULL", QString("{"));
+         myScan   = tcl_codify_token(myScan, "nullptr", QString("{"));
       }
 
       // ToDo: check if multibyte chars are handled correctly
@@ -4159,12 +4406,12 @@ static void tcl_command_SWITCH()
 
          // handle leading whitespace/opening brace/double quotes
          if (elem > 0) {
-            myScan = tcl_codify_token(myScan, "NULL", token.left(elem));
+            myScan = tcl_codify_token(myScan, "nullptr", token.left(elem));
          }
 
          // handle actual element without braces/double quotes
          if (nextIsPattern) {
-            myScan = tcl_codify_token(myScan, "NULL", token.mid(elem, size));
+            myScan = tcl_codify_token(myScan, "nullptr", token.mid(elem, size));
 
          } else {
             myScan = tcl_codify_token(myScan, "script", token.mid(elem, size));
@@ -4173,7 +4420,7 @@ static void tcl_command_SWITCH()
 
          // handle trailing whitespace/closing brace/double quotes
          if (next - elem - size > 0) {
-            myScan = tcl_codify_token(myScan, "NULL", token.mid(elem + size, next - elem - size));
+            myScan = tcl_codify_token(myScan, "nullptr", token.mid(elem + size, next - elem - size));
          }
 
          nextIsPattern = ! nextIsPattern;
@@ -4181,7 +4428,7 @@ static void tcl_command_SWITCH()
       }
 
       if (inBraces) {
-         myScan = tcl_codify_token(myScan, "NULL", QString("}"));
+         myScan = tcl_codify_token(myScan, "nullptr", QString("}"));
       }
 
       if (! nextIsPattern) {
@@ -4272,12 +4519,12 @@ static void tcl_command_FOR()
    }
 
    myScan = tcl_scan_start('?', tcl.listCommandwords.at(2), myScan->ns, myScan->entry_cl, myScan->entry_fn);
-   myScan->after << "NULL" << tcl.listCommandwords[3];
+   myScan->after << "nullptr" << tcl.listCommandwords[3];
 
    myScan = tcl_command_ARG(myScan, 4, true);
-   myScan->after << "NULL" << tcl.listCommandwords[5];
+   myScan->after << "nullptr" << tcl.listCommandwords[5];
    myScan->after << "script" << tcl.listCommandwords[6];
-   myScan->after << "NULL" << tcl.listCommandwords[7];
+   myScan->after << "nullptr" << tcl.listCommandwords[7];
    myScan->after << "script" << tcl.listCommandwords[8];
 }
 
@@ -4581,8 +4828,8 @@ static void tcl_command_ITCL_CLASS()
 
    tcl_codify_cmd("keyword", 0);
    tcl_codify_cmd("", 1);
-   tcl_codify_cmd("NULL", 2);
-   tcl_codify_cmd("NULL", 3);
+   tcl_codify_cmd("nullptr", 2);
+   tcl_codify_cmd("nullptr", 3);
 
    tcl_name(myScan->ns, tcl.listCommandwords.at(2), myNs, myName);
 
@@ -4620,10 +4867,10 @@ static void tcl_command_OO_CLASS()
 
    tcl_codify_cmd("keyword", 0);
    tcl_codify_cmd("", 1);
-   tcl_codify_cmd("NULL", 2);
-   tcl_codify_cmd("NULL", 3);
-   tcl_codify_cmd("NULL", 4);
-   tcl_codify_cmd("NULL", 5);
+   tcl_codify_cmd("nullptr", 2);
+   tcl_codify_cmd("nullptr", 3);
+   tcl_codify_cmd("nullptr", 4);
+   tcl_codify_cmd("nullptr", 5);
    tcl_name(myScan->ns, tcl.listCommandwords.at(4), myNs, myName);
 
    if (myNs.length()) {
@@ -4656,8 +4903,8 @@ static void tcl_command_OO_DEFINE()
 
    tcl_codify_cmd("keyword", 0);
    tcl_codify_cmd("", 1);
-   tcl_codify_cmd("NULL", 2);
-   tcl_codify_cmd("NULL", 3);
+   tcl_codify_cmd("nullptr", 2);
+   tcl_codify_cmd("nullptr", 3);
 
    tcl_name(myScan->ns, tcl.listCommandwords.at(2), myNs, myName);
    if (myNs.length()) {
@@ -4676,7 +4923,7 @@ static void tcl_command_OO_DEFINE()
    if ((myStr == "method"      && n == 11) || (myStr == "constructor" && n == 9) || (myStr == "destructor"  && n == 7)) {
 
       for (unsigned int i = 4; i < n - 1; i++) {
-         tcl_codify_cmd("NULL", i);
+         tcl_codify_cmd("nullptr", i);
       }
 
       QSharedPointer<Entry> myEntry;
@@ -4783,8 +5030,8 @@ static void tcl_command(int what, const QString &text)
    int myLine = 0;
 
    if (what == 0) {
-      tcl.listScan.at(0)->line1 = parse_tcl_YYlineno;    // current line in scan context
-      tcl.line_body0 = parse_tcl_YYlineno;               // start line of command
+      tcl.listScan.at(0)->line1 = yylineno;    // current line in scan context
+      tcl.line_body0 = yylineno;               // start line of command
 
       yy_push_state(COMMAND);
 
@@ -5088,7 +5335,7 @@ static void tcl_command(int what, const QString &text)
    if (myStr == "if" && tcl.listCommandwords.length() > 4) {
       QStringList myType;
 
-      myType << "keyword" << "NULL" << "expr" << "NULL";
+      myType << "keyword" << "nullptr" << "expr" << "nullptr";
       char myState = 'x'; // last word: e'x'pr 't'hen 'b'ody 'e'lse else'i'f..
 
       for (unsigned int i = 4; i < tcl.listCommandwords.count(); i = i + 2) {
@@ -5097,25 +5344,25 @@ static void tcl_command(int what, const QString &text)
          if (myState == 'x') {
             if (word == "then") {
                myState = 't';
-               myType << "keyword" << "NULL";
+               myType << "keyword" << "nullptr";
 
             } else {
                myState = 'b';
-               myType << "script" << "NULL";
+               myType << "script" << "nullptr";
             }
 
          } else if (myState == 't') {
             myState = 'b';
-            myType << "script" << "NULL";
+            myType << "script" << "nullptr";
 
          } else if (myState == 'b') {
             if (word == "elseif") {
                myState = 'i';
-               myType << "keyword" << "NULL";
+               myType << "keyword" << "nullptr";
 
             } else if (word == "else" && i == tcl.listCommandwords.count() - 3) {
                myState = 'b';
-               myType << "keyword" << "NULL" << "script";
+               myType << "keyword" << "nullptr" << "script";
                i = tcl.listCommandwords.count();
 
             } else if (i == tcl.listCommandwords.count() - 1) {
@@ -5130,7 +5377,7 @@ static void tcl_command(int what, const QString &text)
 
          } else if (myState == 'i') {
             myState = 'x';
-            myType << "expr" << "NULL";
+            myType << "expr" << "nullptr";
          }
       }
 
@@ -5252,7 +5499,7 @@ static void tcl_init()
    tcl.cl.clear();
    tcl.fn.clear();
 
-   parse_tcl_YYlineno        = 1;
+   yylineno        = 1;
    tcl.protection  = Public;
    tcl.memberdef   = QSharedPointer<MemberDef>();
 }
@@ -5277,17 +5524,17 @@ static void tcl_parse(const QString ns, const QString cls)
    tcl.ns.insert("::", myEntry);
    tcl.entry_current = tcl_entry_new();
 
-   parse_tcl_YYrestart(parse_tcl_YYin );
+   yyrestart( yyin );
    BEGIN( TOP );
 
-   parse_tcl_YYlineno = 1;
+   yylineno = 1;
 
    myScan = new tcl_scan;
    myScan->tclType = ' ';
 
    myScan->after.clear();
-   myScan->line0 = parse_tcl_YYlineno;
-   myScan->line1 = parse_tcl_YYlineno;
+   myScan->line0 = yylineno;
+   myScan->line1 = yylineno;
    myScan->buffer_state = YY_CURRENT_BUFFER;
    myScan->ns   = ns;
 
@@ -5298,7 +5545,7 @@ static void tcl_parse(const QString ns, const QString cls)
    myScan->entry_scan = tcl.entry_inside;
    tcl.listScan.insert(0, myScan);
 
-   parse_tcl_YYlex();
+   yylex();
 
    tcl.listScan.clear();
    tcl.ns.clear();
@@ -5328,10 +5575,10 @@ void Tcl_Parser::parseInput(const QString &fileName, const QString &input, QShar
 
    tcl.s_inputString = input;
 
-   printlex(parse_tcl_YY_flex_debug, true, __FILE__, fileName);
+   printlex(yy_flex_debug, true, __FILE__, fileName);
 
    msg("Parsing %s\n", csPrintable(fileName));
-   groupEnterFile(fileName, parse_tcl_YYlineno);
+   groupEnterFile(fileName, yylineno);
 
    tcl_init();
    tcl.code        = nullptr;
@@ -5341,11 +5588,11 @@ void Tcl_Parser::parseInput(const QString &fileName, const QString &input, QShar
 
    tcl_parse("", "");
 
-   groupLeaveFile(tcl.file_name, parse_tcl_YYlineno);
+   groupLeaveFile(tcl.file_name, yylineno);
    root->setData(EntryKey::Source_Text, "");
    myFile.close();
 
-   printlex(parse_tcl_YY_flex_debug, false, __FILE__, fileName);
+   printlex(yy_flex_debug, false, __FILE__, fileName);
 }
 
 // Parse file and codify
@@ -5363,7 +5610,7 @@ void Tcl_Parser::parseCode(CodeGenerator &codeOutIntf, const QString &scopeName,
       return;
    }
 
-   printlex(parse_tcl_YY_flex_debug, true, __FILE__, fileDef ? fileDef->fileName() : "" );
+   printlex(yy_flex_debug, true, __FILE__, fileDef ? fileDef->fileName() : "" );
    tcl.s_inputString = input;
 
    QString myNs  = "";
@@ -5413,9 +5660,9 @@ void Tcl_Parser::parseCode(CodeGenerator &codeOutIntf, const QString &scopeName,
       startLine = 1;
    }
 
-   parse_tcl_YYlineno             = startLine;
+   yylineno             = startLine;
    tcl.code_linenumbers = showLineNumbers;
-   tcl.code_line        = parse_tcl_YYlineno;
+   tcl.code_line        = yylineno;
    tcl.code->startCodeLine(tcl.code_linenumbers);
 
    if (tcl.code_linenumbers) {
@@ -5441,7 +5688,7 @@ void Tcl_Parser::parseCode(CodeGenerator &codeOutIntf, const QString &scopeName,
    tcl.fn.clear();
    tcl.entry.clear();
 
-   printlex(parse_tcl_YY_flex_debug, false, __FILE__, fileDef ? fileDef->fileName() : "");
+   printlex(yy_flex_debug, false, __FILE__, fileDef ? fileDef->fileName() : "");
 }
 
 bool Tcl_Parser::needsPreprocessing(const QString &) const
