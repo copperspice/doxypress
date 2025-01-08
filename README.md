@@ -6,7 +6,7 @@ DoxyPress is a modern C++ application for generating documentation from annotate
 DoxyPress and DoxyPressApp were initially derived from Doxygen and DoxyWizard.
 
 
-###### Major enhancements
+###### Major Enhancements
 
 Parsing
 
@@ -18,7 +18,7 @@ Parsing
 Classes and Containers
 
 * DoxyPress links with the CopperSpice libraries
-* Removed all Qt 2 classes and containers
+* Removed all old Qt classes and containers
 * Refactored to use value based containers instead of pointer based containers
 * For improved memory management variadic templates and shared pointers are used
 * Source code reformatted for improved readability
@@ -32,27 +32,30 @@ Output
 * Major improvements to the html output for correctness
 
 
-### Building
+### Binary Files
 
-DoxyPress prebuilt binaries are available for Linux, Mac OS X, and Windows.
+DoxyPress prebuilt binaries are available for all supported platforms.
 
+https://github.com/copperspice/doxypress/releases/
 https://download.copperspice.com/doxypress/binary/
 
-To build DoxyPress from source a current copy of the CopperSpice libraries, a C++17 compiler, and a C++17 standard
-library are required. DoxyPress links with CsCore and CsXml which are part of the CopperSpice libraries.
+CopperSpice prebuilt binaries are available for all supported platforms.
 
-CMake build files are provided with the DoxyPress source distribution.
+https://github.com/copperspice/copperspice/releases/
+https://download.copperspice.com/copperspice/binary/
 
 
-### Dependencies
+### System Requirements
 
- * C++17 compiler
+Building DoxyPress requires a C++20 compiler and a C++20 standard library. You will also need a current copy
+of the CopperSpice libraries. DoxyPressApp links with CsCore and CsXml.
 
- * CopperSpice CsCore and CsXml libraries
+CMake build files are provided with the source distribution to build this application.
 
- * C++17 standard library when using clang for parsing
+One additional requirement for building DoxyPress is the binary files for clang 18. The clang compiler must be built
+with RTTI enabled. Pre-built binary files are available for all supported platforms.
 
- * clang 10 must be compiled with RTTI enabled ( pre-built bianary files are available from our download page )
+https://download.copperspice.com/doxypress/libClang/
 
 
 ### Documentation
@@ -67,21 +70,20 @@ Full documentation for DoxyPress is available on the website or from our downloa
 
 
 For documentation on how to build the DoxyPress application refer to the following page:
-www.copperspice.com/docs/doxypress/build-doxypress.html
 
+https://www.copperspice.com/docs/doxypress/build-doxypress.html
 
 
 ### Presentations
 
-Our YouTube channel videos are about modern C++, build systems, CopperSpice, DoxyPress, and other topics related to
-our open source work.
+Our YouTube channel contains over 75 videos about C++, programming fundamentals, Unicode/Strings, multithreading,
+graphics, CopperSpice, DoxyPress, and other software development topics.
 
 https://www.youtube.com/copperspice
 
+Links to additional videos can be found on our website.
 
-Links to technical presentations recorded at CppNow and CppCon:
-
-www.copperspice.com/presentations.html
+https://www.copperspice.com/presentations.html
 
 
 ### Authors / Contributors
@@ -100,7 +102,7 @@ This program is released under the GPL 2 license. For more information refer to 
 project.
 
 
-## References
+### References
 
  * Website:  https://www.copperspice.com
  * Twitter:  https://twitter.com/copperspice_cpp
