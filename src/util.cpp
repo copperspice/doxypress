@@ -8100,20 +8100,20 @@ int lineBlock(const QString text, const QString marker)
    int retval = 1;
 
    // find the character position of the first marker
-   auto iterM = text.find_fast(marker);
+   auto iterM = text.indexOfFast(marker);
 
-   if (iterM == text.end()) {
+   if (iterM == text.cend()) {
       return retval;
    }
 
-   QStringView tmpView = QStringView(text.begin(), iterM);
-   auto iter = text.begin();
+   QStringView tmpView = QStringView(text.cbegin(), iterM);
+   auto iter = text.cbegin();
 
    // find start line positions for the markers
    while (true) {
-      iter = tmpView.find_fast('\n', iter);
+      iter = tmpView.indexOfFast('\n', iter);
 
-      if (iter == tmpView.end()) {
+      if (iter == tmpView.cend()) {
          break;
       }
 
