@@ -1228,7 +1228,7 @@ void MemberDef::writeLink(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPo
       if (m_impl->m_memberType == MemberDefType::EnumValue && getGroupDef() == nullptr &&
             getEnumScope() && getEnumScope()->getGroupDef()) {
 
-         // but its container is
+         // enum value is not grouped, however the container is
          QSharedPointer<GroupDef> enumValGroup = getEnumScope()->getGroupDef();
 
          ol.writeObjectLink(enumValGroup->getReference(), enumValGroup->getOutputFileBase(), anchor(), n);
@@ -3013,9 +3013,10 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
          bool first = true;
 
          if (! m_impl->m_defaultTemplateArgLists.isEmpty() && lang == SrcLangExt_Cpp) {
-
             // definition has explicit template parameter declarations
+
             for (auto &tal : m_impl->m_defaultTemplateArgLists) {
+                // detailed description, write class template<>
 
                if (tal.count() > 0) {
                   if (! first) {
@@ -3023,7 +3024,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
                   }
 
                   ol.startMemberDocPrefixItem();
-                  writeTemplatePrefix(ol, scopedContainer, tal);
+                  writeTemplatePrefix(ol, scopedContainer, tal, false);
                   ol.endMemberDocPrefixItem();
                }
             }
@@ -3033,6 +3034,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
             // (since no definition was found)
 
             if (cd && ! isTemplateSpecialization()) {
+               // detailed description, write class template<>
 
                QVector<ArgumentList> tempParamLists;
                cd->getTemplateParameterLists(tempParamLists);
@@ -3046,14 +3048,14 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
                      }
 
                      ol.startMemberDocPrefixItem();
-                     writeTemplatePrefix(ol, scopedContainer, tal);
+                     writeTemplatePrefix(ol, scopedContainer, tal, false);
                      ol.endMemberDocPrefixItem();
                   }
                }
             }
 
             if (! m_impl->m_templateArgList.listEmpty()) {
-               // function template prefix
+               // method or function template<>
 
                ol.startMemberDocPrefixItem();
                writeTemplatePrefix(ol, scopedContainer, m_impl->m_templateArgList);
