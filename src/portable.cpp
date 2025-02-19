@@ -258,7 +258,8 @@ void portable_setenv(const QString &name_T, const QString &value_T)
       if (len + 1 < namelen + 1 + vallen) {
          /* The existing string is too short; malloc a new one.  */
          char *newString = (char *)malloc(namelen + 1 + vallen);
-         if (newString == 0) {
+
+         if (newString == nullptr) {
             return;
          }
 

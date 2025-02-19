@@ -229,6 +229,7 @@ data        "random string"
 string      \"([^"&]|{esc})*\"|\'([^'&]|{esc})*\'
 
 %option never-interactive
+%option noinput
 %option nounistd
 %option noyywrap
 %option nounput

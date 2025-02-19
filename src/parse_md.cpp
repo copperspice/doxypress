@@ -3271,7 +3271,7 @@ static QString processBlocks(QStringView str, int indent)
    int blockIndent = indent;
 
    // get number of spaces in the first line
-   int sp = 0;
+   // int sp = 0;
 
    QChar prevCh = *iter_end;
    ++iter_end;
@@ -3279,7 +3279,7 @@ static QString processBlocks(QStringView str, int indent)
    while (iter_end < str.constEnd() && prevCh != '\n') {
 
       if (prevCh == ' ') {
-         ++sp;
+         // ++sp;
       }
 
       prevCh = *iter_end;

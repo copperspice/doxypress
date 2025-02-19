@@ -988,7 +988,6 @@ bool DotFilePatcher::run()
 
    QTextStream t(&fo);
 
-   int lineNr = 1;
    int width;
    int height;
 
@@ -1115,8 +1114,6 @@ bool DotFilePatcher::run()
          t << line;
 
       }
-
-      ++lineNr;
    }
 
    fi.close();

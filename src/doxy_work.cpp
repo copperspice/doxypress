@@ -2612,11 +2612,9 @@ void Doxy_Work::resolveClassNestingRelations()
    }
 
    bool done = false;
-   int iteration = 0;
 
    while (! done) {
       done = true;
-      ++iteration;
 
       for (auto cd : Doxy_Globals::classSDict) {
 
@@ -10519,7 +10517,6 @@ void Doxy_Work::readDir(const QFileInfo &fi, ReadDirArgs &data)
    QDir dir(dirName);
    dir.setFilter(QDir::Files | QDir::Dirs | QDir::Hidden);
 
-   int totalSize = 0;
    msg("Searching for files in directory %s\n", csPrintable(fi.absoluteFilePath()) );
 
    const QFileInfoList list = dir.entryInfoList();
@@ -10548,7 +10545,6 @@ void Doxy_Work::readDir(const QFileInfo &fi, ReadDirArgs &data)
 
                if (testA && testB && ! data.killSet.contains(filePath) ) {
 
-                  totalSize += cfi.size() + filePath.length() + 4;
                   QString name = cfi.fileName();
 
                   if (data.isFnDict) {

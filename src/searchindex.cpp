@@ -925,7 +925,6 @@ void writeJavascriptSearchIndex()
             ti << "[" << endl;
 
             bool firstEntry = true;
-            int itemCount   = 0;
 
             for (auto dl : *sl) {
                QSharedPointer<Definition> def = dl->first();
@@ -1138,7 +1137,6 @@ void writeJavascriptSearchIndex()
                }
 
                ti << "]";
-               itemCount++;
             }
 
             if (! firstEntry) {

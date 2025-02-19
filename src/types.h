@@ -104,11 +104,16 @@ struct Grouping {
          case GROUPING_INGROUP:
             return QString("@ingroup");
       }
+
       return QString("Unknown Group Command");
    }
 
-   Grouping( const QString &gn, GroupPri_t p ) : groupname(gn), pri(p) {}
-   Grouping( const Grouping &g ) : groupname(g.groupname), pri(g.pri) {}
+   Grouping(const QString &gn, GroupPri_t p)
+      : groupname(gn), pri(p)
+   { }
+
+   Grouping(const Grouping &g) = default;
+   Grouping& operator=(const Grouping &g) = default;
 
    QString groupname;      // name of the group
    GroupPri_t pri;         // priority of this definition
