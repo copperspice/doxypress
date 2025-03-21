@@ -6,7 +6,7 @@
 # ************************************************************************
 
 echo "Compile cstyle"
-   flex -Pcode_cstyle_YY     -L -t  code_cstyle.l  > code_cstyle.cpp
+   flex -Pcode_cstyle_YY     -L -t code_cstyle.l  > code_cstyle.cpp
    cp  code_cstyle.cpp       ../generated/code_cstyle.cpp
    rm  code_cstyle.cpp
 
@@ -106,6 +106,7 @@ sed -e "1r license.txt" -e "1d" -e 's/#line 3 "<stdout>"//' -i ../generated/cons
 sed -e "1r license.txt" -e "1d" -e 's/#line 3 "<stdout>"//' -i ../generated/declinfo.cpp
 sed -e "1r license.txt" -e "1d" -e 's/#line 3 "<stdout>"//' -i ../generated/default_args.cpp
 
+
 #
 sed -e 's/#define YY_BUF_SIZE 16384/#define YY_BUF_SIZE 262144/g' -i ../generated/code_cstyle.cpp
 sed -e 's/#define YY_BUF_SIZE 16384/#define YY_BUF_SIZE 262144/g' -i ../generated/parse_cstyle.cpp
@@ -145,19 +146,19 @@ sed -e 's/#define YY_READ_BUF_SIZE 8192/#define YY_READ_BUF_SIZE 196608/g' -i ..
 
 
 #
-sed -e 's/register //g' -i ../generated/code_cstyle.cpp
-sed -e 's/register //g' -i ../generated/parse_cstyle.cpp
-sed -e 's/register //g' -i ../generated/code_fortran.cpp
-sed -e 's/register //g' -i ../generated/parse_fortran.cpp
-sed -e 's/register //g' -i ../generated/code_py.cpp
-sed -e 's/register //g' -i ../generated/parse_py.cpp
-sed -e 's/register //g' -i ../generated/parse_tcl.cpp
-sed -e 's/register //g' -i ../generated/code_xml.cpp
+sed -e 's/\bNULL\b/nullptr/g' -i ../generated/code_cstyle.cpp
+sed -e 's/\bNULL\b/nullptr/g' -i ../generated/parse_cstyle.cpp
+sed -e 's/\bNULL\b/nullptr/g' -i ../generated/code_fortran.cpp
+sed -e 's/\bNULL\b/nullptr/g' -i ../generated/parse_fortran.cpp
+sed -e 's/\bNULL\b/nullptr/g' -i ../generated/code_py.cpp
+sed -e 's/\bNULL\b/nullptr/g' -i ../generated/parse_py.cpp
+sed -e 's/\bNULL\b/nullptr/g' -i ../generated/parse_tcl.cpp
+sed -e 's/\bNULL\b/nullptr/g' -i ../generated/code_xml.cpp
 
-sed -e 's/register //g' -i ../generated/commentcnv.cpp
-sed -e 's/register //g' -i ../generated/commentscan.cpp
-sed -e 's/register //g' -i ../generated/doctokenizer.cpp
-sed -e 's/register //g' -i ../generated/pre.cpp
-sed -e 's/register //g' -i ../generated/constexp.cpp
-sed -e 's/register //g' -i ../generated/declinfo.cpp
-sed -e 's/register //g' -i ../generated/default_args.cpp
+sed -e 's/\bNULL\b/nullptr/g' -i ../generated/commentcnv.cpp
+sed -e 's/\bNULL\b/nullptr/g' -i ../generated/commentscan.cpp
+sed -e 's/\bNULL\b/nullptr/g' -i ../generated/doctokenizer.cpp
+sed -e 's/\bNULL\b/nullptr/g' -i ../generated/pre.cpp
+sed -e 's/\bNULL\b/nullptr/g' -i ../generated/constexp.cpp
+sed -e 's/\bNULL\b/nullptr/g' -i ../generated/declinfo.cpp
+sed -e 's/\bNULL\b/nullptr/g' -i ../generated/default_args.cpp
