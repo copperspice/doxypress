@@ -156,6 +156,15 @@ class Concept_Test
 };
 
 
+template <typename X>
+template <typename T, typename U>
+requires Concept_Test::CS_Moveable<T> && CS_Moveable<U>
+T moveMe_2(U varA)
+{
+   // implementation would appear here
+}
+
+
 /// This is the detailed documentation for class Clang_gameSports, located above the class declaration.
 class Clang_gameSports : public Clang_gameBase
 {

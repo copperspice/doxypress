@@ -3,8 +3,8 @@
         "clang-compilation-path": "",
         "clang-dialect": "-std=c++20",
         "clang-flags": [
-            "-Ic:\\MinGW_64_10.5\\lib\\gcc\\x86_64-w64-mingw32\\10.5.0\\include\\c++\\x86_64-w64-mingw32\\",
-            "-Ic:\\MinGW_64_10.5\\lib\\gcc\\x86_64-w64-mingw32\\10.5.0\\include\\c++\\"
+            "-Ic:\\MinGW_64_13.3\\x86_64-w64-mingw32\\include\\c++\\13.3.0\\x86_64-w64-mingw32\\",
+            "-Ic:\\MinGW_64_13.3\\x86_64-w64-mingw32\\include\\c++\\13.3.0\\"
         ],
         "clang-include-input-source": true,
         "clang-parsing": true,
@@ -416,7 +416,7 @@
         "project-brief": "",
         "project-logo": "images/cslogo-32.png",
         "project-name": "DoxyPress Clang Parsing",
-        "project-version": "1.7.0"
+        "project-version": "2.0.0"
     },
     "source": {
         "inline-source": true,
