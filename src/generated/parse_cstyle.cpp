@@ -1,6 +1,6 @@
 /************************************************************************
 *
-* Copyright (c) 2014-2025 Barbara Geller & Ansel Sermersheim
+* Copyright (c) 2014-2026 Barbara Geller & Ansel Sermersheim
 * Copyright (c) 1997-2014 Dimitri van Heesch
 *
 * DoxyPress is free software. You can redistribute it and/or
@@ -14811,7 +14811,7 @@ goto find_rule; \
 char *yytext;
 /*************************************************************************
  *
- * Copyright (c) 2014-2025 Barbara Geller & Ansel Sermersheim
+ * Copyright (c) 2014-2026 Barbara Geller & Ansel Sermersheim
  * Copyright (c) 1997-2014 Dimitri van Heesch
 
 *************************************************************************/

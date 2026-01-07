@@ -4,7 +4,7 @@
 #
 # Convert from bibtex to XHTML.
 #
-# Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
+# Copyright (C) 2014-2026 Barbara Geller & Ansel Sermersheim
 #
 # (C) Copyright 2002-2010 Diomidis Spinellis
 # http://www.spinellis.gr
