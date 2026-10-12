@@ -48,6 +48,10 @@ Entry::Entry(const Entry &e)
    // int
    section          = e.section;
    initLines        = e.initLines;
+
+   referencedByRelation = e.referencedByRelation;
+   referencesRelation   = e.referencesRelation;
+
    docLine          = e.docLine;
    briefLine        = e.briefLine;
    inbodyLine       = e.inbodyLine;
@@ -102,6 +106,9 @@ void Entry::reset()
    static const bool dotCallGraph = Config::getBool("dot-call");
    static const bool dotCalledBy  = Config::getBool("dot-called-by");
 
+   static const bool refByRelation = Config::getBool("ref-by-relation");
+   static const bool refRelation   = Config::getBool("ref-relation");
+
    m_tagInfo.clear();
    argList.clear();
    typeConstr.clear();
@@ -118,6 +125,10 @@ void Entry::reset()
    // int
    section       = Entry::EMPTY_SEC;
    initLines     = -1;
+
+   referencedByRelation = refByRelation;
+   referencesRelation   = refRelation;
+
    docLine       = -1;
    briefLine     = -1;
    inbodyLine    = -1;
