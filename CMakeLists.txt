@@ -14,6 +14,11 @@ endif()
 
 project(doxypress)
 
+if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+   # without a build type the compiler does not optimize, which is about ten times slower
+   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type: Release, Debug, RelWithDebInfo, MinSizeRel" FORCE)
+endif()
+
 set(BUILD_MAJOR "2")
 set(BUILD_MINOR "1")
 set(BUILD_MICRO "0")
