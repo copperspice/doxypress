@@ -1801,10 +1801,17 @@ void processInline(QString &out, QStringView processText, QString::const_iterato
             skipCount = processHtmlTag(out, s1, iter_size, s2);
             break;
 
-         case '-':
-            // last one is  passing pristineChars8
-            skipCount = processNmdash(out, s1, iter_size, QStringView(iter_index - 8, iter_index));
+         case '-': {
+            // last one is passing pristineChars8, there can be less than 8 characters before the dash
+            QString::const_iterator iter_prev = iter_index;
+
+            for (int count = 0; count < 8 && iter_prev != processText.constBegin(); ++count) {
+               --iter_prev;
+            }
+
+            skipCount = processNmdash(out, s1, iter_size, QStringView(iter_prev, iter_index));
             break;
+         }
 
          case '"':
             skipCount = processQuoted(out, s1, iter_size);
