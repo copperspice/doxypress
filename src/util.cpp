@@ -72,8 +72,8 @@ static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<const Definit
       QSharedPointer<const FileDef> fileScope, const QString &n, QSharedPointer<MemberDef> *pTypeDef,
       QString *pTemplSpec, QString *pResolvedType);
 
-static int isAccessibleFromWithExpScope(QSharedPointer<const Definition> scope, QSharedPointer<const FileDef> fileScope,
-      QSharedPointer<const Definition> item, const QString &explicitScopePart);
+static int isAccessibleFromWithExpScope(const QSharedPointer<const Definition> &scope, const QSharedPointer<const FileDef> &fileScope,
+      const QSharedPointer<const Definition> &item, const QString &explicitScopePart);
 
 #define HEXTONUM(x) (((x)>='0' && (x)<='9') ? ((x)-'0') :       \
                      ((x)>='a' && (x)<='f') ? ((x)-'a'+10) :    \
@@ -681,7 +681,7 @@ done:
 /*! Substitutes a simple unqualified name within a scope. Returns the
  *  value of the typedef or name if no typedef was found.
  */
-static QString substTypedef(QSharedPointer<const Definition> scopeDef, QSharedPointer<const FileDef> fileScope,
+static QString substTypedef(const QSharedPointer<const Definition> &scopeDef, const QSharedPointer<const FileDef> &fileScope,
                   const QString &phraseName, QSharedPointer<MemberDef> *pTypeDef = nullptr)
 {
    QString result = phraseName;
@@ -752,8 +752,8 @@ static QSharedPointer<Definition> endOfPathIsUsedClass(const StringMap<QSharedPo
  *  searched. If found the scope definition is returned, otherwise 0
  *  is returned.
  */
-static QSharedPointer< const Definition> followPath(QSharedPointer<const Definition> start,
-                  QSharedPointer<const FileDef> fileScope, const QString &path)
+static QSharedPointer< const Definition> followPath(const QSharedPointer<const Definition> &start,
+                  const QSharedPointer<const FileDef> &fileScope, const QString &path)
 {
    int is;
    int ps;
@@ -819,8 +819,8 @@ static QSharedPointer< const Definition> followPath(QSharedPointer<const Definit
    return current;
 }
 
-bool accessibleViaUsingClass(const StringMap<QSharedPointer<Definition>> *cl, QSharedPointer<const FileDef> fileScope,
-                             QSharedPointer<const Definition> item, const QString &explicitScopePart = QString())
+bool accessibleViaUsingClass(const StringMap<QSharedPointer<Definition>> *cl, const QSharedPointer<const FileDef> &fileScope,
+                             const QSharedPointer<const Definition> &item, const QString &explicitScopePart = QString())
 {
    if (cl != nullptr) {
       // see if the class was imported via a using statement
@@ -847,8 +847,8 @@ bool accessibleViaUsingClass(const StringMap<QSharedPointer<Definition>> *cl, QS
    return false;
 }
 
-static bool accessibleViaUsingNamespace(const NamespaceSDict *nl, QSharedPointer<const FileDef> fileScope,
-                  QSharedPointer<const Definition> item, const QString &explicitScopePart = QString())
+static bool accessibleViaUsingNamespace(const NamespaceSDict *nl, const QSharedPointer<const FileDef> &fileScope,
+                  const QSharedPointer<const Definition> &item, const QString &explicitScopePart = QString())
 {
    static QSet<QString> visitedDict;
 
@@ -897,8 +897,8 @@ class AccessStack
    AccessStack() : m_index(0)
    {}
 
-   void push(QSharedPointer<const Definition> scopeDef, QSharedPointer<const FileDef> fileScope,
-                  QSharedPointer<const Definition> item) {
+   void push(const QSharedPointer<const Definition> &scopeDef, const QSharedPointer<const FileDef> &fileScope,
+                  const QSharedPointer<const Definition> &item) {
 
       if (m_index < MAX_STACK_SIZE) {
          m_elements[m_index].scopeDef  = scopeDef;
@@ -908,8 +908,8 @@ class AccessStack
       }
    }
 
-   void push(QSharedPointer<const Definition> scopeDef, QSharedPointer<const FileDef> fileScope,
-                  QSharedPointer<const Definition> item, const QString &expScope) {
+   void push(const QSharedPointer<const Definition> &scopeDef, const QSharedPointer<const FileDef> &fileScope,
+                  const QSharedPointer<const Definition> &item, const QString &expScope) {
 
       if (m_index < MAX_STACK_SIZE) {
          m_elements[m_index].scopeDef  = scopeDef;
@@ -926,8 +926,8 @@ class AccessStack
       }
    }
 
-   bool find(QSharedPointer<const Definition> scopeDef, QSharedPointer<const FileDef> fileScope,
-                  QSharedPointer<const Definition> item) {
+   bool find(const QSharedPointer<const Definition> &scopeDef, const QSharedPointer<const FileDef> &fileScope,
+                  const QSharedPointer<const Definition> &item) {
 
       for (int i = 0; i < m_index; i++) {
          AccessElem *e = &m_elements[i];
@@ -940,7 +940,7 @@ class AccessStack
       return false;
    }
 
-   bool find(QSharedPointer<const Definition> scopeDef, QSharedPointer<const FileDef> fileScope,
+   bool find(const QSharedPointer<const Definition> &scopeDef, const QSharedPointer<const FileDef> &fileScope,
              QSharedPointer<const Definition> item, const QString &expScope) {
 
       for (int i = 0; i < m_index; i++) {
@@ -971,8 +971,8 @@ class AccessStack
 /* Returns the "distance" (=number of levels up) from item to scope, or -1
  * if item in not inside scope.
  */
-int isAccessibleFrom(QSharedPointer<const Definition> scopeDef, QSharedPointer<const FileDef> fileScope,
-                  QSharedPointer<const Definition> item)
+int isAccessibleFrom(const QSharedPointer<const Definition> &scopeDef, const QSharedPointer<const FileDef> &fileScope,
+                  const QSharedPointer<const Definition> &item)
 {
    static AccessStack accessStack;
 
@@ -985,18 +985,17 @@ int isAccessibleFrom(QSharedPointer<const Definition> scopeDef, QSharedPointer<c
    int result = 0;
    int i;
 
-   QSharedPointer<Definition>       itemScope     = item->getOuterScope();
-   QSharedPointer<const ClassDef>   tempPtr       = scopeDef.dynamicCast<const ClassDef>();
-   QSharedPointer<const MemberDef>  tempItem      = item.dynamicCast<const MemberDef>();
-   QSharedPointer<const ClassDef>   tempItemScope = item.dynamicCast<const ClassDef>();
+   QSharedPointer<Definition> itemScope = item->getOuterScope();
 
-   bool memberAccessibleFromScope = (item->definitionType() == Definition::TypeMember &&
-       itemScope && itemScope->definitionType() == Definition::TypeClass  &&
-       scopeDef->definitionType() == Definition::TypeClass && tempPtr->isAccessibleMember(tempItem));
+   // only cast when required, this method is called for every definition which has the searched name
+   const bool classInClass = itemScope && itemScope->definitionType() == Definition::TypeClass &&
+       scopeDef->definitionType() == Definition::TypeClass;
 
-   bool nestedClassInsideBaseClass = (item->definitionType() == Definition::TypeClass &&
-       itemScope && itemScope->definitionType() == Definition::TypeClass &&
-       scopeDef->definitionType() == Definition::TypeClass && tempPtr->isBaseClass(tempItemScope, true));
+   bool memberAccessibleFromScope = (classInClass && item->definitionType() == Definition::TypeMember &&
+       scopeDef.dynamicCast<const ClassDef>()->isAccessibleMember(item.dynamicCast<const MemberDef>()));
+
+   bool nestedClassInsideBaseClass = (classInClass && item->definitionType() == Definition::TypeClass &&
+       scopeDef.dynamicCast<const ClassDef>()->isBaseClass(item.dynamicCast<const ClassDef>(), true));
 
    if (itemScope == scopeDef || memberAccessibleFromScope || nestedClassInsideBaseClass) {
 
@@ -1033,13 +1032,13 @@ int isAccessibleFrom(QSharedPointer<const Definition> scopeDef, QSharedPointer<c
       if (scopeDef->definitionType() == Definition::TypeNamespace) {
          QSharedPointer<const NamespaceDef> nscope = scopeDef.dynamicCast<const NamespaceDef>();
 
-         StringMap<QSharedPointer<Definition>> cl = nscope->getUsedClasses();
+         const StringMap<QSharedPointer<Definition>> &cl = nscope->getUsedClasses();
 
          if (accessibleViaUsingClass(&cl, fileScope, item)) {
             goto done;
          }
 
-         NamespaceSDict nl = nscope->getUsedNamespaces();
+         const NamespaceSDict &nl = nscope->getUsedNamespaces();
 
          if (accessibleViaUsingNamespace(&nl, fileScope, item)) {
             goto done;
@@ -1073,8 +1072,8 @@ done:
  *   not found and then A::I is searched in the global scope, which matches and
  *   thus the result is 1.
  */
-int isAccessibleFromWithExpScope(QSharedPointer<const Definition> scopeDef, QSharedPointer<const FileDef> fileScope,
-                  QSharedPointer<const Definition> item, const QString &explicitScopePart)
+int isAccessibleFromWithExpScope(const QSharedPointer<const Definition> &scopeDef, const QSharedPointer<const FileDef> &fileScope,
+                  const QSharedPointer<const Definition> &item, const QString &explicitScopePart)
 {
    if (explicitScopePart.isEmpty()) {
       // handle degenerate case where there is no explicit scope
@@ -1125,7 +1124,7 @@ int isAccessibleFromWithExpScope(QSharedPointer<const Definition> scopeDef, QSha
             // in A via a using directive.
 
             QSharedPointer<const NamespaceDef> nscope = newScope.dynamicCast<const NamespaceDef>();
-            StringMap<QSharedPointer<Definition>> cl = nscope->getUsedClasses();
+            const StringMap<QSharedPointer<Definition>> &cl = nscope->getUsedClasses();
 
             for (auto cd : cl) {
                if (cd == item) {
@@ -1133,7 +1132,7 @@ int isAccessibleFromWithExpScope(QSharedPointer<const Definition> scopeDef, QSha
                }
             }
 
-            NamespaceSDict nl = nscope->getUsedNamespaces();
+            const NamespaceSDict &nl = nscope->getUsedNamespaces();
 
             for (auto nd : nl) {
                if (! s_visitedNamespaces.contains(nd->name())) {
@@ -1158,7 +1157,7 @@ int isAccessibleFromWithExpScope(QSharedPointer<const Definition> scopeDef, QSha
 
       if (scopeDef->definitionType() == Definition::TypeNamespace) {
          QSharedPointer<const NamespaceDef> nscope = scopeDef.dynamicCast<const NamespaceDef>();
-         NamespaceSDict nl = nscope->getUsedNamespaces();
+         const NamespaceSDict &nl = nscope->getUsedNamespaces();
 
          if (accessibleViaUsingNamespace(&nl, fileScope, item, explicitScopePart)) {
             // found in used namespace

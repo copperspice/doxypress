@@ -206,8 +206,8 @@ QByteArray getCanonicalTemplateSpec(QSharedPointer<Definition> d, QSharedPointer
 
 bool    hasVisibleRoot(SortedList<BaseClassDef *> *bcl);
 
-int     isAccessibleFrom(QSharedPointer<const Definition> scope, QSharedPointer<const FileDef> fileScope,
-                  QSharedPointer<const Definition> item);
+int     isAccessibleFrom(const QSharedPointer<const Definition> &scope, const QSharedPointer<const FileDef> &fileScope,
+                  const QSharedPointer<const Definition> &item);
 
 bool    isURL(const QString &url);
 
