@@ -56,14 +56,23 @@ struct SectionInfo;
 // Ordered dictionary of elements of type T Internally uses a QMap<T>
 class StringCompare {
    public:
-      explicit StringCompare(Qt::CaseSensitivity sortCase) : m_sortCase_enum(sortCase) { }
+      // uniqueCase: sort order follows sortCase, keys which differ only in case remain distinct entries
+      explicit StringCompare(Qt::CaseSensitivity sortCase, bool uniqueCase = false)
+         : m_sortCase_enum(sortCase), m_uniqueCase(uniqueCase) { }
 
       bool operator()(const QString &a, const QString &b) const {
-         return a.compare(b, m_sortCase_enum) < 0;
+         int retval = a.compare(b, m_sortCase_enum);
+
+         if (retval == 0 && m_uniqueCase && m_sortCase_enum == Qt::CaseInsensitive) {
+            retval = a.compare(b, Qt::CaseSensitive);
+         }
+
+         return retval < 0;
       }
 
    private:
       Qt::CaseSensitivity m_sortCase_enum;
+      bool m_uniqueCase;
 };
 
 template<class T, class SC = StringCompare>
@@ -356,8 +365,9 @@ class LongMap
 class ClassSDict : public StringMap<QSharedPointer<ClassDef>>
 {
    public:
-   ClassSDict(Qt::CaseSensitivity isCase = Qt::CaseSensitive)
-         : StringMap<QSharedPointer<ClassDef>>(isCase)
+      // isCase only selects the sort order, class names which differ only in case are different classes
+      ClassSDict(Qt::CaseSensitivity isCase = Qt::CaseSensitive)
+         : StringMap<QSharedPointer<ClassDef>>(StringCompare(isCase, true))
       {}
 
       ~ClassSDict() {}
