@@ -61,13 +61,61 @@ class StringCompare {
          : m_sortCase_enum(sortCase), m_uniqueCase(uniqueCase) { }
 
       bool operator()(const QString &a, const QString &b) const {
-         int retval = a.compare(b, m_sortCase_enum);
+         int retval;
 
-         if (retval == 0 && m_uniqueCase && m_sortCase_enum == Qt::CaseInsensitive) {
+         if (m_sortCase_enum == Qt::CaseInsensitive) {
+            retval = compareNoCase(a, b);
+
+            if (retval == 0 && m_uniqueCase) {
+               retval = a.compare(b, Qt::CaseSensitive);
+            }
+
+         } else {
             retval = a.compare(b, Qt::CaseSensitive);
          }
 
          return retval < 0;
+      }
+
+      // same result as a.compare(b, Qt::CaseInsensitive), which case folds both strings into new
+      // strings for every call, ASCII text is compared in place since this is used for every lookup
+      static int compareNoCase(const QString &a, const QString &b) {
+         auto iterA = a.storage_begin();
+         auto iterB = b.storage_begin();
+
+         const auto endA = a.storage_end();
+         const auto endB = b.storage_end();
+
+         while (iterA != endA && iterB != endB) {
+            unsigned char chA = *iterA;
+            unsigned char chB = *iterB;
+
+            if (chA >= 0x80 || chB >= 0x80) {
+               return a.compare(b, Qt::CaseInsensitive);
+            }
+
+            if (chA >= 'A' && chA <= 'Z') {
+               chA += 'a' - 'A';
+            }
+
+            if (chB >= 'A' && chB <= 'Z') {
+               chB += 'a' - 'A';
+            }
+
+            if (chA != chB) {
+               return chA < chB ? -1 : 1;
+            }
+
+            ++iterA;
+            ++iterB;
+         }
+
+         if (iterA == endA && iterB == endB) {
+            return 0;
+         }
+
+         // remaining text can contain non ASCII characters which fold to nothing or to ASCII
+         return a.compare(b, Qt::CaseInsensitive);
       }
 
    private:
